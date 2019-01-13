@@ -1,0 +1,23 @@
+<%inherit file="/admin/base.html" />
+<%namespace name="utils" file="/admin/utils.html" />
+
+<%def name="title()">Login</%def>
+<%def name="tab()"></%def>
+
+<%def name="more_header()">
+  <meta name="error" content="${ error }">
+</%def>
+
+<%def name="content()">
+<div class="text-center">
+  <form class="uk-form-horizontal uk-margin-large login-form" action="${ app.url_for('index.login') }" method="POST" name="login_user_form">
+    <fieldset class="uk-fieldset">
+      <legend class="uk-legend">Login</legend>
+      ${ form.hidden_tag() | n }
+      ${ utils.render_field_with_errors(form.name) }
+      ${ utils.render_field_with_errors(form.password) }
+      ${ utils.render_submit(form.submit) }
+    </fieldset>
+  </form>
+</div>
+</%def>

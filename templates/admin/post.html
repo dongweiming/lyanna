@@ -1,0 +1,37 @@
+<%inherit file="/admin/base.html" />
+<%namespace name="utils" file="/admin/utils.html" />
+
+<%def name="more_header()">
+  <meta name="raw_content" content="${ form.content.data }">
+</%def>
+
+<%def name="content()">
+
+  <ul uk-tab>
+    <li><a href="${ app.url_for('admin.list_posts', page=1) }">List</a></li>
+    <li class="${ 'uk-active' if not post_id else '' }"><a href="${ app.url_for('admin.new_post') if post_id else 'javascript:void(0)' }">Create</a></li>
+    % if post_id:
+       <li class="${ 'uk-active' if post_id else '' }"><a href="javascript:void(0)">Edit</a></li>
+    % endif
+  </ul>
+
+  <form class="uk-form-horizontal uk-margin-large uk-form post-form" action="${ app.url_for('admin.edit_post', post_id=post_id) if post_id else app.url_for('admin.new_post') }" method="POST" name="post_form">
+    <fieldset class="uk-fieldset">
+      ${ form.hidden_tag() | n }
+      ${ utils.render_field_with_errors(form.title) }
+      ${ utils.render_field_with_errors(form.slug) }
+      ${ utils.render_field_with_errors(form.summary) }
+      ${ utils.render_field_with_errors(form.content) }
+      ${ utils.render_field_with_errors(form.tags, option='tags', tags=tags) }
+      ${ utils.render_field_with_errors(form.author_id, option='authors', authors=authors) }
+      ${ utils.render_field_with_errors(form.is_page) }
+      ${ utils.render_field_with_errors(form.can_comment) }
+      ${ utils.render_field_with_errors(form.status) }
+      ${ utils.render_submit(form.submit) }
+    </fieldset>
+  </form>
+</%def>
+
+<%def name="bottom_script()">
+  <script src="${ app.url_for('static', filename='dist/admin/post.js')}"></script>
+</%def>

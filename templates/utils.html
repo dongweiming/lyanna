@@ -1,0 +1,133 @@
+<%!
+    from config import REACT_PROMPT
+    from models.consts import K_POST
+    from models.react import ReactItem
+%>
+
+<%def name="render_comment_container(post, comment_per_page=10, github_user=None, liked_comment_ids=[])">
+<%
+  comments = post.comments[:comment_per_page]  # 模板只显示第一页，翻页用ajax拿数据
+  n_comments = post.n_comments
+  post_id = post.id
+%>
+<div class="gitment-container gitment-root-container">
+  <div class="gitment-container gitment-comments-container">
+    % if comments:
+    <ul class="gitment-comments-list">
+      ${ render_comments(comments, github_user, liked_comment_ids) }
+    </ul>
+    <ul class="gitment-comments-pagination">
+      <li class="gitment-comments-page-item gitment-hidden prev">Previous</li>
+      <%  n_pages = n_comments // comment_per_page %>
+      % for page in range(n_pages if not n_comments % comment_per_page else n_pages + 1):
+        <li class="gitment-comments-page-item ${'gitment-selected' if not page else ''}">${ page + 1}</li>
+      % endfor
+      <li class="gitment-comments-page-item ${'gitment-hidden' if n_comments <= comment_per_page else ''} next">Next</li>
+    </ul>
+    % else:
+    <div class="gitment-comments-empty">还没有评论</div>
+    % endif
+    <div>
+  % if post.can_comment:
+  <div class="gitment-container gitment-editor-container">
+    <a class="gitment-editor-avatar" href="${ github_user['link'] if github_user else f'/oauth/post/{post_id}' }">
+      % if github_user:
+      <img class="gitment-editor-avatar-img" src="${ github_user['picture'] }">
+      % else:
+      <svg class="gitment-github-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><path d="M25 10c-8.3 0-15 6.7-15 15 0 6.6 4.3 12.2 10.3 14.2.8.1 1-.3 1-.7v-2.6c-4.2.9-5.1-2-5.1-2-.7-1.7-1.7-2.2-1.7-2.2-1.4-.9.1-.9.1-.9 1.5.1 2.3 1.5 2.3 1.5 1.3 2.3 3.5 1.6 4.4 1.2.1-1 .5-1.6 1-2-3.3-.4-6.8-1.7-6.8-7.4 0-1.6.6-3 1.5-4-.2-.4-.7-1.9.1-4 0 0 1.3-.4 4.1 1.5 1.2-.3 2.5-.5 3.8-.5 1.3 0 2.6.2 3.8.5 2.9-1.9 4.1-1.5 4.1-1.5.8 2.1.3 3.6.1 4 1 1 1.5 2.4 1.5 4 0 5.8-3.5 7-6.8 7.4.5.5 1 1.4 1 2.8v4.1c0 .4.3.9 1 .7 6-2 10.2-7.6 10.2-14.2C40 16.7 33.3 10 25 10z"></path></svg>
+      % endif
+    </a>
+
+    <div class="gitment-editor-main">
+      <div class="gitment-editor-header">
+        <nav class="gitment-editor-tabs">
+          <button class="gitment-editor-tab write gitment-selected">输入</button>
+          <button class="gitment-editor-tab preview">预览</button>
+        </nav>
+        <div class="gitment-editor-login">
+          % if not github_user:
+          <a class="gitment-editor-login-link" href="${ f'/oauth/post/{post_id}' }">Login</a>
+          % else:
+            <a class="gitment-editor-logout-link">${ github_user['username'] }</a>
+          % endif
+        </div>
+      </div>
+      <div class="gitment-editor-body">
+        <div class="gitment-editor-write-field">
+          <textarea placeholder="评价一下吧" title=""
+            % if not github_user:
+            disabled
+            % endif
+          ></textarea>
+        </div>
+        <div class="gitment-editor-preview-field gitment-hidden">
+          <div class="gitment-editor-preview gitment-markdown">空空如也</div>
+        </div>
+      </div>
+    </div>
+    <div class="gitment-editor-footer">
+      <a class="gitment-editor-footer-tip" href="https://guides.github.com/features/mastering-markdown/" target="_blank">
+        支持 Markdown 语法
+      </a>
+      <button class="gitment-editor-submit" title="">评论</button>
+    </div>
+    % endif
+  </div>
+  <div>
+</%def>
+
+<%def name="render_comments(comments, github_user, liked_comment_ids)">
+    % for comment in comments:
+      ${ render_single_comment(comment, github_user, liked_comment_ids) }
+    % endfor
+</%def>
+
+<%def name="render_single_comment(comment, github_user, liked_comment_ids)">
+  <% user = comment.user %>
+  <li class="gitment-comment">
+    <a class="gitment-comment-avatar" href="${ user.link }" target="_blank">
+      <img class="gitment-comment-avatar-img" src="${ user.picture }">
+    </a>
+    <div class="gitment-comment-main">
+      <div class="gitment-comment-header">
+        <a class="gitment-comment-name" href="${ user.link if user else '#' }" target="_blank">
+          ${ user.username }
+        </a>
+        commented on
+        <span title="${ comment.created_at }">${ comment.created_at.strftime('%a %B %d, %Y') }</span>
+        % if github_user:
+        <div class="gitment-comment-like-btn ${'liked' if comment.id in liked_comment_ids else ''}" data-id=${ comment.id }><svg class="gitment-heart-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><path d="M25 39.7l-.6-.5C11.5 28.7 8 25 8 19c0-5 4-9 9-9 4.1 0 6.4 2.3 8 4.1 1.6-1.8 3.9-4.1 8-4.1 5 0 9 4 9 9 0 6-3.5 9.7-16.4 20.2l-.6.5zM17 12c-3.9 0-7 3.1-7 7 0 5.1 3.2 8.5 15 18.1 11.8-9.6 15-13 15-18.1 0-3.9-3.1-7-7-7-3.5 0-5.4 2.1-6.9 3.8L25 17.1l-1.1-1.3C22.4 14.1 20.5 12 17 12z"></path></svg><span>${ comment.n_likes }</span></div>
+        % endif
+      </div>
+      <div class="gitment-comment-body gitment-markdown">${ comment.html_content | n }</div>
+    </div>
+  </li>
+</%def>
+
+<%def name="render_react_container(stats, reaction_type)">
+<%
+    reaction_enable = reaction_type is None
+    total = sum([getattr(stats, f'{name}_count') for name in ReactItem.REACTION_MAP])
+%>
+<div id="reactions">
+  <div class="text-bold align align--center">${ REACT_PROMPT }</div>
+  % if total:
+  <div class="spacing-top-small align align--center">${ total } 表态</div>
+  % endif
+  <div class="reaction-items">
+    <div class="align align--center align--wrap">
+      % for name, kind in ReactItem.REACTION_MAP.items():
+      <div class="reaction-item align align--column align--middle reaction-item__${ 'enabled' if reaction_enable else 'disabled'} ${ 'reaction-item__selected' if kind == reaction_type else '' }">
+        <div class="align align--middle reaction-item-button" data-kind=${ kind }>
+          <img src="${ app.url_for('static', filename=f'img/{name}.png') }">
+          <div class="reaction-item__text">${ name.capitalize() }</div>
+        </div>
+        % if not reaction_enable:
+          <div class="reaction-item__votes">${ getattr(stats, f'{name}_count') }</div>
+        % endif
+      </div>
+      % endfor
+    </div>
+  </div>
+</div>
+</%def>

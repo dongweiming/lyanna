@@ -1,0 +1,76 @@
+<%! from config import SITE_NAV_MENUS, SITE_TITLE, GOOGLE_ANALYTICS %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+    <title>${ self.title() }</title>
+    ${ self.doc_head() }
+    ${ self.ga() }
+  </head>
+  <body>
+    <div class="nav-container">
+      <nav class="home-menu pure-menu pure-menu-horizontal">
+        <a class="pure-menu-heading" href="/">
+          <span class="title">${ SITE_TITLE }</span>
+        </a>
+
+        <ul class="pure-menu-list clearfix">
+          % for endpoint_or_url, name in SITE_NAV_MENUS:
+            <% url = app.url_for(endpoint_or_url) if '.' in endpoint_or_url else endpoint_or_url %>
+            <li class="pure-menu-item ${ 'actived' if request.path == url else ''  }">
+              <a href="${ url }" class="pure-menu-link">${ name }</a>
+            </li>
+          % endfor
+        </ul>
+      </nav>
+    </div>
+
+    <div class="container" id="content-outer">
+      <div class="inner" id="content-inner">
+        ${ self.content() }
+      </div>
+      ${ self.pagination() }
+    </div>
+
+    <footer class="footer text-center">
+      <div id="bottom-inner">
+        <a class="bottom-item" href="/">首页</a> |
+        <a class="bottom-item" href="https://github.com/dongweiming/lyanna" target="_blank">GitHub</a> |
+        Powered by <a class="href-item" href="https://github.com/huge-success/sanic" target="_blank">Sanic</a>、<a class="href-item" href="https://github.com/dongweiming/sanic-mako" target="_blank">SanicMako</a> | Theme inspired by <a class="href-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">hexo-theme-xoxo</a>
+      </div>
+    </footer>
+
+    ${ self.bottom_script() }
+  </body>
+</html>
+
+<%def name="title()">${ SITE_TITLE }</%def>
+<%def name="more_header()"></%def>
+
+<%def name="doc_head()">
+  <link rel="stylesheet" href="${ app.url_for('static', filename='css/main.min.css') } ">
+  ${self.more_header() | n}
+</%def>
+
+<%def name="content()"></%def>
+
+<%def name="bottom_script()">
+</%def>
+
+<%def name="pagination()">
+</%def>
+
+<%def name="ga()">
+  % if GOOGLE_ANALYTICS:
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=${ GOOGLE_ANALYTICS }"></script>
+  <script>
+   window.dataLayer = window.dataLayer || [];
+   function gtag(){dataLayer.push(arguments);}
+   gtag('js', new Date());
+
+   gtag('config', '${ GOOGLE_ANALYTICS }');
+  </script>
+  % endif
+</%def>

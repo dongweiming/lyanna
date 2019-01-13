@@ -1,0 +1,70 @@
+<%! from config import SHOW_PROFILE %>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>${ self.title() }</title>
+    ${ self.doc_head() }
+  </head>
+  <body>
+    ${ self.tab() }
+
+    <div class="uk-section">
+      <div class="uk-container">
+        ${ self.content() }
+      </div>
+    </div>
+
+    <div class="uk-section uk-section-primary uk-preserve-color footer">
+      <div class="uk-container uk-container-center uk-text-center">
+        <ul class="uk-subnav uk-subnav-line uk-flex-center">
+            <li><a href="https://github.com/dongweiming/lyanna">GitHub</a></li>
+            <li><a href="https://github.com/dongweiming/lyanna/blob/master/CHANGELOG.md">Changelog</a></li>
+        </ul>
+
+        <div class="uk-panel">
+          <p>Made by <a href="https://github.com/huge-success/sanic" target="_blank">Sanic</a>、<a href="https://getuikit.com" target="_blank">Uikit</a>、<a href="https://github.com/dongweiming/sanic-mako" target="_blank">SanicMako</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  ${ self.bottom_script() }
+  </body>
+</html>
+
+<%def name="title()">管理后台</%def>
+<%def name="more_header()"></%def>
+
+<%def name="doc_head()">
+  <link rel="stylesheet" href="${ app.url_for('static', filename='css/admin/uikit.min.css') } ">
+  ${self.more_header() | n}
+</%def>
+
+<%def name="content()"></%def>
+
+<%def name="bottom_script()">
+  <script src="${ app.url_for('static', filename='dist/admin/admin.js')}"></script>
+</%def>
+
+<%def name="tab()">
+    <div class="uk-section-primary uk-preserve-color">
+      <div uk-sticky="animation: uk-animation-slide-top; sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; cls-inactive: uk-navbar-transparent uk-light; top: 200">
+        <nav class="uk-navbar-container">
+            <div class="uk-container uk-container-expand">
+                <div uk-navbar>
+
+                    <ul class="uk-navbar-nav">
+                        <li class="uk-active"><a href="/admin">Home</a></li>
+                        <li><a href="${ app.url_for('admin.list_posts', page=1) }">Posts</a></li>
+                        <li><a href="${ app.url_for('admin.list_users') }">Users</a></li>
+                        % if SHOW_PROFILE:
+                        <li><a href="${ app.url_for('admin.profile') }">Profile</a></li>
+                        % endif
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+      </div>
+    </div>
+</%def>

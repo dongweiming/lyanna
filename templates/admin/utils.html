@@ -1,0 +1,77 @@
+<%def name="render_field_with_errors(field, option=None, **kwargs)">
+  <%
+    label_id = field.label.field_id
+    if label_id in ('email', 'password'):
+        type = label_id
+    else:
+        type = 'text'
+  %>
+<div class="uk-margin">
+  <label class="uk-form-label" for="${ label_id }">${ field.label.text }</label>
+  <div class="uk-form-controls">
+    % if field.type == 'SwitchField':
+      <input type="uk-checkbox" name="${ label_id }" class="switch-input" value="${ field.data }">
+      <label class="uk-switch">
+        <input type="checkbox" value="${ field.data }"
+          % if field.data == 'on':
+          checked
+          % endif
+        >
+        <div class="uk-switch-slider uk-switch-on-off round"></div>
+      </label>
+    % elif field.type == 'SelectField':
+      <select name="${ label_id }">
+        % for item in kwargs.pop(option):
+        <option value="${ item.id }"
+          % if str(item.id) == field.data:
+            selected="selected"
+          % endif
+        >
+          ${ item.name }
+        </option>
+        % endfor
+      </select>
+    % elif field.type == 'TextAreaField':
+      <textarea name="${ label_id }" class="uk-textarea"></textarea>
+    % elif field.type == 'FileField':
+      <div class="js-upload uk-form-custom" uk-form-custom="target: true">
+        % if form.avatar_path.data:
+        <img class="user-avatar" style="width: 100px;" src="${ app.url_for('static', filename=f'upload/{form.avatar_path.data}') }">
+        % endif
+        <input type="file" name="${label_id}">
+        ## <input class="uk-input uk-form-width-medium" type="text" placeholder="Select file" disabled>
+        <button class="uk-button uk-button-default" type="button" tabindex="-1">Select</button>
+      </div>
+    % elif field.type == 'SelectMultipleField':
+      <select name="${ label_id }" multiple="multiple">
+        % for item in kwargs.pop(option):
+        <option value="${ item.name }"
+          % if item.name in field.data:
+            selected="selected"
+          % endif
+        >
+          ${ item.name }
+        </option>
+        % endfor
+      </select>
+    % else:
+       % if field.widget.input_type != 'checkbox':
+        <input name="${label_id}" class="uk-input uk-form-width-large ${'uk-form-danger' if field.errors else ''}" type="${ type }" value=${ field.data }>
+         % if field.errors:
+           <span class="control-label uk-form-danger">${ field.errors[0] }</span>
+         % endif
+       % else:
+           <input class="uk-checkbox" type="checkbox" name="${label_id}" value="${ field.data }"
+           % if field.data:
+              checked
+           % endif
+           >
+       % endif
+     % endif
+     </div>
+  </div>
+</%def>
+
+<%def name="render_submit(field)">
+  <button class="uk-button uk-button-primary uk-button-small">${ field.label.text }</button>
+</%def>

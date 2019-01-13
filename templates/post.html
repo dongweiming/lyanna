@@ -1,0 +1,99 @@
+<%inherit file="/base.html" />
+<%namespace name="utils" file="/utils.html"/>
+
+<%!
+from config import SITE_TITLE
+%>
+
+<%def name="doc_head()">
+<meta name="post_id" content="${ post.id }">
+<meta name="keywords" content="${ ','.join(tag.name for tag in post.tags) }">
+<meta name="description" content="${ post.excerpt }">
+<meta name="summary" content="${ SITE_TITLE }">
+
+<meta property="og:type" content="article">
+<meta property="og:title" content="${ post.title }">
+<meta property="og:url" content="${ post.url }">
+<meta property="og:site_name" content="SITE_TITLE">
+<meta property="og:description" content="${ post.excerpt }">
+<meta property="og:published_time" content="${ post.created_at.isoformat() }">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="${ post.title }">
+<meta name="twitter:description" content="${ post.excerpt }">
+<script src="${ app.url_for('static', filename='js/highlight.min.js')}"></script>
+<link rel="stylesheet" href="${ app.url_for('static', filename='css/tomorrow.min.css') } ">
+<link rel="stylesheet" href="${ app.url_for('static', filename='css/post.min.css') } ">
+</%def>
+
+<%def name="content()">
+<div class="post-container">
+  <article class="post" id="post">
+    <header class="post-header text-center">
+      <h1 class="title">
+        ${ post.title }
+      </h1>
+      <span>
+        <time class="time" datetime="${ post.created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ') }">
+          ${ post.created_at.strftime('%Y-%m-%d') }
+        </time>
+      </span>
+      <span class="slash">/</span>
+      <span class="post-meta">
+        <span class="post-tags">
+          <ul class="article-tag-list">
+            % for tag in post.tags:
+            <li class="article-tag-list-item">
+              <a class="article-tag-list-link" href="${ tag.url }">${ tag.name }</a>
+            </li>
+            % endfor
+          </ul>
+        </span>
+      </span>
+    </header>
+
+    <div class="post-content">
+      ${ post.html_content | n }
+    </div>
+
+  </article>
+  <div class="toc-container">
+    ${ post.toc | n }
+  </div>
+</div>
+
+<div class="social-sharer" data-title="${ post.title }" date-url="${ post.url }" data-services="wechat,weibo,douban,yingxiang,linkedin"></div>
+
+% if related_posts:
+<ul id="related">
+  % for p in related_posts:
+  <li>
+    <a href="${ p.url }" title="${ p.title }">${ p.title }</a>
+  </li>
+  % endfor
+</ul>
+% endif
+
+<div id="reactions-container">
+  ${ utils.render_react_container(stats, reaction_type) }
+</div>
+
+${ utils.render_comment_container(post, 10, github_user, liked_comment_ids) }
+
+<div class="copyright">
+    <span>本作品采用</span>
+    <a href="https://creativecommons.org/licenses/by/4.0/">知识共享署名 4.0 国际许可协议</a>
+    <span>进行许可。 转载时请注明原文链接。</span>
+</div>
+
+<div class="post-nav">
+</div>
+</%def>
+
+<%def name="pagination()">
+</%def>
+
+<%def name="title()">${ post.title } - ${ SITE_TITLE }</%def>
+
+<%def name="bottom_script()">
+  <script src="${ app.url_for('static', filename='dist/blog/blog.js')}"></script>
+</%def>

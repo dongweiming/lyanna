@@ -1,0 +1,42 @@
+<%inherit file="/admin/base.html" />
+
+<%def name="content()">
+
+  % if msg:
+  <div class="uk-alert-success" uk-alert>
+    <a class="uk-alert-close" uk-close></a>
+    <p>${ msg }</p>
+  </div>
+  % endif
+  <ul uk-tab>
+    <li class="uk-active"><a href="${ app.url_for('admin.list_users') }">List(${ total })</a></li>
+    <li><a href="${ app.url_for('admin.new_user') }">Create</a></li>
+  </ul>
+
+  <table class="uk-table uk-table-hover uk-table-divider">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Active</th>
+        <th><strong>Profile</strong></th>
+      </tr>
+    </thead>
+    <tbody>
+      % for user in users:
+      <tr>
+        <td>
+          <a href="${ app.url_for('admin.edit_user', user_id=user.id) }">
+            <span uk-icon="file-edit"></span>
+          </a>
+        </td>
+        <td>${ user.name }</td>
+        <td>${ user.email }</td>
+        <td>${ 'Active' if user.active else 'Deactivated' }</td>
+        <td></td>
+      </tr>
+      % endfor
+    </tbody>
+</table>
+</%def>

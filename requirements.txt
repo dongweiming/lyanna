@@ -1,0 +1,24 @@
+sanic==0.8.3
+click==7.0
+aiohttp==3.5.1
+sanic_oauth==0.2.5
+sanic_mako==0.4.0
+aiomysql==0.0.19
+aiocontextvars==0.1.2
+WTForms==2.2.1
+Sanic-Auth==0.2.0
+Sanic-wtf==0.5.0
+sanic-session==0.4.1
+aiomcache==0.6.0
+aioredis==1.2.0
+cython==0.29.2
+mistune==0.8.4
+aiotask-context==0.6.0
+asyncblink==0.3.2
+jsonschema==2.6.0
+Werkzeug==0.14.1
+Pygments==2.3.0
+cssmin==0.2.0
+gunicorn==19.8.0
+sanic-sentry==0.1.7
+-e git+https://github.com/dongweiming/tortoise-orm.git@dev#egg=tortoise

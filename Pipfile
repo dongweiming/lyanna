@@ -1,0 +1,36 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+sanic = "==0.8.3"
+tortoise-orm = "*"
+aiomysql = "==0.0.19"
+ipython = "*"
+aiohttp = "==3.5.1"
+click = "==7.0"
+sanic-oauth = "==0.2.5"
+sanic-mako = "==0.4.0"
+aiocontextvars = "==0.1.2"
+wtforms = "==2.2.1"
+sanic-auth = "==0.2.0"
+sanic-wtf = "==0.5.0"
+sanic-session = "==0.4.1"
+aiomcache = "==0.6.0"
+aioredis = "==1.2.0"
+cython = "==0.29.2"
+mistune = "==0.8.4"
+aiotask-context = "==0.6.0"
+asyncblink = "==0.3.2"
+jsonschema = "==2.6.0"
+werkzeug = "==0.14.1"
+pygments = "==2.3.0"
+cssmin = "==0.2.0"
+sanic-sentry = "*"
+tortoise = {editable = true,git = "https://github.com/dongweiming/tortoise-orm.git",ref = "dev"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"

@@ -1,0 +1,165 @@
+img {
+    border: 0;
+    -ms-interpolation-mode: bicubic;
+}
+
+#reactions, #reactions-promotion {
+    margin-bottom: 10px;
+}
+
+.align {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-direction: row;
+    flex-direction: row;
+}
+
+.align--center {
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+.align--wrap {
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.align--column {
+    -ms-flex-direction: column;
+    flex-direction: column;
+}
+
+.align--middle {
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+#reactions .reaction-items .reaction-item,
+#reactions-promotion .reaction-items .reaction-item {
+    margin-bottom: 5px;
+}
+
+#reactions .reaction-items .reaction-item .reaction-item-button,
+#reactions-promotion .reaction-items .reaction-item .reaction-item-button {
+    border: 1px solid #e0e3e9;
+    padding: 5px 10px;
+    margin: 5px 6px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+#reactions .reaction-items .reaction-item img,
+#reactions-promotion .reaction-items .reaction-item img {
+    position: relative;
+}
+
+#reactions .reaction-items .reaction-item .reaction-item-button img,
+#reactions-promotion .reaction-items .reaction-item .reaction-item-button img {
+    height: 24px;
+}
+
+#reactions .reaction-items .reaction-item .reaction-item__text,
+#reactions-promotion .reaction-items .reaction-item .reaction-item__text {
+    margin-left: 8px;
+}
+
+#reactions .reaction-items:not(.is-submitting):not(.readonly) .reaction-item__enabled .reaction-item-button:hover>img, #reactions-promotion .reaction-items:not(.is-submitting):not(.readonly) .reaction-item__enabled .reaction-item-button:hover>img {
+    animation: anim-hop 1s ease-in-out infinite alternate;
+                                                                                                                        }
+
+
+#reactions .reaction-items .reaction-item .reaction-item-button,#reactions-promotion .reaction-items .reaction-item .reaction-item-button {
+    border: 1px solid #e0e3e9;
+    padding: 5px 10px;
+    margin: 5px 6px 10px;
+    border-radius: 4px;
+    white-space: nowrap
+}
+
+#reactions .reaction-items .reaction-item .reaction-item-button img,#reactions-promotion .reaction-items .reaction-item .reaction-item-button img {
+    height: 24px
+}
+
+#reactions .reaction-items .reaction-item.reaction-item__selected,#reactions-promotion .reaction-items .reaction-item.reaction-item__selected {
+    color: #2e87e7
+}
+
+#reactions .reaction-items .reaction-item.reaction-item__selected .reaction-item-button,#reactions-promotion .reaction-items .reaction-item.reaction-item__selected .reaction-item-button {
+    background-color: #f2f9ff;
+    border-color: #2e87e7
+}
+
+.dark #reactions .reaction-items .reaction-item.reaction-item__selected,.dark #reactions-promotion .reaction-items .reaction-item.reaction-item__selected {
+    color: #fff
+}
+
+.dark #reactions .reaction-items .reaction-item.reaction-item__selected .reaction-item-button,.dark #reactions-promotion .reaction-items .reaction-item.reaction-item__selected .reaction-item-button {
+    background-color: #6C6F73;
+    border-color: #e0e3e9
+}
+
+#reactions .reaction-items .reaction-item.reaction-item__selected .reaction-item__votes:after,#reactions-promotion .reaction-items .reaction-item.reaction-item__selected .reaction-item__votes:after {
+    animation: anim-heart .4s forwards
+}
+
+#reactions .reaction-items .reaction-item .reaction-item__votes,#reactions-promotion .reaction-items .reaction-item .reaction-item__votes {
+    position: relative;
+    transition: all .2s ease-in-out
+}
+
+#reactions .reaction-items .reaction-item .reaction-item__votes:after,#reactions-promotion .reaction-items .reaction-item .reaction-item__votes:after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -25px 0 0 -25px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    content: '';
+    opacity: 0;
+    background: rgba(46,135,231,.2)
+}
+
+@keyframes anim-heart {
+    0% {
+        opacity: 0;
+        transform: scale(.2,.2)
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2,1.2)
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(.75,.75)
+    }
+}
+
+@keyframes anim-hop {
+    0% {
+        transform: scale(.9)
+    }
+
+    100% {
+        transform: scale(1.4)
+    }
+}
+
+.text-bold {
+    font-weight: 600;
+}
+
+.spacing-top-small {
+    margin-top: 5px;
+}
+
+#reactions .reaction-items,
+#reactions-promotion .reaction-items {
+    padding-top: 10px;
+}
+
+.reaction-item__enabled {
+    cursor: pointer;
+}

@@ -1,0 +1,84 @@
+<%! from config import SHOW_PROFILE %>
+<%inherit file="/base.html" />
+
+<%def name="doc_head()">
+  <link rel="stylesheet" href="${ app.url_for('static', filename='css/index.min.css') } ">
+</%def>
+
+<%def name="content()">
+  <div class="${ 'post-list' if SHOW_PROFILE else ''}">
+    <div class="recent-posts">
+      % for post in paginatior.items:
+      <article class="recent-post-item">
+        <a class="title" href="${ post.url }"><h2>${ post.title }</h2></a>
+          <div class="post-meta">
+            <time class="time" datetime="${ post.created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ') }">
+              ${ post.created_at.strftime('%Y-%m-%d')  }
+            </time>
+            <span class="slash">/</span>
+
+            <ul class="index-tag-list">
+              % for tag in post.tags:
+                <li class="index-tag-list-item"><a class="index-tag-list-link" href="${ tag.url }">${ tag.name }</a></li>
+              % endfor
+            </ul>
+          </div>
+            <div class="post-excerpt">
+              <p>${ post.excerpt }</p>
+            </div>
+
+          <a class="more" href="${ post.url }"> 阅读全文 〉</a>
+      </article>
+      % endfor
+    </div>
+  </div>
+
+  % if SHOW_PROFILE:
+  <section id="sidebar">
+    <div class="short-about">
+      <img id="avatar_pic" src="${ app.url_for('static', filename=f'upload/{profile.avatar}') }">
+      <p>${ profile.intro }</p>
+
+      <!-- SNS Link -->
+      <ul class="list-inline">
+        % for sns in ('github', 'linkedin'):
+        <li>
+          <a target="_blank" href="${ getattr(profile, f'{sns}_url') }">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-${ sns } fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        % endfor
+      </ul>
+    </div>
+    ## <hr>
+  </section>
+  % endif
+</%def>
+
+<%def name="pagination()">
+  <nav class="page-nav text-center">
+    % if paginatior.has_prev:
+    <a class="extend prev" rel="prev" href="${ app.url_for('blog.page', ident=paginatior.prev_num) }">〈</a>
+    % endif
+
+    % for page in paginatior.iter_pages():
+      % if page:
+        % if page == paginatior.page:
+        <span class="page-number current">${ page }</span>
+        % else:
+        <a class="page-number" href="${ app.url_for('blog.page', ident=page) }">${ page }</a>
+        % endif
+      % else:
+        <span class=ellipsis>…</span>
+      % endif
+    % endfor
+
+    % if paginatior.has_next:
+      <a class="extend next" rel="next" href="${ app.url_for('blog.page', ident=paginatior.next_num) }">〉</a>
+    % endif
+    </ul>
+  </nav>
+</%def>

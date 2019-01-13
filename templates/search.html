@@ -1,0 +1,29 @@
+<%inherit file="/base.html" />
+
+<%def name="content()">
+<article class="post page" id="page">
+  <header class="post-header text-center">
+  </header>
+  <div class="post-content">
+    <div class="search-content">
+      <form class="pure-form" _lpchecked="1">
+        <input type="text" id="local-search-input" name="q" results="0" autocomplete="off" placeholder="搜索" class="pure-input pure-input-1" value="${ q }">
+      </form>
+      <div id="local-search-result">
+        <ul class="search-result-list">
+          % for post in []:
+          <li><a href="${ post.url }" class="search-result-title">${ post.title }</a><p class="search-result">${ post.excerpt }</p></li>
+          % endfor
+        </ul>
+      </div>
+    </div>
+  </div>
+</article>
+</%def>
+
+<%def name="pagination()">
+</%def>
+
+<%def name="bottom_script()">
+<script src="${ app.url_for('static', filename='dist/blog/search.js')}"></script>
+</%def>

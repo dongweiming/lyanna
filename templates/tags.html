@@ -1,0 +1,19 @@
+<%inherit file="/base.html" />
+
+<%def name="content()">
+<article class="post page" id="page">
+  <div class="post-content">
+    <ul class="tag-list">
+      % for tag, count in tags:
+      <li class="tag-list-item">
+        <a class="tag-list-link" href="${ tag.url }">${ tag.name }</a>
+        <span class="tag-list-count">${ count }</span>
+      </li>
+      % endfor
+    </ul>
+  </div>
+</article>
+</%def>
+
+<%def name="pagination()">
+</%def>

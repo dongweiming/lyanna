@@ -1,0 +1,24 @@
+<%inherit file="/admin/base.html" />
+<%namespace name="utils" file="/admin/utils.html" />
+
+<%def name="content()">
+
+  <ul uk-tab>
+    <li><a href="${ app.url_for('admin.list_users') }">List</a></li>
+    <li class="${ 'uk-active' if not user_id else '' }"><a href="${ app.url_for('admin.new_user') if user_id else 'javascript:void(0)' }">Create</a></li>
+    % if user_id:
+       <li class="${ 'uk-active' if user_id else '' }"><a href="javascript:void(0)">Edit</a></li>
+    % endif
+  </ul>
+
+  <form class="uk-form-horizontal uk-margin-large user-form" action="${ app.url_for('admin.edit_user', user_id=user_id) if user_id else app.url_for('admin.new_user') }" method="POST" name="user_form">
+    <fieldset class="uk-fieldset">
+      ${ form.hidden_tag() | n }
+      ${ utils.render_field_with_errors(form.name) }
+      ${ utils.render_field_with_errors(form.email) }
+      ${ utils.render_field_with_errors(form.password) }
+      ${ utils.render_field_with_errors(form.active) }
+      ${ utils.render_submit(form.submit) }
+    </fieldset>
+  </form>
+</%def>

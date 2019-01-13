@@ -1,0 +1,10 @@
+.editor-toolbar *:focus {
+  outline: 0;
+}
+.CodeMirror-fullscreen, .editor-preview-side {
+  z-index: 980;
+}
+
+.editor-toolbar.fullscreen {
+  z-index: 980;
+}
