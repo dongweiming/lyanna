@@ -67,7 +67,7 @@ async def comments(request, post_id):
         'html': await render_template_def(
             'utils.html', 'render_comments', request,
             {'comments': comments, 'github_user': user,
-             'liked_comment_ids': liked_comment_ids })
+             'liked_comment_ids': liked_comment_ids})
     })
 
 
@@ -77,7 +77,7 @@ async def render_markdown(request, user):
     text = request.form.get('text')
     if not text:
         return json({'r': 1, 'msg': 'Text required.'})
-    return json({ 'r': 0, 'text':  mistune.markdown(text) })
+    return json({'r': 0, 'text':  mistune.markdown(text)})
 
 
 @bp.route('/post/<post_id>/react', methods=['POST', 'DELETE'])
@@ -96,11 +96,11 @@ async def react(request, user, post):
     liked_comment_ids = []
     if user:
         reaction_type = await post.get_reaction_type(user['gid'])
-    return json({ 'r': int( not rv),
-                  'html': await render_template_def(
-                      'utils.html', 'render_react_container', request,
-                      {'stats': stats, 'reaction_type': reaction_type })
-    })
+    return json({'r': int(not rv),
+                 'html': await render_template_def(
+        'utils.html', 'render_react_container', request,
+                      {'stats': stats, 'reaction_type': reaction_type})
+                 })
 
 
 @bp.route('/comment/<comment_id>/like', methods=['POST', 'DELETE'])
@@ -117,4 +117,4 @@ async def comment_like(request, comment_id):
     elif request.method == 'DELETE':
         rv = await comment.cancel_reaction(user['gid'])
 
-    return json({ 'r': int( not rv), 'n_likes': await comment.n_likes })
+    return json({'r': int(not rv), 'n_likes': await comment.n_likes})

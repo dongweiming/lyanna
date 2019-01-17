@@ -9,13 +9,13 @@ from .mc import cache, clear_mc
 from .utils import AttrDict, empty
 
 schema = {
-     "type" : "object",
-     "properties" : {
-         "intro" : {"type" : "string"},
-         "github_url" : {"type" : "string"},
-         "avatar" : {"type" : "string"},
-         "linkedin_url" : {"type" : "string"}
-     },
+    "type": "object",
+    "properties": {
+        "intro": {"type": "string"},
+        "github_url": {"type": "string"},
+        "avatar": {"type": "string"},
+        "linkedin_url": {"type": "string"}
+    },
 }
 MC_KEY_PROFILE = 'profile'
 PROFILE_FILE = 'profile.json'
@@ -36,4 +36,3 @@ async def set_profile(**kw):
     with open(Path(HERE) / PROFILE_FILE, 'w') as f:
         json.dump(kw, f)
         await clear_mc(MC_KEY_PROFILE)
-

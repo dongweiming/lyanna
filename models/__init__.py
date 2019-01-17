@@ -1,5 +1,5 @@
-from .blog import Post, Tag, PostTag
-from .comment import Comment
-from .react import ReactItem
-from .user import User, create_user, GithubUser
-from .react import ReactItem, ReactStats
+from .blog import Post, Tag, PostTag  # noqa
+from .comment import Comment  # noqa
+from .react import ReactItem  # noqa
+from .user import User, create_user, GithubUser  # noqa
+from .react import ReactItem, ReactStats  # noqa

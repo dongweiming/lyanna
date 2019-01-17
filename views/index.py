@@ -123,7 +123,7 @@ async def feed(request):
 @mako.template('search.html')
 async def search(request):
     q = request.args.get('q') or ''
-    return { 'q': q }
+    return {'q': q}
 
 
 @cache(MC_KEY_SEARCH)

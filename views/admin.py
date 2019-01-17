@@ -34,7 +34,7 @@ async def _get_post_context(page=1):
     start = (page - 1) * PER_PAGE
     posts = await Post.get_all()
     total = len(posts)
-    posts = posts[start: start+PER_PAGE]
+    posts = posts[start: start + PER_PAGE]
     paginatior = Pagination(page, PER_PAGE, total, posts)
     return {'paginatior': paginatior, 'total': total, 'msg': '', 'page': page}
 
@@ -79,7 +79,7 @@ async def _post(request, post_id=None):
         return await render_template('admin/list_posts.html', request, context)
     elif post_id is not None:
         form = PostForm(request, obj=post)
-        form.tags.data = [ tag.name for tag in post.tags]
+        form.tags.data = [tag.name for tag in post.tags]
         form.can_comment.data = post.can_comment
         form.is_page.data = post.is_page
         form.status.data = 'on' if post.status else 'off'
@@ -170,7 +170,8 @@ async def profile(request):
             github_url = form.github_url.data
             linkedin_url = form.linkedin_url.data
             avatar_path = image.name
-            uploaded_file = Path(request.app.config.UPLOAD_FOLDER) / avatar_path
+            uploaded_file = Path(
+                request.app.config.UPLOAD_FOLDER) / avatar_path
             uploaded_file.write_bytes(image.body)
             form.avatar_path.data = avatar_path
             kw = {'intro': intro, 'github_url': github_url,

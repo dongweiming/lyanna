@@ -19,6 +19,7 @@ _redis = None
 
 
 class PropertyHolder(type):
+
     def __new__(cls, name, bases, attrs):
         new_cls = type.__new__(cls, name, bases, attrs)
         new_cls.property_fields = []
@@ -109,11 +110,11 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     async def set_props_by_key(self, key, value):
         key = self.get_db_key(key)
-        return await (await self.redis).set(key, value)
+        return await(await self.redis).set(key, value)
 
     async def get_props_by_key(self, key):
         key = self.get_db_key(key)
-        return await (await self.redis).get(key) or b''
+        return await(await self.redis).get(key) or b''
 
     @classmethod
     async def get_or_404(cls, id, sync=False):
@@ -125,7 +126,7 @@ class BaseModel(Model, metaclass=ModelMeta):
         return obj
 
     @classmethod
-    @cache(MC_KEY_ITEM_BY_ID  % ('{cls.__name__}', '{id}'))
+    @cache(MC_KEY_ITEM_BY_ID % ('{cls.__name__}', '{id}'))
     async def cache(cls, id):
         return await cls.filter(id=id).first()
 

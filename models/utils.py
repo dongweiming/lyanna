@@ -1,6 +1,4 @@
-import sys
 import math
-import pkgutil
 
 
 def trunc_utf8(string, num, etc='...'):
@@ -72,12 +70,14 @@ empty = Empty()
 
 
 class AttrDict(dict):
+
     def __init__(self, *args, **kwargs):
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
 
 class Pagination:
+
     def __init__(self, page, per_page, total, items):
         self.page = page
         self.per_page = per_page
@@ -117,7 +117,7 @@ class Pagination:
         last = 0
         for num in range(1, self.pages + 1):
             if num <= left_edge or \
-               (num > self.page - left_current - 1 and \
+               (num > self.page - left_current - 1 and
                 num < self.page + right_current) or \
                num > self.pages - right_edge:
                 if last + 1 != num:

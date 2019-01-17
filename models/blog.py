@@ -35,6 +35,7 @@ BQ_REGEX = re.compile(r'<blockquote>.*?</blockquote>')
 
 
 class MLStripper(HTMLParser):
+
     def __init__(self):
         super().__init__()
         self.reset()
@@ -50,6 +51,7 @@ class MLStripper(HTMLParser):
 
 
 class BlogHtmlFormatter(HtmlFormatter):
+
     def __init__(self, **options):
         super().__init__(**options)
         self.lang = options.get('lang', '')
@@ -110,6 +112,7 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
 
 
 class BlogRenderer(mistune.Renderer):
+
     def header(self, text, level, raw=None):
         text = text.replace(' ', '')
         return f'<h{level} id="{text}">{text}</h{level}>\n'

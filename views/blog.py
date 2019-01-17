@@ -12,14 +12,14 @@ from models.mc import cache
 from models.profile import get_profile
 from models.utils import Pagination
 from models.blog import (
-     MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG)
+    MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG)
 from models import Post, Tag, PostTag, ReactItem, ReactStats
 
 bp = Blueprint('blog', url_prefix='/')
 
 
 def grouper(item):
-     return item.created_at.year
+    return item.created_at.year
 
 
 @bp.route('/')
@@ -30,7 +30,7 @@ async def index(request):
 @bp.route('/page/<ident>')
 async def page(request, ident=1):
     if str(ident).isdigit():
-         return await _posts(request, page=int(ident))
+        return await _posts(request, page=int(ident))
     return await _post(request, ident=ident)
 
 
@@ -39,7 +39,7 @@ async def _posts(request, page=1):
     start = (page - 1) * PER_PAGE
     posts = await Post.get_all(with_page=False)
     total = len(posts)
-    posts = posts[start: start+PER_PAGE]
+    posts = posts[start: start + PER_PAGE]
     paginatior = Pagination(page, PER_PAGE, total, posts)
     profile = await get_profile()
     return {'paginatior': paginatior, 'profile': profile}
@@ -83,8 +83,8 @@ async def preview(request, ident):
 async def archives(request):
     rv = {
         year: list(items) for year, items in groupby(
-          await Post.filter(Q(status=Post.STATUS_ONLINE)).order_by('-id'),
-          grouper)
+            await Post.filter(Q(status=Post.STATUS_ONLINE)).order_by('-id'),
+            grouper)
     }
     archives = sorted(rv.items(), key=lambda x: x[0],
                       reverse=True)
@@ -96,9 +96,9 @@ async def archives(request):
 @cache(MC_KEY_ARCHIVE % '{year}')
 async def archive(request, year):
     posts = await Post.filter(
-         Q(status=Post.STATUS_ONLINE),
-         Q(created_at__gte=f'{ year }-01-01'),
-         Q(created_at__lt=f'{ int(year) + 1 }-01-01')).order_by('-id')
+        Q(status=Post.STATUS_ONLINE),
+        Q(created_at__gte=f'{ year }-01-01'),
+        Q(created_at__lt=f'{ int(year) + 1 }-01-01')).order_by('-id')
     archives = [(year, posts)]
     return {'archives': archives}
 
@@ -119,8 +119,8 @@ async def tags(request):
 @mako.template('tag.html')
 @cache(MC_KEY_TAG % '{tag_id}')
 async def tag(request, tag_id):
-     tag = await Tag.cache(tag_id)
-     post_ids = await PostTag.filter(tag_id=tag_id).order_by('-post_id').values_list(
-          'post_id', flat=True)
-     posts = await Post.get_multi(post_ids)
-     return {'tag': tag, 'posts': posts}
+    tag = await Tag.cache(tag_id)
+    post_ids = await PostTag.filter(tag_id=tag_id).order_by('-post_id').values_list(
+        'post_id', flat=True)
+    posts = await Post.get_multi(post_ids)
+    return {'tag': tag, 'posts': posts}

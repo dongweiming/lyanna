@@ -1,7 +1,9 @@
 # coding: utf-8
 # Modified from https://github.com/lepture/mistune-contrib
 
+
 class TocMixin:
+
     """TOC mixin for Renderer, mix this with Renderer::
 
         class TocRenderer(TocMixin, Renderer):
