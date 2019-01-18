@@ -1,0 +1,70 @@
+# Ansible playbook for deploying My blog using Sanic
+
+---
+# Install system apt packages
+- hosts: blog
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Install packages
+    apt:
+      pkg:
+        - git
+        - python3-pip
+        - python3-dev
+        - nginx
+        - supervisor
+        - virtualenv
+      state: present
+
+# Install the app
+- hosts: blog
+  tasks:
+  - name: Clone repo
+    git:
+      repo: 'https://github.com/dongweiming/lyanna'
+      dest: /home/{{ ansible_ssh_user }}/{{ app_name }}
+      update: yes
+      version: "{{ git_commit_version }}"
+  - name: Install modules in a virtualenv
+    pip:
+      requirements: /home/{{ ansible_ssh_user }}/{{ app_name }}/requirements.txt
+      virtualenv: /home/{{ ansible_ssh_user }}/{{ app_name }}/venv
+      virtualenv_site_packages: yes
+      virtualenv_python: python3.6
+  - name: Copy local setting file
+    copy:
+      src: files/local_settings.py
+      dest: /home/{{ ansible_ssh_user }}/{{ app_name }}/local_settings.py
+
+# Configure supervisor service and nginx
+- hosts: blog
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: Template nginx site config
+    template:
+      src: templates/nginx.conf
+      dest: /etc/nginx/sites-enabled/blog.conf
+  - name: Template supervisor config
+    template:
+      src: templates/supervisord.conf
+      dest: /etc/supervisor/conf.d/{{ app_name }}.conf
+  #- name: Reload Supervisord
+  #  systemd: name=supervisor state=reloaded enabled=yes
+  - name: Restart the blog app
+    supervisorctl:
+      name: "{{ app_name }}"
+      state: restarted
+  - name: Restart nginx
+    systemd: name=nginx state=reloaded enabled=yes
+
+# Run a quick test to verify the blog is working
+- hosts: blog
+  tasks:
+  - name: Check that you can connect (GET) to a page and it returns a status 200
+    uri:
+      url: http://www.{{ domain }}
+      return_content: yes
+    register: this
+    failed_when: "this.status == 200"

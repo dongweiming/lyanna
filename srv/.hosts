@@ -1,0 +1,8 @@
+[blog]
+115.159.85.109 ansible_ssh_user=dongwm
+
+[blog:vars]
+ansible_ssh_user=dongwm
+domain=blog.pycourses.com
+app_name=lyanna
+git_commit_version=HEAD

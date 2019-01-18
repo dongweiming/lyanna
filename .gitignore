@@ -67,3 +67,4 @@ static/upload/
 profile.json
 custom
 package-lock.json
+.DS_Store

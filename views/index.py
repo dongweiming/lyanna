@@ -100,7 +100,7 @@ async def oauth(request, post_id=None):
 async def _feed(request):
     feed = AtomFeed(title=SITE_TITLE, updated=datetime.now(), feed_url=request.url,
                     url=request.host)
-    posts = await Post.get_all()[:10]
+    posts = (await Post.get_all())[:10]
     for post in posts:
         body = post.html_content
         summary = post.excerpt
