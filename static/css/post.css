@@ -1,0 +1,46 @@
+.post-container, #related, #reactions-container {
+  max-width: 880px;
+  margin: auto;
+  padding: 10px 20px;
+}
+
+.social-sharer {
+    max-width: 880px;
+    margin: 1rem auto;
+    text-align: center;
+}
+
+.post-content pre, .post-content code {
+    font-family: 'Roboto Mono',Monaco,courier,monospace;
+    font-size: 13px;
+}
+
+.post-content figure {
+    background: #f8f8f8;
+    padding: 0 10px;
+    border-radius: 2px;
+    margin: 20px 0;
+    overflow: auto;
+    position: relative;
+}
+
+.post-content figure:after {
+    content: attr(data-lang);
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #ccc;
+    text-align: right;
+    font-size: .8em;
+    padding: 5px 10px 0;
+    line-height: 15px;
+    height: 15px;
+    font-weight: 500;
+}
+.hljs {
+  background: #f8f8f8 !important;
+}
+
+#related {
+    max-width: 800px;
+}
