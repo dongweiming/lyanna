@@ -46,7 +46,8 @@ async def write_post(file):
             elif 'date:' in i:
                 date = i.split(':')[1].strip()
             elif 'tags' in i:
-                tags = filter(None, i.split(':')[1].strip()[1:-1].split(','))
+                i = i.split(':')[1].strip()[1:-1] if '[' in i else i.split(':')[1]
+                tags = filter(None, map(lambda x : x.strip(), i.split(',')))
         content = ''.join(f.readlines())
 
         try:
