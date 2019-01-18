@@ -63,8 +63,8 @@ def build_css():
     build_map = {
         'main.min.css': ['pure-min.css', 'base.css'],
         'index.min.css': ['main.min.css', 'fontawesome.min.css'],
-        'post.min.css': ['main.min.css', 'react.css', 'gitment.css',
-                         'social-sharer.css']
+        'post.min.css': ['main.min.css', 'post.css', 'react.css',
+                         'gitment.css', 'social-sharer.css']
     }
     css_map = {}
     css_dir = Path(HERE) / 'static/css/'

@@ -772,18 +772,6 @@ body {
   padding-left: 1rem;
   color: #2196F3;
 }
-.disqus-comments {
-  background-color: #fff;
-  display: block;
-  margin: 0 auto;
-  width: 830px;
-  padding: 0 15px;
-}
-@media (max-width: 880px) {
-  .disqus-comments {
-    display: none!important;
-  }
-}
 .search-content .pure-input {
   border-radius: 2px !important;
 }
@@ -877,6 +865,7 @@ code {
   padding: 2px 4px;
   font-size: 0.8rem;
 }
+
 .highlight {
   display: block;
   overflow-x: auto;
@@ -898,122 +887,6 @@ code {
 .highlight table td {
   border: none !important;
   padding: 0 !important;
-}
-.highlight .line {
-  height: 20px;
-  line-height: 20px;
-}
-.highlight .gutter pre {
-  padding: 10px;
-  color: #869194;
-  background-color: #eff2f3;
-  text-align: center;
-  overflow: hidden;
-}
-.highlight .code {
-  font-size: 0.8rem;
-}
-.highlight .code pre {
-  padding: 10px;
-}
-.highlight .comment,
-.highlight .meta {
-  color: #b3b3b3;
-}
-.highlight .string,
-.highlight .value,
-.highlight .variable,
-.highlight .template-variable,
-.highlight .strong,
-.highlight .emphasis,
-.highlight .quote,
-.highlight .inheritance,
-.highlight .ruby .symbol,
-.highlight .xml .cdata {
-  color: #1abc9c;
-}
-.highlight .keyword,
-.highlight .selector-tag,
-.highlight .type,
-.highlight .javascript .function {
-  color: #e96900;
-}
-.highlight .preprocessor,
-.highlight .built_in,
-.highlight .params,
-.highlight .constant,
-.highlight .symbol,
-.highlight .bullet,
-.highlight .attribute,
-.highlight .css .hexcolor {
-  color: #1abc9c;
-}
-.highlight .number,
-.highlight .literal {
-  color: #ae81ff;
-}
-.highlight .section,
-.highlight .header,
-.highlight .name,
-.highlight .function,
-.highlight .python .decorator,
-.highlight .python .title,
-.highlight .ruby .function .title,
-.highlight .ruby .title .keyword,
-.highlight .perl .sub,
-.highlight .javascript .title,
-.highlight .coffeescript .title {
-  color: #525252;
-}
-.highlight .tag,
-.highlight .regexp {
-  color: #2973b7;
-}
-.highlight .title,
-.highlight .attr,
-.highlight .selector-id,
-.highlight .selector-class,
-.highlight .selector-attr,
-.highlight .selector-pseudo,
-.highlight .ruby .constant,
-.highlight .xml .tag .title,
-.highlight .xml .pi,
-.highlight .xml .doctype,
-.highlight .html .doctype,
-.highlight .css .id,
-.highlight .css .pseudo,
-.highlight .class,
-.highlight .ruby .class .title {
-  color: #2973b7;
-}
-.highlight .css .code .attribute {
-  color: #e96900;
-}
-.highlight .css .class {
-  color: #525252;
-}
-.highlight .tag .attribute {
-  color: #e96900;
-}
-.highlight .addition {
-  color: #55a532;
-  background-color: #eaffea;
-}
-.highlight .deletion {
-  color: #bd2c00;
-  background-color: #ffecec;
-}
-.highlight .link {
-  text-decoration: underline;
-}
-.highlight .function .keyword {
-  color: #0092db;
-}
-.highlight .function .params {
-  color: #525252;
-}
-.highlight .function .title {
-  color: #525252;
 }
 
 #content-outer {
@@ -1108,49 +981,6 @@ hr {
   margin-bottom: 20px;
   border: 0;
   border-top: 1px solid #eee;
-}
-
-.post-container, #related, #reactions-container {
-  max-width: 880px;
-  margin: auto;
-  padding: 10px 20px;
-}
-
-.social-sharer {
-    max-width: 880px;
-    margin: 1rem auto;
-    text-align: center;
-}
-
-.post-content pre, .post-content code {
-    font-family: 'Roboto Mono',Monaco,courier,monospace;
-    font-size: 13px;
-}
-
-.post-content figure {
-    background: #f8f8f8;
-    padding: 0 10px;
-    border-radius: 2px;
-    margin: 20px 0;
-    overflow: auto;
-    position: relative;
-}
-
-.post-content figure:after {
-    content: attr(data-lang);
-    position: absolute;
-    top: 0;
-    right: 0;
-    color: #ccc;
-    text-align: right;
-    font-size: .8em;
-    padding: 5px 10px 0;
-    line-height: 15px;
-    height: 15px;
-    font-weight: 500;
-}
-.hljs {
-  background: #f8f8f8 !important;
 }
 
 #local-search-input {
