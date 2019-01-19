@@ -179,7 +179,7 @@ class Post(CommentMixin, ReactMixin, BaseModel):
 
     @property
     async def author(self):
-        rv = await User.get(id=self.author_id)
+        rv = await User.cache(self.author_id)
         return rv
 
     @property

@@ -16,7 +16,7 @@ class User(BaseModel):
 
 class GithubUser(BaseModel):
     gid = fields.IntField(unique=True)
-    email = fields.CharField(max_length=100, unique=True)
+    email = fields.CharField(max_length=100, default='', unique=True)
     username = fields.CharField(max_length=100, unique=True)
     picture = fields.CharField(max_length=100, default='')
     link = fields.CharField(max_length=100, default='')
