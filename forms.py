@@ -1,7 +1,7 @@
 import markupsafe
 from sanic_wtf import SanicForm as _SanicForm, FileAllowed, FileRequired
 from wtforms import (
-    PasswordField, StringField, SubmitField, BooleanField, IntegerField,
+    PasswordField, StringField, SubmitField, BooleanField,
     SelectField, SelectMultipleField, TextAreaField, FileField)
 from wtforms.widgets import HiddenInput
 from wtforms.validators import DataRequired
@@ -41,6 +41,7 @@ class SanicForm(_SanicForm):
                 success = False
         return success
 
+
 class LoginForm(SanicForm):
     name = StringField('Name', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
@@ -62,7 +63,7 @@ class PostForm(SanicForm):
     content = TextAreaField('Content', default='')
     can_comment = BooleanField('CanComment', default=True)
     tags = SelectMultipleField('Tags', default=[])
-    author_id = SelectField('AuthorId', default='', validators=[DataRequired()])
+    author_id = SelectField('AuthorId', default='', validators=[DataRequired()])  # noqa
     status = SwitchField('Published', choices=[('on', 1), ('off', 0)],
                          default='on')
     is_page = BooleanField('IsPage', default=False)
@@ -77,4 +78,3 @@ class ProfileForm(SanicForm):
     github_url = StringField('Github URL', default='')
     linkedin_url = StringField('Linkedin URL', default='')
     submit = SubmitField('Submit')
-

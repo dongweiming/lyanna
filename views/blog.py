@@ -6,14 +6,13 @@ from sanic.exceptions import abort
 from tortoise.query_utils import Q
 
 from ext import mako
-from models.consts import K_POST
 from config import PER_PAGE
 from models.mc import cache
 from models.profile import get_profile
 from models.utils import Pagination
 from models.blog import (
     MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG)
-from models import Post, Tag, PostTag, ReactItem, ReactStats
+from models import Post, Tag, PostTag
 
 bp = Blueprint('blog', url_prefix='/')
 
@@ -55,7 +54,7 @@ async def _post(request, ident, is_preview=False):
     post = await Post.get_or_404(ident)
     if not is_preview and post.status != Post.STATUS_ONLINE:
         abort(404)
-    post_id = post.id
+
     github_user = request['session'].get('user')
     stats = await post.stats
     reaction_type = None
@@ -120,7 +119,7 @@ async def tags(request):
 @cache(MC_KEY_TAG % '{tag_id}')
 async def tag(request, tag_id):
     tag = await Tag.cache(tag_id)
-    post_ids = await PostTag.filter(tag_id=tag_id).order_by('-post_id').values_list(
+    post_ids = await PostTag.filter(tag_id=tag_id).order_by('-post_id').values_list(  # noqa
         'post_id', flat=True)
     posts = await Post.get_multi(post_ids)
     return {'tag': tag, 'posts': posts}

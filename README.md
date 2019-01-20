@@ -1,5 +1,7 @@
 # lyanna
 
+[![Build Status](https://travis-ci.org/dongweiming/lyanna.svg?branch=master)](https://travis-ci.org/dongweiming/lyanna)
+
 <p align="center">
   My Blog Using Sanic
 </p>

@@ -46,8 +46,8 @@ async def write_post(file):
             elif 'date:' in i:
                 date = i.split(':')[1].strip()
             elif 'tags' in i:
-                i = i.split(':')[1].strip()[1:-1] if '[' in i else i.split(':')[1]
-                tags = filter(None, map(lambda x : x.strip(), i.split(',')))
+                i = i.split(':')[1].strip()[1:-1] if '[' in i else i.split(':')[1]  # noqa
+                tags = filter(None, map(lambda x: x.strip(), i.split(',')))
         content = ''.join(f.readlines())
 
         try:
@@ -66,4 +66,3 @@ async def main():
 
 if __name__ == '__main__':
     run_async(main())
-

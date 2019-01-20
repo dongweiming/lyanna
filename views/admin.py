@@ -4,8 +4,8 @@ from sanic import Blueprint
 from sanic_mako import render_template
 
 from ext import mako, auth
-from config import UPLOAD_FOLDER, PER_PAGE
-from models import Post, User, create_user, Tag
+from config import PER_PAGE
+from models import Post, User, Tag
 from models.utils import Pagination
 from models.user import generate_password
 from models.profile import get_profile, set_profile

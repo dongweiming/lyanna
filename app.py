@@ -16,7 +16,6 @@ from ext import mako, init_db, auth, context, sentry
 from models.mc import cache
 from models.blog import Post, Tag, MC_KEY_SITEMAP
 
-from werkzeug.contrib.atom import AtomFeed
 from werkzeug.utils import find_modules, import_string
 
 
@@ -35,6 +34,7 @@ class Request(_Request):
     @property
     def user_id(self):
         return self.user.id if self.user else 0
+
 
 app = Sanic(__name__, request_class=Request)
 app.config.from_object(config)

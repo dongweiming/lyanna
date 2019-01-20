@@ -86,7 +86,8 @@ class BlogHtmlFormatter(HtmlFormatter):
 
         # the empty span here is to keep leading empty lines from being
         # ignored by HTML parsers
-        yield 0, ('<pre' + (style and ' style="%s"' % style) + (self.lang and f' class="hljs {self.lang}"') + '><span></span>')
+        yield 0, ('<pre' + (style and ' style="%s"' % style) + (
+            self.lang and f' class="hljs {self.lang}"') + '><span></span>')
         for tup in inner:
             yield tup
         yield 0, '</pre>'
@@ -261,7 +262,8 @@ class Post(CommentMixin, ReactMixin, BaseModel):
             return await Post.sync_filter(status=Post.STATUS_ONLINE,
                                           orderings=['-id'])
         return await Post.sync_filter(status=Post.STATUS_ONLINE,
-                                      type__not=cls.TYPE_PAGE, orderings=['-id'])
+                                      type__not=cls.TYPE_PAGE,
+                                      orderings=['-id'])
 
     @classmethod
     async def cache(cls, ident):
