@@ -110,11 +110,11 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     async def set_props_by_key(self, key, value):
         key = self.get_db_key(key)
-        return await(await self.redis).set(key, value)
+        return await (await self.redis).set(key, value)  # noqa: W606
 
     async def get_props_by_key(self, key):
         key = self.get_db_key(key)
-        return await(await self.redis).get(key) or b''
+        return await (await self.redis).get(key) or b''  # noqa: W606
 
     @classmethod
     async def get_or_404(cls, id, sync=False):
