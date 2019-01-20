@@ -260,10 +260,10 @@ class Post(CommentMixin, ReactMixin, BaseModel):
     async def get_all(cls, with_page=True):
         if with_page:
             return await Post.sync_filter(status=Post.STATUS_ONLINE,
-                                          orderings=['-id'])
+                                          orderings=['-created_at'])
         return await Post.sync_filter(status=Post.STATUS_ONLINE,
                                       type__not=cls.TYPE_PAGE,
-                                      orderings=['-id'])
+                                      orderings=['-created_at'])
 
     @classmethod
     async def cache(cls, ident):
