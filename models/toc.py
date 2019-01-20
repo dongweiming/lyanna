@@ -41,7 +41,7 @@ class TocMixin:
         first_level = 0
         last_level = 0
 
-        yield '<div id="toc" class="toc-article"><strong class="toc-title">目录</strong><ol class="toc">\n'
+        yield '<div id="toc" class="toc-article"><strong class="toc-title">目录</strong><ol class="toc">\n'  # noqa
 
         for toc in self.toc_tree:
             index, text, l, raw = toc
@@ -55,12 +55,12 @@ class TocMixin:
                 # based on first level
                 first_level = l
                 last_level = l
-                yield f'<li class="toc-item toc-level-{l - 1}"><a class="toc-link" href="#{title}"><span class="toc-text">{text}</span></a>'
+                yield f'<li class="toc-item toc-level-{l - 1}"><a class="toc-link" href="#{title}"><span class="toc-text">{text}</span></a>'  # noqa
             elif last_level == l:
-                yield f'</li>\n<li class="toc-item toc-level-{l - 1}"><a class="toc-link" href="#{title}"><span class="toc-text">{text}</span></a>'
+                yield f'</li>\n<li class="toc-item toc-level-{l - 1}"><a class="toc-link" href="#{title}"><span class="toc-text">{text}</span></a>'  # noqa
             elif last_level == l - 1:
                 last_level = l
-                yield f'<ol class="toc-child">\n<li class="toc-item toc-level-{l - 1}"><a class="toc-link" href="#{title}"><span class="toc-text">{text}</span></a>'
+                yield f'<ol class="toc-child">\n<li class="toc-item toc-level-{l - 1}"><a class="toc-link" href="#{title}"><span class="toc-text">{text}</span></a>'  # noqa
             elif last_level > l:
                 yield '</li>'
                 while last_level > l:

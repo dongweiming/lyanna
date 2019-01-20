@@ -1,0 +1,16 @@
+sudo: false
+language: python
+cache:
+  directories:
+    - $HOME/.cache/pip
+before_script:
+  - pip install tox
+matrix:
+  include:
+    - python: 3.6
+      env: TOXENV=flake8
+
+install:
+  - pip install -U tox
+script:
+  - tox

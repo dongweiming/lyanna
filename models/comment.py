@@ -1,6 +1,5 @@
 import mistune
 from tortoise import fields
-from sanic_mako import render_template_def
 from tortoise.query_utils import Q
 
 from .base import BaseModel

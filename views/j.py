@@ -2,11 +2,9 @@ import mistune
 
 from sanic import Blueprint
 from sanic.response import json
-from sanic.exceptions import abort
 from sanic_mako import render_template_def
 
-from models.consts import K_POST
-from models import Post, ReactItem, ReactStats, Comment
+from models import Post, ReactItem, Comment
 
 bp = Blueprint('j', url_prefix='/j')
 
@@ -58,9 +56,11 @@ async def comments(request, post_id):
 
     start = (page - 1) * per_page
     comments = (await post.comments)[start: start + per_page]
-    liked_comment_ids = await post.comment_ids_liked_by(user['gid'])
-
     user = request['session'].get('user')
+
+    liked_comment_ids = []
+    if user:
+        liked_comment_ids = await post.comment_ids_liked_by(user['gid'])
 
     return json({
         'r': 0,
@@ -93,7 +93,7 @@ async def react(request, user, post):
 
     stats = await post.stats
     reaction_type = None
-    liked_comment_ids = []
+
     if user:
         reaction_type = await post.get_reaction_type(user['gid'])
     return json({'r': int(not rv),

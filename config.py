@@ -25,9 +25,9 @@ GOOGLE_ANALYTICS = ''
 SENTRY_DSN = ''
 REQUEST_TIMEOUT = 15
 
-SITE_NAV_MENUS = [('blog.index', '首页'), ('blog.archives', '归档'), ('blog.tags', '标签'),
-                  ('index.search', '搜索'), ('index.feed', '订阅'),
-                  ('/page/aboutme', '关于我')]
+SITE_NAV_MENUS = [('blog.index', '首页'), ('blog.archives', '归档'),
+                  ('blog.tags', '标签'), ('index.search', '搜索'),
+                  ('index.feed', '订阅'), ('/page/aboutme', '关于我')]
 
 try:
     from local_settings import *  # noqa

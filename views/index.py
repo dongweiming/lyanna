@@ -5,7 +5,7 @@ from sanic import Blueprint, response
 from sanic.log import logger
 from sanic.response import redirect, text, HTTPResponse
 from sanic_mako import render_template
-from sanic_oauth.providers import GithubClient, UserInfo
+from sanic_oauth.providers import GithubClient
 from werkzeug.contrib.atom import AtomFeed
 
 from ext import mako, auth
@@ -88,7 +88,7 @@ async def oauth(request, post_id=None):
         user, info = await client.user_info()
     except Exception as exc:
         logger.exception(exc)
-        return redirect(cfg.oauth_redirect_path)
+        return redirect(config.oauth_redirect_path)
 
     user = await create_github_user(user)
     request['session']['user'] = user.to_dict()
@@ -98,8 +98,8 @@ async def oauth(request, post_id=None):
 
 @cache(MC_KEY_FEED)
 async def _feed(request):
-    feed = AtomFeed(title=SITE_TITLE, updated=datetime.now(), feed_url=request.url,
-                    url=request.host)
+    feed = AtomFeed(title=SITE_TITLE, updated=datetime.now(),
+                    feed_url=request.url, url=request.host)
     posts = (await Post.get_all())[:10]
     for post in posts:
         body = post.html_content
