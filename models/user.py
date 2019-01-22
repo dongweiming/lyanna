@@ -51,6 +51,6 @@ async def validate_login(name, password):
 
 async def create_github_user(user_info):
     user, _ = await GithubUser.get_or_create(
-        gid=user_info.id, email=user_info.email,
+        gid=user_info.id, email=user_info.email or user_info.username,
         username=user_info.username, picture=user_info.picture)
     return user
