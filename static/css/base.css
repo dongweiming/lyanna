@@ -1010,7 +1010,7 @@ hr {
         margin: 0 10px !important;
     }
     .post-container, #related, #reactions-container {
-        padding: 0;
+        padding: 0 !important;
     }
 
   .post {
@@ -1029,9 +1029,6 @@ hr {
   }
   .page {
       margin: 0 10px;
-  }
-  .post-content {
-      margin-right: 20px;
   }
   .page li {
       margin-left: 20px;
