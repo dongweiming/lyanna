@@ -30,6 +30,10 @@
           '/': 'Search'
         }
       },
+      pagination: {
+        previousText: '上一章节',
+        nextText: '下一章节',
+      },
       markdown: function (marked, renderer) {
         delete renderer.code;
         marked.setOptions({
@@ -44,6 +48,6 @@
   </script>
   <script src="//unpkg.com/docsify/lib/docsify.min.js"></script>
   <script src="//unpkg.com/docsify/lib/plugins/search.min.js"></script>
+  <script src="//unpkg.com/docsify-pagination/dist/docsify-pagination.min.js"></script>
 </body>
 </html>
-
