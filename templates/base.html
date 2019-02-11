@@ -17,7 +17,7 @@
 
         <ul class="pure-menu-list clearfix">
           % for endpoint_or_url, name in SITE_NAV_MENUS:
-            <% url = app.url_for(endpoint_or_url) if '.' in endpoint_or_url else endpoint_or_url %>
+          <% url = app.url_for(endpoint_or_url) if '.' in endpoint_or_url and 'http' not in endpoint_or_url else endpoint_or_url %>
             <li class="pure-menu-item ${ 'actived' if request.path == url else ''  }">
               <a href="${ url }" class="pure-menu-link">${ name }</a>
             </li>
