@@ -1,4 +1,4 @@
-<%! from config import SITE_NAV_MENUS, SITE_TITLE, GOOGLE_ANALYTICS %>
+<%! from config import SITE_NAV_MENUS, SITE_TITLE, GOOGLE_ANALYTICS, BEIAN_ID %>
 <!DOCTYPE html>
 <html>
   <head>
@@ -38,6 +38,9 @@
         <a class="bottom-item" href="/">首页</a> |
         <a class="bottom-item" href="https://github.com/dongweiming/lyanna" target="_blank">GitHub</a> |
         Powered by <a class="href-item" href="https://github.com/huge-success/sanic" target="_blank">Sanic</a>、<a class="href-item" href="https://github.com/dongweiming/sanic-mako" target="_blank">SanicMako</a> | Theme inspired by <a class="href-item" href="https://github.com/KevinOfNeu/hexo-theme-xoxo" target="_blank">hexo-theme-xoxo</a>
+        % if BEIAN_ID:
+        | <span class="href-item">${ BEIAN_ID }</span>
+        % endif
       </div>
     </footer>
 
