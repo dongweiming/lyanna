@@ -113,7 +113,7 @@ async def _feed(request):
     return feed.to_string()
 
 
-@bp.route('atom.xml')
+@bp.route('atom.xml', methods=['GET', 'HEAD'])
 async def feed(request):
     return HTTPResponse(await _feed(request), status=200, headers=None,
                         content_type='text/xml')

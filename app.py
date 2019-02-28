@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 
 import aiomcache
 from sanic import Sanic
-from sanic.response import HTTPResponse
+from sanic.exceptions import NotFound
+from sanic.response import HTTPResponse, text, redirect
 from sanic_mako import render_string
 from sanic.request import Request as _Request
 from sanic_session import Session, MemcacheSessionInterface
@@ -49,6 +50,15 @@ app.static('/static', './static')
 session = Session()
 client = None
 redis = None
+
+@app.exception(NotFound)
+async def ignore_404s(request, exception):
+    return text("Oops, That page couldn't found.")
+
+
+async def server_error_handler(request, exception):
+    return text('Oops, Sanic Server Error! Please contact the blog owner',
+                status=500)
 
 
 @app.listener('before_server_start')
@@ -101,6 +111,9 @@ async def _sitemap(request):
 async def sitemap(request):
     return HTTPResponse(await _sitemap(request), status=200, headers=None,
                         content_type="text/xml")
+
+
+app.error_handler.add(Exception, server_error_handler)
 
 
 if __name__ == '__main__':

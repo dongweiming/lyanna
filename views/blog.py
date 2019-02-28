@@ -119,6 +119,8 @@ async def tags(request):
 @cache(MC_KEY_TAG % '{tag_id}')
 async def tag(request, tag_id):
     tag = await Tag.cache(tag_id)
+    if not tag:
+        abort(404)
     post_ids = await PostTag.filter(tag_id=tag_id).order_by('-post_id').values_list(  # noqa
         'post_id', flat=True)
     posts = await Post.get_multi(post_ids)
