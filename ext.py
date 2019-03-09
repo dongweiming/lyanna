@@ -1,12 +1,10 @@
 from tortoise import Tortoise
 from sanic_mako import SanicMako
-from sanic_auth import Auth
 import aiotask_context as context  # noqa
 
 from config import DB_URL, SENTRY_DSN
 
 mako = SanicMako()
-auth = Auth()
 
 
 async def init_db(create_db=False):

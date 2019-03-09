@@ -1,8 +1,9 @@
 import markupsafe
+from sanic.log import logger
 from sanic_wtf import SanicForm as _SanicForm, FileAllowed, FileRequired
 from wtforms import (
     PasswordField, StringField, SubmitField, BooleanField,
-    SelectField, SelectMultipleField, TextAreaField, FileField)
+    SelectField, SelectMultipleField, TextAreaField)
 from wtforms.widgets import HiddenInput
 from wtforms.validators import DataRequired
 
@@ -27,7 +28,13 @@ class SanicForm(_SanicForm):
             u'\n'.join(str(f) for f in hidden_fields(fields or self))
         )
 
-    def validate(self, extra_validators=None):
+    def validate(self):
+        extra_validators = {}
+        for name in self._fields:
+            inline = getattr(self.__class__, 'validate_%s' % name, None)
+            if inline is not None:
+                extra_validators[name] = [inline]
+
         self._errors = None
         success = True
         for name, field in self._fields.items():
@@ -39,6 +46,7 @@ class SanicForm(_SanicForm):
                 extra = tuple()
             if not field.validate(self, extra):
                 success = False
+                logger.info(f'[Validate Fail] {field}')
         return success
 
 
@@ -64,16 +72,13 @@ class PostForm(SanicForm):
     can_comment = BooleanField('CanComment', default=True)
     tags = SelectMultipleField('Tags', default=[])
     author_id = SelectField('AuthorId', default='', validators=[DataRequired()])  # noqa
-    status = SwitchField('Published', choices=[('on', 1), ('off', 0)],
-                         default='on')
+    status = SwitchField('Published', choices=[(0, 0), (1, 1)], default=1)
     is_page = BooleanField('IsPage', default=False)
     submit = SubmitField('Submit')
 
 
 class ProfileForm(SanicForm):
-    avatar = FileField('Avatar', validators=[
-        FileRequired(), FileAllowed('bmp gif jpg jpeg png'.split())])
-    avatar_path = StringField('AvatarPath', default='')
+    avatar = StringField('Avatar', default='')
     intro = StringField('Intro', default='')
     github_url = StringField('Github URL', default='')
     linkedin_url = StringField('Linkedin URL', default='')

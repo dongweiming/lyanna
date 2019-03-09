@@ -6,50 +6,74 @@ from datetime import datetime, timedelta
 
 import aiomcache
 from sanic import Sanic
-from sanic.exceptions import NotFound
-from sanic.response import HTTPResponse, text, redirect
-from sanic_mako import render_string
 from sanic.request import Request as _Request
+from sanic.exceptions import NotFound
+from sanic.response import HTTPResponse, text
+from sanic_mako import render_string
+from sanic_jwt import Initialize
 from sanic_session import Session, MemcacheSessionInterface
 
 import config
-from ext import mako, init_db, auth, context, sentry
+from ext import mako, init_db, context, sentry
 from models.mc import cache
+from models import jwt_authenticate, User
 from models.blog import Post, Tag, MC_KEY_SITEMAP
 
-from werkzeug.utils import find_modules, import_string
+from werkzeug.utils import find_modules, import_string, ImportStringError
+
+
+async def retrieve_user(request, payload, *args, **kwargs):
+    if payload:
+        user_id = payload.get('user_id', None)
+        if user_id is None:
+            return
+        return await User.get_or_404(user_id)
+
+
+async def store_refresh_token(user_id, refresh_token, *args, **kwargs):
+    key = f'refresh_token_{user_id}'
+    await redis.set(key, refresh_token)
+
+
+async def retrieve_refresh_token(user_id, *args, **kwargs):
+    key = f'refresh_token_{user_id}'
+    return await redis.get(key)
 
 
 def register_blueprints(root, app):
     for name in find_modules(root, recursive=True):
         mod = import_string(name)
         if hasattr(mod, 'bp'):
+            if mod.bp.name == 'admin':
+                Initialize(mod.bp, app=app, authenticate=jwt_authenticate,
+                           retrieve_user=retrieve_user,
+                           store_refresh_token=store_refresh_token,
+                           retrieve_refresh_token=retrieve_refresh_token,
+                           secret=config.JWT_SECRET,
+                           expiration_delta=config.EXPIRATION_DELTA)
             app.register_blueprint(mod.bp)
 
 
 class Request(_Request):
-    @property
-    def user(self):
-        return auth.current_user(self)
-
-    @property
-    def user_id(self):
-        return self.user.id if self.user else 0
+    user = None
 
 
 app = Sanic(__name__, request_class=Request)
 app.config.from_object(config)
-auth.setup(app)
 mako.init_app(app, context_processors=())
 if sentry is not None:
     sentry.init_app(app)
 register_blueprints('views', app)
-register_blueprints('custom', app)
+try:
+    register_blueprints('custom', app)
+except ImportStringError:
+    ...
 app.static('/static', './static')
 
 session = Session()
 client = None
 redis = None
+
 
 @app.exception(NotFound)
 async def ignore_404s(request, exception):
@@ -113,7 +137,7 @@ async def sitemap(request):
                         content_type="text/xml")
 
 
-app.error_handler.add(Exception, server_error_handler)
+# app.error_handler.add(Exception, server_error_handler)
 
 
 if __name__ == '__main__':
