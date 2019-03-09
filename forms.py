@@ -1,6 +1,6 @@
 import markupsafe
 from sanic.log import logger
-from sanic_wtf import SanicForm as _SanicForm, FileAllowed, FileRequired
+from sanic_wtf import SanicForm as _SanicForm
 from wtforms import (
     PasswordField, StringField, SubmitField, BooleanField,
     SelectField, SelectMultipleField, TextAreaField)
@@ -48,12 +48,6 @@ class SanicForm(_SanicForm):
                 success = False
                 logger.info(f'[Validate Fail] {field}')
         return success
-
-
-class LoginForm(SanicForm):
-    name = StringField('Name', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Sign In')
 
 
 class UserForm(SanicForm):
