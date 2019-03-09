@@ -4,16 +4,14 @@ from urllib.parse import unquote
 from sanic import Blueprint, response
 from sanic.log import logger
 from sanic.response import redirect, text, HTTPResponse
-from sanic_mako import render_template
 from sanic_oauth.providers import GithubClient
 from werkzeug.contrib.atom import AtomFeed
 
 from ext import mako
-from forms import LoginForm
 from config import AUTHOR, SITE_TITLE
 from models.mc import cache
 from models.blog import Post, MC_KEY_FEED, MC_KEY_SEARCH
-from models.user import validate_login, create_github_user
+from models.user import create_github_user
 
 import config
 

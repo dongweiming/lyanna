@@ -28,6 +28,8 @@ My Blog Using Sanic
   <img width="600" src="./screenshot/admin.png" >
 </p>
 
+Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
+
 ## Features
 
 * 可以通过后台对文章、标签等做增删改查
@@ -49,4 +51,5 @@ My Blog Using Sanic
 ## Video
 
 [My blog](https://youtu.be/rHYvrefjZwg)
-[]()
+
+[My blog's Admin page](https://youtu.be/iZCGTvC1NPo)

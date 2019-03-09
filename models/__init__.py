@@ -1,4 +1,4 @@
-from sanic_jwt import exceptions  #noqa
+from sanic_jwt import exceptions  # noqa
 
 from .blog import Post, Tag, PostTag  # noqa
 from .comment import Comment  # noqa

@@ -3,15 +3,14 @@ import mimetypes
 from pathlib import Path
 
 from sanic import Blueprint, response
+from sanic.exceptions import abort
 from sanic_jwt import protected
 from sanic_jwt.decorators import instant_config
 from sanic_jwt.utils import call as jwt_call
-from sanic_mako import render_template
 
 from ext import mako
 from config import PER_PAGE, SHOW_PROFILE
 from models import Post, User, Tag
-from models.utils import Pagination
 from models.user import generate_password
 from models.profile import get_profile, set_profile
 from forms import UserForm, PostForm, ProfileForm
@@ -102,10 +101,10 @@ async def _post(request, post_id=None):
         ok = True
     else:
         ok = False
-    post  = await post.to_sync_dict()
+    post = await post.to_sync_dict()
     post['tags'] = [t.name for t in post['tags']]
     del post['author']
-    return response.json({'post': post if post else None, 'ok': ok })
+    return response.json({'post': post if post else None, 'ok': ok})
 
 
 @bp.route('/api/post/<post_id>', methods=['GET', 'PUT'])
@@ -170,8 +169,8 @@ async def _user(request, user_id=None):
         ok = True
     else:
         ok = False
-    return response.json({'user' : await user.to_sync_dict()
-                          if user else None, 'ok': ok })
+    return response.json({'user': await user.to_sync_dict()
+                          if user else None, 'ok': ok})
 
 
 @bp.route('/api/upload', methods=['POST', 'OPTIONS'])
@@ -216,7 +215,8 @@ async def profile(request):
 
     avatar = profile.get('avatar')
     if avatar:
-        profile['avatar_url'] = request.app.url_for('static', filename=f'upload/{avatar}')
+        profile['avatar_url'] = request.app.url_for(
+            'static', filename=f'upload/{avatar}')
     else:
         profile['avatar_url'] = ''
     return response.json({'on': True, 'profile': profile})
@@ -245,7 +245,7 @@ async def delete(request, post_id):
         abort(404)
     post = await Post.get(id=post_id)
     if not post:
-        return json({'r': 0, 'msg': 'Post not exist'})
+        return response.json({'r': 0, 'msg': 'Post not exist'})
     await post.delete()
     return response.json({'r': 1})
 
