@@ -1,2 +1,0 @@
-import './admin';
-import './select';

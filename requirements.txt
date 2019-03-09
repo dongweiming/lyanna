@@ -5,7 +5,6 @@ sanic_oauth==0.2.5
 sanic_mako==0.4.0
 aiomysql==0.0.20
 WTForms==2.2.1
-Sanic-Auth==0.2.0
 Sanic-wtf==0.5.0
 sanic-session==0.4.1
 aiomcache==0.6.0
@@ -20,4 +19,5 @@ Pygments==2.3.0
 cssmin==0.2.0
 gunicorn==19.8.0
 sanic-sentry==0.1.7
+sanic-jwt==1.2.1
 -e git+https://github.com/dongweiming/tortoise-orm.git@dev#egg=tortoise

@@ -14,7 +14,7 @@ from .utils import AttrDict
 from ._compat import PY36
 
 MC_KEY_ITEM_BY_ID = '%s:%s'
-IGNORE_ATTRS = ['redis']
+IGNORE_ATTRS = ['redis', 'stats']
 _redis = None
 
 
@@ -75,11 +75,15 @@ class BaseModel(Model, metaclass=ModelMeta):
         return await rv.to_sync_dict() if rv else None
 
     @classmethod
-    async def sync_filter(cls, orderings=None, *args, **kwargs):
+    async def sync_filter(cls, orderings=None, offset=0, limit=20,
+                          *args, **kwargs):
         items = []
         queryset = super().filter(*args, **kwargs)
         if orderings is not None:
+            if not isinstance(orderings, list):
+                orderings = [orderings]
             queryset = queryset.order_by(*orderings)
+        queryset = queryset.offset(offset).limit(limit)
         for item in await queryset:
             items.append(await item.to_sync_dict())
         return items

@@ -6,7 +6,7 @@ from jsonschema import validate
 
 from config import HERE
 from .mc import cache, clear_mc
-from .utils import AttrDict, empty
+from .utils import AttrDict
 
 schema = {
     "type": "object",
@@ -25,7 +25,7 @@ PROFILE_FILE = 'profile.json'
 async def get_profile():
     file = Path(HERE) / PROFILE_FILE
     if not os.path.exists(file):
-        return empty
+        return {}
 
     with open(file) as f:
         return AttrDict(json.load(f))

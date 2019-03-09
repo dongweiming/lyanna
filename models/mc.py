@@ -25,11 +25,13 @@ async def get_memcache():
         memcache = context.get('memcache')
     except AttributeError:
         # Hack for debug mode
+        memcache = None
+    if memcache is None:
         loop = asyncio.get_event_loop()
         memcache = aiomcache.Client(config.MEMCACHED_HOST,
                                     config.MEMCACHED_PORT,
                                     loop=loop)
-        _memcache = memcache
+    _memcache = memcache
     return memcache
 
 
