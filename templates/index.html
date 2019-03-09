@@ -42,14 +42,17 @@
       <!-- SNS Link -->
       <ul class="list-inline">
         % for sns in ('github', 'linkedin'):
-        <li>
-          <a target="_blank" href="${ getattr(profile, f'{sns}_url') }">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-${ sns } fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
+          <% url = getattr(profile, f'{sns}_url') %>
+          % if url:
+            <li>
+              <a target="_blank" href="${ f'https://{url}' }">
+                <span class="fa-stack fa-lg">
+                  <i class="fa fa-circle fa-stack-2x"></i>
+                  <i class="fa fa-${ sns } fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+            </li>
+          % endif
         % endfor
       </ul>
     </div>

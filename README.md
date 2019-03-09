@@ -2,13 +2,9 @@
 
 [![Build Status](https://travis-ci.org/dongweiming/lyanna.svg?branch=master)](https://travis-ci.org/dongweiming/lyanna)
 
-<p align="center">
-  My Blog Using Sanic
-</p>
+My Blog Using Sanic
 
-<p align="center">
-  <a href="https://dongweiming.github.io/lyanna/">查看文档 📖</a>
-</p>
+[查看文档 📖](https://dongweiming.github.io/lyanna/)
 
 ## Overview
 
@@ -20,14 +16,16 @@
 * 缓存: aiomcache
 * KV数据库: aioredis
 
-其他aio扩展: Sanic-Auth、Sanic-wtf、sanic-session、aiotask-context、asyncblink、sanic-sentry
-
-## Demo
-
-[DEMO](https://blog.pycourses.com)
+其他aio扩展: Sanic-Auth、Sanic-wtf、sanic-session、aiotask-context、asyncblink、sanic-sentry、sanic-jwt
 
 <p align="center">
   <img width="600" src="./screenshot/blog.png" >
+</p>
+
+管理后台使用 ElementUI + Vue-CLI + Vue-Router + Vuex
+
+<p align="center">
+  <img width="600" src="./screenshot/admin.png" >
 </p>
 
 ## Features
@@ -47,3 +45,8 @@
 * 支持RSS/Sitemap
 * 相关文章推荐(根据相似标签)
 * 响应式设计
+
+## Video
+
+[My blog](https://youtu.be/rHYvrefjZwg)
+[]()
