@@ -26,6 +26,7 @@ werkzeug = "==0.14.1"
 pygments = "==2.3.0"
 cssmin = "==0.2.0"
 sanic-sentry = "*"
+sanic-jwt = "==1.2.1"
 tortoise = {editable = true,git = "https://github.com/dongweiming/tortoise-orm.git",ref = "dev"}
 
 [dev-packages]

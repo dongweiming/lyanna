@@ -61,6 +61,7 @@ async def list_posts(request):
     for post in _posts:
         post['author_name'] = post['author'].name
         del post['author']
+        del post['comments']
         post['tags'] = [t.name for t in post['tags']]
         posts.append(post)
     return response.json({'items': posts, 'total': total})
@@ -76,16 +77,16 @@ async def _post(request, post_id=None):
     form = PostForm(request)
     form.status.data = int(form.status.data)
 
+    post = None
     if post_id is not None:
         post = await Post.get_or_404(post_id)
 
     if request.method in ('POST', 'PUT') and form.validate():
         title = form.title.data
         assert str(form.author_id.data).isdigit()
-        post = await Post.filter(title=title).first()
-        if post:
-            await post.save()
-        else:
+        if post_id is None:
+            post = await Post.filter(title=title).first()
+        if not post:
             post = Post()
         tags = form.tags.data
         content = form.content.data
