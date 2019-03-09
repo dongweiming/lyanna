@@ -26,7 +26,7 @@ yarn build
 
 ## 后台
 
-使用 ElementUI+Vue-Router+Vuex+Webpack+ES6+Sass ，需要安装依赖：
+使用 ElementUI+Vue-CLI+Vue-Router+Vuex+Webpack+ES6+Sass ，需要安装依赖：
 
 ```bash
 cd admin  # 在 admin 子目录下
