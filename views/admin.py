@@ -10,7 +10,7 @@ from sanic_jwt.utils import call as jwt_call
 
 from ext import mako
 from config import PER_PAGE, SHOW_PROFILE
-from models import Post, User, Tag
+from models import Post, User, Tag, PostTag
 from models.user import generate_password
 from models.profile import get_profile, set_profile
 from forms import UserForm, PostForm, ProfileForm
@@ -247,6 +247,9 @@ async def delete(request, post_id):
     if not post:
         return response.json({'r': 0, 'msg': 'Post not exist'})
     await post.delete()
+    post_tags = await PostTag.filter(post_id=post_id).all()
+    for post_tag in post_tags:
+        await post_tag.delete()
     return response.json({'r': 1})
 
 
