@@ -104,6 +104,7 @@ async def _post(request, post_id=None):
     post = await post.to_sync_dict()
     post['tags'] = [t.name for t in post['tags']]
     del post['author']
+    del post['comments']
     return response.json({'post': post if post else None, 'ok': ok})
 
 
