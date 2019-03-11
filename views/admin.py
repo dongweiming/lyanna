@@ -9,6 +9,7 @@ from sanic_jwt.decorators import instant_config
 from sanic_jwt.utils import call as jwt_call
 
 from ext import mako
+from tortoise.query_utils import Q
 from config import PER_PAGE, SHOW_PROFILE
 from models import Post, User, Tag, PostTag
 from models.user import generate_password
@@ -247,9 +248,7 @@ async def delete(request, post_id):
     if not post:
         return response.json({'r': 0, 'msg': 'Post not exist'})
     await post.delete()
-    post_tags = await PostTag.filter(post_id=post_id).all()
-    for post_tag in post_tags:
-        await post_tag.delete()
+    await PostTag.filter(Q(post_id=post_id)).delete()
     return response.json({'r': 1})
 
 
