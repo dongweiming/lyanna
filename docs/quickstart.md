@@ -1,5 +1,7 @@
 # 快速开始
 
+## 安装
+
 首先确保要使用的CPython版本>=3.6，接着克隆项目:
 
 ```bash
@@ -21,6 +23,16 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
+
+## 准备环境
+
+[重要]你需要确保安装并启动如下软件：
+
+1. MySQL
+2. Memcached
+3. Redis
+
+### 初始化
 
 安装依赖后，需要做一些初始化工作：
 
