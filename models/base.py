@@ -83,7 +83,8 @@ class BaseModel(Model, metaclass=ModelMeta):
             if not isinstance(orderings, list):
                 orderings = [orderings]
             queryset = queryset.order_by(*orderings)
-        queryset = queryset.offset(offset).limit(limit)
+        if limit is None:
+            queryset = queryset.offset(offset).limit(limit)
         for item in await queryset:
             items.append(await item.to_sync_dict())
         return items
