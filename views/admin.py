@@ -120,6 +120,7 @@ async def post(request, post_id):
     author = rv['author']
     rv['status'] = str(rv['status'])
     rv['author'] = {'id': author.id, 'name': author.name}
+    del rv['comments']
     return response.json(rv)
 
 
