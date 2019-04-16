@@ -13,7 +13,7 @@ from tortoise.query_utils import Q
 from config import PER_PAGE, SHOW_PROFILE
 from models import Post, User, Tag, PostTag
 from models.user import generate_password
-from models.profile import get_profile, set_profile
+from models.profile import Profile
 from forms import UserForm, PostForm, ProfileForm
 from views.utils import json
 
@@ -36,7 +36,7 @@ async def inject_user(request):
 @bp.route('/api/user/info')
 @protected(bp)
 async def user_info(request):
-    profile = await get_profile()
+    profile = await Profile.get()
     avatar = profile.get('avatar')
     data = {
         'name': request.user.name,
@@ -54,7 +54,7 @@ async def admin(request):
 
 
 @bp.route('/api/posts')
-#@protected(bp)
+@protected(bp)
 async def list_posts(request):
     limit = int(request.args.get('limit')) or PER_PAGE
     page = int(request.args.get('page')) or 1
@@ -207,14 +207,14 @@ async def profile(request):
                        'linkedin_url': linkedin_url}
             if avatar:
                 profile.update(avatar=avatar)
-            await set_profile(**profile)
+            await Profile.set(**profile)
         if not profile.get('avatar'):
             try:
-                profile['avatar'] = (await get_profile()).avatar
+                profile['avatar'] = (await Profile.get()).avatar
             except AttributeError:
                 ...
     elif request.method == 'GET':
-        profile = await get_profile()
+        profile = await Profile.get()
 
     avatar = profile.get('avatar')
     if avatar:
