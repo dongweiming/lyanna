@@ -12,12 +12,12 @@ cython==0.29.2
 mistune==0.8.4
 aiotask-context==0.6.0
 asyncblink==0.3.2
-jsonschema==2.6.0
 Werkzeug==0.14.1
 Pygments==2.3.0
 cssmin==0.2.0
 gunicorn==19.8.0
 sanic-sentry==0.1.7
 sanic-jwt==1.2.1
+attrs==19.1.0
 -e git+https://github.com/dongweiming/aiomcache.git@dev2#egg=aiomcache
 -e git+https://github.com/dongweiming/tortoise-orm.git@dev#egg=tortoise
