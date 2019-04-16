@@ -35,9 +35,13 @@ async def inject_user(request):
 @bp.route('/api/user/info')
 @protected(bp)
 async def user_info(request):
+    profile = await get_profile()
+    avatar = profile.get('avatar')
     data = {
         'name': request.user.name,
-        'avatar': 'http://i.pravatar.cc/300'
+        'avatar': (
+            request.app.url_for('static', filename=f'upload/{avatar}')
+            if avatar else '')
     }
     return response.json(data)
 
