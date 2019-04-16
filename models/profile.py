@@ -21,7 +21,7 @@ MC_KEY_PROFILE = 'profile'
 PROFILE_FILE = 'profile.json'
 
 
-#@cache(MC_KEY_PROFILE)
+@cache(MC_KEY_PROFILE)
 async def get_profile():
     file = Path(HERE) / PROFILE_FILE
     if not os.path.exists(file):
