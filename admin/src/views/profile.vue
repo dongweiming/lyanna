@@ -113,7 +113,7 @@ export default {
             let { profile } = response.data
             if (profile) {
                 this.form = response.data.profile
-                this.image = this.form.avatar_url || 'http://i.pravatar.cc/300'
+                this.image = this.form.avatar_url || '/static/img/default-avatar.jpg'
             }
             this.loading = false
             this.setTagsViewTitle()
