@@ -13,6 +13,11 @@ class User(BaseModel):
     class Meta:
         table = 'users'
 
+    def to_dict(self):
+        rv = super().to_dict()
+        rv.pop('password')
+        return rv
+
 
 class GithubUser(BaseModel):
     gid = fields.IntField(unique=True)
