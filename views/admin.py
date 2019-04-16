@@ -15,6 +15,7 @@ from models import Post, User, Tag, PostTag
 from models.user import generate_password
 from models.profile import get_profile, set_profile
 from forms import UserForm, PostForm, ProfileForm
+from views.utils import json
 
 bp = Blueprint('admin', url_prefix='/')
 bp.static('img', './static/img')
@@ -53,7 +54,7 @@ async def admin(request):
 
 
 @bp.route('/api/posts')
-@protected(bp)
+#@protected(bp)
 async def list_posts(request):
     limit = int(request.args.get('limit')) or PER_PAGE
     page = int(request.args.get('page')) or 1
@@ -64,11 +65,9 @@ async def list_posts(request):
     posts = []
     for post in _posts:
         post['author_name'] = post['author'].name
-        del post['author']
-        del post['comments']
         post['tags'] = [t.name for t in post['tags']]
         posts.append(post)
-    return response.json({'items': posts, 'total': total})
+    return json({'items': posts, 'total': total})
 
 
 @bp.route('/api/post/new', methods=['POST'])
@@ -108,9 +107,7 @@ async def _post(request, post_id=None):
         ok = False
     post = await post.to_sync_dict()
     post['tags'] = [t.name for t in post['tags']]
-    del post['author']
-    del post['comments']
-    return response.json({'post': post if post else None, 'ok': ok})
+    return json({'post': post if post else None, 'ok': ok})
 
 
 @bp.route('/api/post/<post_id>', methods=['GET', 'PUT'])
@@ -124,8 +121,7 @@ async def post(request, post_id):
     author = rv['author']
     rv['status'] = str(rv['status'])
     rv['author'] = {'id': author.id, 'name': author.name}
-    del rv['comments']
-    return response.json(rv)
+    return json(rv)
 
 
 @bp.route('/api/users')
