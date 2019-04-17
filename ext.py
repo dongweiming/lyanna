@@ -1,6 +1,5 @@
 from tortoise import Tortoise
 from sanic_mako import SanicMako
-import aiotask_context as context  # noqa
 
 from config import DB_URL, SENTRY_DSN
 

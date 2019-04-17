@@ -7,9 +7,8 @@ from pickle import loads, dumps
 import aiomcache
 
 import config
-from ext import context
+from .var import memcache_var
 from .utils import Empty
-
 
 _memcache = None
 __formaters = {}
@@ -22,8 +21,8 @@ async def get_memcache():
     if _memcache is not None:
         return _memcache
     try:
-        memcache = context.get('memcache')
-    except AttributeError:
+        memcache = memcache_var.get()
+    except LookupError:
         # Hack for debug mode
         memcache = None
     if memcache is None:

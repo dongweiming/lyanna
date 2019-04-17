@@ -8,10 +8,10 @@ from tortoise import fields
 from tortoise.models import Model, ModelMeta as _ModelMeta
 
 import config
-from ext import context
 from .mc import cache, clear_mc
 from .utils import AttrDict
 from ._compat import PY36
+from .var import redis_var
 
 MC_KEY_ITEM_BY_ID = '%s:%s'
 IGNORE_ATTRS = ['redis', 'stats']
@@ -101,8 +101,8 @@ class BaseModel(Model, metaclass=ModelMeta):
         global _redis
         if _redis is None:
             try:
-                redis = context.get('redis')
-            except AttributeError:
+                redis = redis_var.get()
+            except LookupError:
                 # Hack for debug mode
                 loop = asyncio.get_event_loop()
                 redis = await aioredis.create_redis_pool(
