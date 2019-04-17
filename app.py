@@ -14,9 +14,10 @@ from sanic_jwt import Initialize
 from sanic_session import Session, MemcacheSessionInterface
 
 import config
-from ext import mako, init_db, context, sentry
+from ext import mako, init_db, sentry
 from models.mc import cache
 from models import jwt_authenticate, User
+from models.var import redis_var, memcache_var
 from models.blog import Post, Tag, MC_KEY_SITEMAP
 
 from werkzeug.utils import find_modules, import_string, ImportStringError
@@ -91,7 +92,6 @@ async def setup_db(app, loop):
     await init_db()
     client = aiomcache.Client(config.MEMCACHED_HOST, config.MEMCACHED_PORT, loop=loop)  # noqa
     session.init_app(app, interface=MemcacheSessionInterface(client))
-    loop.set_task_factory(context.task_factory)
     app.async_session = aiohttp.ClientSession()
     Path(config.UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 
@@ -108,8 +108,8 @@ async def setup_context(request):
     if redis is None:
         redis = await aioredis.create_redis_pool(
             config.REDIS_URL, minsize=5, maxsize=20, loop=loop)
-    context.set('redis', redis)
-    context.set('memcache', client)
+    redis_var.set(redis)
+    memcache_var.set(client)
 
 
 @cache(MC_KEY_SITEMAP)
