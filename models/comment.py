@@ -64,6 +64,8 @@ class CommentMixin:
         obj = await Comment.create(github_id=user_id, post_id=self.id,
                                    ref_id=ref_id)
         await obj.set_content(content)
+        from tasks import mention_users
+        await mention_users.delay(self.id, content, user_id)
         return obj
 
     async def del_comment(self, user_id, comment_id):
