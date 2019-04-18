@@ -49,6 +49,9 @@ class BaseModel(Model, metaclass=ModelMeta):
     def url(self):
         return f'/{self.__class__.__name__.lower()}/{self.id}/'
 
+    def canonical_url(self):
+        return f'{config.BLOG_URL}{self.url}'
+
     def to_dict(self):
         return {f: getattr(self, f) for f in self._meta.fields}
 
