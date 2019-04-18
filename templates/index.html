@@ -36,13 +36,13 @@
   % if SHOW_PROFILE:
   <section id="sidebar">
     <div class="short-about">
-      <img id="avatar_pic" src="${ app.url_for('static', filename=f'upload/{profile.avatar}') }">
-      <p>${ profile.intro }</p>
+      <img id="avatar_pic" src="${ app.url_for('static', filename=f'upload/{profile["avatar"]}') }">
+      <p>${ profile['intro'] }</p>
 
       <!-- SNS Link -->
       <ul class="list-inline">
         % for sns in ('github', 'linkedin'):
-          <% url = getattr(profile, f'{sns}_url') %>
+          <% url = profile.get(f'{sns}_url') %>
           % if url:
             <li>
               <a target="_blank" href="${ f'https://{url}' }">
