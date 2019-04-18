@@ -33,16 +33,12 @@ JWT_SECRET = 'lyanna'
 EXPIRATION_DELTA = 60 * 60
 WTF_CSRF_ENABLED = False
 
-CELERY_RESULT_BACKEND = BROKER_URL = 'redis://localhost:6379/0'
-CELERY_TASK_SERIALIZER = 'msgpack'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TASK_RESULT_EXPIRES = 60 * 60 * 24
-CELERY_ACCEPT_CONTENT = ['json', 'msgpack'] # 指定接受的内容类型
-
 MAIL_SERVER = 'smtp.qq.com'
 MAIL_PORT = 465
 MAIL_USERNAME = ''
 MAIL_PASSWORD = ''
+
+BLOG_URL = 'https://example.com'
 
 try:
     from local_settings import *  # noqa

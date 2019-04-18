@@ -1,9 +1,15 @@
 import smtplib
-from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+try:
+    from contextlib import asynccontextmanager
+except ModuleNotFoundError:
+    from async_generator import asynccontextmanager
 
 from aiotasks import build_manager
 
-from ext import init_db
+from ext import init_db, mako
 from models.blog import Post
 from models.mention import Mention, EMAIL_SUBJECT, EMAIL_BODY
 from config import (MAIL_SERVER, MAIL_PORT, MAIL_USERNAME,
@@ -18,12 +24,11 @@ async def send_email(subject, content, send_to):
     if not CAN_SEND:
         return
 
-    msg = EmailMessage()
-    msg.set_content(content)
-
+    msg = MIMEMultipart()
     msg['Subject'] = subject
     msg['From'] = MAIL_USERNAME
     msg['To'] = send_to
+    msg.attach(MIMEText(message, 'html'))
 
     s = smtplib.SMTP_SSL(MAIL_SERVER, port=MAIL_PORT)
     s.login(MAIL_USERNAME, MAIL_PASSWORD)

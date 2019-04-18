@@ -7,10 +7,6 @@ from models.user import GithubUser
 MENTION_LIMIT = 20
 _METION_UID_RE = re.compile(r'@([a-zA-Z0-9][-.\w]*?)(?![-.\w])')
 EMAIL_SUBJECT = '有人在 {title} 的评论中提到了你!'
-EMAIL_BODY = '''Hi, {name}:
-
-有人在 {site} 的 {subject} 这篇文章下的评论中提到了你! 快去看看把~
-'''
 
 
 class Mention:
