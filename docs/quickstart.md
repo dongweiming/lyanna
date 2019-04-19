@@ -12,13 +12,6 @@ cd lyanna
 安装依赖:
 
 ```bash
-pipenv install --skip-lock
-pipenv shell
-```
-
-没有pipenv, 或者觉得pipenv安装太慢，可以使用venv模块:
-
-```bash
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
