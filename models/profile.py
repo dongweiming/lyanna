@@ -6,7 +6,6 @@ import attr
 
 from config import HERE
 from .mc import cache, clear_mc
-from .utils import AttrDict
 
 MC_KEY_PROFILE = 'profile'
 PROFILE_FILE = 'profile.json'

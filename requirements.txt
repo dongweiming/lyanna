@@ -18,7 +18,6 @@ gunicorn==19.8.0
 sanic-sentry==0.1.7
 sanic-jwt==1.2.1
 attrs==19.1.0
-aiotasks==1.0.0
 aiosmtplib==1.0.4
 contextvars==2.4;python_version == '3.6'
 -e git+https://github.com/dongweiming/aiomcache.git@dev2#egg=aiomcache
