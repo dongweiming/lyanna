@@ -4,10 +4,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import aiosmtplib
+from mako.template import Template
+from mako.lookup import TemplateLookup
 from aiotasks import build_manager
-from sanic_mako import render_string
 
-from app import app  # noqa
 from ext import init_db
 from models.blog import Post
 from models.mention import Mention, EMAIL_SUBJECT
@@ -59,13 +59,9 @@ async def mention_users(post_id, content, author_id):
         if not email:
             continue
         subject = EMAIL_SUBJECT.format(title=post.title)
-        request = type('Request', (), {'app': app, 'get': lambda self: False})
-        html = await render_string(
-            'email/mention.html', request,
-            {
-                'username': user.username,
-                'site_url': BLOG_URL,
-                'site_name': SITE_TITLE,
-                'post': post
-            })
+        lookup = TemplateLookup(directories=['templates'])
+        template = lookup.get_template('email/mention.html')
+        html = template.render(username=user.username,
+                               site_url=BLOG_URL, post=post,
+                               site_name=SITE_TITLE)
         await send_email.delay(subject, html, email)
