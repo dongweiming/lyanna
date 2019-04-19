@@ -15,8 +15,9 @@ My Blog Using Sanic
 * 数据库: TortoiseORM/aiomysql
 * 缓存: aiomcache
 * KV数据库: aioredis
+* 分布式任务管理器: aiotasks
 
-其他aio扩展: Sanic-Auth、Sanic-wtf、sanic-session、aiotask-context、asyncblink、sanic-sentry、sanic-jwt
+其他aio扩展: Sanic-Auth、Sanic-wtf、sanic-session、aiotask-context、asyncblink、sanic-sentry、sanic-jwt、aiosmtplib
 
 <p align="center">
   <img width="600" src="./screenshot/blog.png" >
@@ -47,6 +48,7 @@ Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 * 支持RSS/Sitemap
 * 相关文章推荐(根据相似标签)
 * 响应式设计
+* 支持评论提及邮件
 
 ## Video
 
