@@ -101,3 +101,45 @@ Github申请的应用client_secret，如果只是使用默认的 http://127.0.0.
 ## BEIAN_ID
 
 可以设置ICP备案号
+
+## JWT_SECRET
+
+- 默认值: `lyanna`
+
+JWT的秘钥
+
+## EXPIRATION_DELTA
+
+- 默认值: `3600(秒)`
+
+JWT的超时时间
+
+## MAIL_SERVER
+
+- 默认值: `smtp.qq.com`
+
+用来发邮件的SMTP服务器主机，为空将不会发邮件
+
+## MAIL_PORT
+
+- 默认值: `465`
+
+用来发邮件的SMTP服务端口
+
+## MAIL_USERNAME
+
+- 默认值: `''`
+
+用来发邮件的账号，为空将不会发邮件
+
+## MAIL_PASSWORD
+
+- 默认值: `''`
+
+用来发邮件的账号密码，为空将不会发邮件
+
+## BLOG_URL
+
+- 默认值: `https://example.com`
+
+博客的地址，在提及邮件中可以直接访问博客对应文章页面
