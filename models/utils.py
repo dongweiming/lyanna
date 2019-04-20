@@ -1,4 +1,8 @@
 import math
+from dataclasses import dataclass
+
+from sqlalchemy.engine.url import _parse_rfc1738_args
+from arq.connections import RedisSettings as _RedisSettings
 
 
 def trunc_utf8(string, num, etc='...'):
@@ -125,3 +129,11 @@ class Pagination:
                     yield None
                 yield num
                 last = num
+
+
+@dataclass
+class RedisSettings(_RedisSettings):
+    @classmethod
+    def from_url(cls, db_url):
+        url = _parse_rfc1738_args(db_url)
+        return cls(url.host, url.port, url.database, url.password, 1, 5, 1)

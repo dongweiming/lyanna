@@ -19,7 +19,8 @@ sanic-sentry==0.1.7
 sanic-jwt==1.2.1
 attrs==19.1.0
 aiosmtplib==1.0.4
+dataclasses==0.6;python_version == '3.6'
 contextvars==2.4;python_version == '3.6'
 -e git+https://github.com/dongweiming/aiomcache.git@dev2#egg=aiomcache
 -e git+https://github.com/dongweiming/tortoise-orm.git@dev#egg=tortoise
--e git+https://github.com/cr0hn/aiotasks.git@42b2395c12e26626d5262d6af1e472b4e5e10509#egg=aiotasks
+-e git+https://github.com/samuelcolvin/arq.git@v0.16a4#egg=arq
