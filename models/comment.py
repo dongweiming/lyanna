@@ -2,14 +2,15 @@ import mistune
 from tortoise import fields
 from tortoise.query_utils import Q
 from arq import create_pool
-from arq.connections import RedisSettings
 
+from config import REDIS_URL
 from .base import BaseModel
 from .mc import cache, clear_mc
 from .user import GithubUser
 from .consts import K_COMMENT, ONE_HOUR
 from .react import ReactMixin, ReactItem
 from .signals import comment_reacted
+from .utils import RedisSettings
 
 markdown = mistune.Markdown()
 MC_KEY_COMMENT_LIST = 'comment:%s:comment_list'
@@ -66,7 +67,7 @@ class CommentMixin:
         obj = await Comment.create(github_id=user_id, post_id=self.id,
                                    ref_id=ref_id)
         await obj.set_content(content)
-        redis = await create_pool(RedisSettings())
+        redis = await create_pool(RedisSettings.from_url(REDIS_URL))
         await redis.enqueue_job('mention_users', self.id, content, user_id)
         return obj
 
