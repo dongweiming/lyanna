@@ -4,16 +4,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import aiosmtplib
-from mako.template import Template
 from mako.lookup import TemplateLookup
-from arq import create_pool
-from arq.connections import RedisSettings
 
 from ext import init_db
 from models.blog import Post
 from models.mention import Mention, EMAIL_SUBJECT
 from config import (MAIL_SERVER, MAIL_PORT, MAIL_USERNAME,
-                    MAIL_PASSWORD, REDIS_URL, SITE_TITLE, BLOG_URL)
+                    MAIL_PASSWORD, SITE_TITLE, BLOG_URL)
 
 CAN_SEND = all((MAIL_SERVER, MAIL_USERNAME, MAIL_PASSWORD))
 
