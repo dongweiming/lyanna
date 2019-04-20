@@ -69,3 +69,4 @@ custom
 package-lock.json
 .DS_Store
 deploy
+srv/deploy.retry

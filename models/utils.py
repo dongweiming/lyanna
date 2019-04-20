@@ -1,7 +1,8 @@
+import re
 import math
+from urllib.parse import unquote
 from dataclasses import dataclass
 
-from sqlalchemy.engine.url import _parse_rfc1738_args
 from arq.connections import RedisSettings as _RedisSettings
 
 
@@ -131,9 +132,50 @@ class Pagination:
                 last = num
 
 
+def _parse_rfc1738_args(name):
+    pattern = re.compile(
+        r"""
+            (?P<name>[\w\+]+)://
+            (?:
+                (?P<username>[^:/]*)
+                (?::(?P<password>.*))?
+            @)?
+            (?:
+                (?:
+                    \[(?P<ipv6host>[^/]+)\] |
+                    (?P<ipv4host>[^/:]+)
+                )?
+                (?::(?P<port>[^/]*))?
+            )?
+            (?:/(?P<database>.*))?
+            """,
+        re.X,
+    )
+
+    m = pattern.match(name)
+    if m is not None:
+        components = m.groupdict()
+        if components['database'] is not None:
+            tokens = components['database'].split('?', 2)
+            components['database'] = tokens[0]
+
+        if components['password'] is not None:
+            components['password'] = unquote(components['password'])
+
+        ipv4host = components.pop('ipv4host')
+        ipv6host = components.pop('ipv6host')
+        components['host'] = ipv4host or ipv6host
+        return components
+    else:
+        raise ValueError(
+            f"Could not parse rfc1738 URL from string '{name}'"
+        )
+
+
 @dataclass
 class RedisSettings(_RedisSettings):
     @classmethod
     def from_url(cls, db_url):
         url = _parse_rfc1738_args(db_url)
-        return cls(url.host, url.port, url.database, url.password, 1, 5, 1)
+        return cls(url['host'], url['port'], int(url['database']),
+                   url['password'], 1, 5, 1)
