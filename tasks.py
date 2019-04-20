@@ -6,7 +6,8 @@ from email.mime.text import MIMEText
 import aiosmtplib
 from mako.template import Template
 from mako.lookup import TemplateLookup
-from aiotasks import build_manager
+from arq import create_pool
+from arq.connections import RedisSettings
 
 from ext import init_db
 from models.blog import Post
@@ -14,7 +15,6 @@ from models.mention import Mention, EMAIL_SUBJECT
 from config import (MAIL_SERVER, MAIL_PORT, MAIL_USERNAME,
                     MAIL_PASSWORD, REDIS_URL, SITE_TITLE, BLOG_URL)
 
-manager = build_manager(REDIS_URL)
 CAN_SEND = all((MAIL_SERVER, MAIL_USERNAME, MAIL_PASSWORD))
 
 
@@ -27,7 +27,6 @@ def with_context(f):
     return _deco
 
 
-@manager.task()
 async def send_email(subject, html, send_to):
     if not CAN_SEND:
         return
@@ -47,9 +46,8 @@ async def send_email(subject, html, send_to):
     await smtp.quit()
 
 
-@manager.task()
 @with_context
-async def mention_users(post_id, content, author_id):
+async def mention_users(ctx, post_id, content, author_id):
     post = await Post.cache(post_id)
     if not post:
         return
@@ -59,9 +57,15 @@ async def mention_users(post_id, content, author_id):
         if not email:
             continue
         subject = EMAIL_SUBJECT.format(title=post.title)
-        lookup = TemplateLookup(directories=['templates'])
+        lookup = TemplateLookup(directories=['templates'],
+                                input_encoding='utf-8',
+                                output_encoding='utf-8')
         template = lookup.get_template('email/mention.html')
         html = template.render(username=user.username,
                                site_url=BLOG_URL, post=post,
                                site_name=SITE_TITLE)
-        await send_email.delay(subject, html, email)
+        await send_email(subject, html.decode(), email)
+
+
+class WorkerSettings:
+    functions = [mention_users]

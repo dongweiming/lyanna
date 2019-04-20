@@ -15,7 +15,7 @@ My Blog Using Sanic
 * 数据库: TortoiseORM/aiomysql
 * 缓存: aiomcache
 * KV数据库: aioredis
-* 分布式任务管理器: aiotasks
+* 任务队列: arq
 
 其他aio扩展: Sanic-Auth、Sanic-wtf、sanic-session、aiotask-context、asyncblink、sanic-sentry、sanic-jwt、aiosmtplib
 
