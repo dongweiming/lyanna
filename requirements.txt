@@ -23,4 +23,4 @@ dataclasses==0.6;python_version == '3.6'
 contextvars==2.4;python_version == '3.6'
 -e git+https://github.com/dongweiming/aiomcache.git@dev2#egg=aiomcache
 -e git+https://github.com/dongweiming/tortoise-orm.git@dev#egg=tortoise
--e git+https://github.com/dongweiming/arq.git@08a442e565192519ae2ea85e087dc3d1316ac1c4#egg=arq
+-e git+https://github.com/samuelcolvin/arq.git@v0.16a5#egg=arq
