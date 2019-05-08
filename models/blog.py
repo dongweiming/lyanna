@@ -115,7 +115,8 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
 class BlogRenderer(mistune.Renderer):
 
     def header(self, text, level, raw=None):
-        return f'<h{level} id="{text.replace(' ', '')}">{text}</h{level}>\n'
+        hid = text.replace(' ', '')
+        return f'<h{level} id="{hid}">{text}</h{level}>\n'
 
     def block_code(self, text, lang):
         inlinestyles = self.options.get('inlinestyles')
