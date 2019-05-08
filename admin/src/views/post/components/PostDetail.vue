@@ -34,7 +34,7 @@
         <el-row>
           <el-col :span="24">
             <el-form-item style="margin-bottom: 20px;" prop="title">
-              <MDinput v-model="postForm.summary" :maxlength="100" name="summary" required>
+              <MDinput v-model="postForm.summary" name="summary" required>
                 Summary
               </MDinput>
             </el-form-item>
