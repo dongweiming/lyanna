@@ -11,7 +11,7 @@
       <div class="createPost-main-container">
         <el-row>
           <el-col :span="24">
-            <el-form-item style="margin-bottom: 40px;" prop="title">
+            <el-form-item style="margin-bottom: 40px;" prop="name">
               <MDinput v-model="userForm.name" :maxlength="100" name="name" required :disabled="isEdit">
                 Name
               </MDinput>
@@ -21,7 +21,7 @@
 
         <el-row>
           <el-col :span="24">
-            <el-form-item style="margin-bottom: 40px;" prop="title">
+            <el-form-item style="margin-bottom: 40px;" prop="email">
               <MDinput v-model="userForm.email" :maxlength="100" name="email" required>
                 Email
               </MDinput>
@@ -31,7 +31,7 @@
 
         <el-row>
           <el-col :span="24">
-            <el-form-item style="margin-bottom: 40px;" prop="title">
+            <el-form-item style="margin-bottom: 40px;" prop="password">
               <MDinput v-model="userForm.password" :maxlength="100" name="password" required>
                 Password
               </MDinput>
