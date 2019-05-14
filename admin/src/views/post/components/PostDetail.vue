@@ -5,7 +5,7 @@
       <sticky class-name='sub-navbar draft'>
         <Dropdown v-model="postForm.is_page" enabled-text="Page页面" disabled-text="Post页面" />
         <Dropdown v-model="postForm.can_comment" enabled-text="评论打开" disabled-text="评论关闭" />
-        <Dropdown v-model="postForm.status" enabled-text="发布" disabled-text="草稿" enabledLabel="1" disabledLabel="0" />
+        <Dropdown v-model="postForm.status" enabled-text="发布" disabled-text="草稿" enabled-label="1" disabled-label="0" />
         <el-button v-loading="loading" style="margin-left: 10px;" type="success" @click="submitForm"> {{ isEdit ? '更新' : '发布' }}
         </el-button>
       </sticky>
@@ -23,7 +23,7 @@
 
         <el-row>
           <el-col :span="24">
-            <el-form-item style="margin-bottom: 20px;" prop="title">
+            <el-form-item style="margin-bottom: 20px;" prop="slug">
               <MDinput v-model="postForm.slug" :maxlength="100" name="slug" required>
                 Slug
               </MDinput>
@@ -33,7 +33,7 @@
 
         <el-row>
           <el-col :span="24">
-            <el-form-item style="margin-bottom: 20px;" prop="title">
+            <el-form-item style="margin-bottom: 20px;" prop="summary">
               <MDinput v-model="postForm.summary" name="summary" required>
                 Summary
               </MDinput>
