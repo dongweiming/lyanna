@@ -110,19 +110,28 @@ async def _post(request, post_id=None):
     return json({'post': post if post else None, 'ok': ok})
 
 
-@bp.route('/api/post/<post_id>', methods=['GET', 'PUT'])
+@bp.route('/api/post/<post_id>', methods=['GET', 'PUT', 'DELETE'])
 @protected(bp)
 async def post(request, post_id):
     if request.method == 'PUT':
         return await _post(request, post_id=post_id)
-    post = await Post.get_or_404(post_id)
+
+    post = await Post.get_or_404(id=post_id)
+    if not post:
+        return response.json({'r': 0, 'msg': 'Post not exist'})
+    
+    if request.method == 'DELETE':
+        await post.delete()
+        await PostTag.filter(Q(post_id=post_id)).delete()
+        return response.json({'r': 1})
+
     rv = await post.to_sync_dict()
     rv['tags'] = [t.name for t in rv['tags']]
     author = rv['author']
     rv['status'] = str(rv['status'])
     rv['author'] = {'id': author.id, 'name': author.name}
     return json(rv)
-
+    
 
 @bp.route('/api/users')
 @protected(bp)
@@ -238,19 +247,6 @@ async def status(request, post_id):
     elif request.method == 'DELETE':
         post.status = Post.STATUS_UNPUBLISHED
     await post.save()
-    return response.json({'r': 1})
-
-
-@bp.route('/api/post/<post_id>', methods=['DELETE'])
-@protected(bp)
-async def delete(request, post_id):
-    if not post_id:
-        abort(404)
-    post = await Post.get(id=post_id)
-    if not post:
-        return response.json({'r': 0, 'msg': 'Post not exist'})
-    await post.delete()
-    await PostTag.filter(Q(post_id=post_id)).delete()
     return response.json({'r': 1})
 
 
