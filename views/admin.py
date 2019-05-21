@@ -119,7 +119,7 @@ async def post(request, post_id):
     post = await Post.get_or_404(id=post_id)
     if not post:
         return response.json({'r': 0, 'msg': 'Post not exist'})
-    
+
     if request.method == 'DELETE':
         await post.delete()
         await PostTag.filter(Q(post_id=post_id)).delete()
@@ -131,7 +131,7 @@ async def post(request, post_id):
     rv['status'] = str(rv['status'])
     rv['author'] = {'id': author.id, 'name': author.name}
     return json(rv)
-    
+
 
 @bp.route('/api/users')
 @protected(bp)
