@@ -160,8 +160,10 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     @classmethod
     async def __flush__(cls, target):
-        await clear_mc(MC_KEY_ITEM_BY_ID % (target.__class__.__name__, target.id))  # noqa
-        await target.clear_mc()
+        await asyncio.gather(
+            clear_mc(MC_KEY_ITEM_BY_ID % (target.__class__.__name__, target.id)),
+            target.clear_mc(), return_exceptions=True
+        )
 
     async def clear_mc(self):
         ...

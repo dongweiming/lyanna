@@ -1,5 +1,6 @@
 import re
 import random
+import asyncio
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
 
@@ -238,17 +239,18 @@ class Post(CommentMixin, ReactMixin, BaseModel):
         return await self.get_multi(post_ids)
 
     async def clear_mc(self):
-        await clear_mc(MC_KEY_RELATED % self.id)
-        await clear_mc(MC_KEY_POST_BY_SLUG % self.slug)
+        coros = [clear_mc(MC_KEY_RELATED % self.id),
+                 clear_mc(MC_KEY_POST_BY_SLUG % self.slug),
+                 clear_mc(MC_KEY_ARCHIVE % self.created_at.year)]
         for key in [MC_KEY_FEED, MC_KEY_SITEMAP, MC_KEY_SEARCH,
                     MC_KEY_ARCHIVES, MC_KEY_TAGS]:
-            await clear_mc(key)
+            coros.append(clear_mc(key))
         for i in [True, False]:
-            await clear_mc(MC_KEY_ALL_POSTS % i)
-        await clear_mc(MC_KEY_ARCHIVE % self.created_at.year)
+            coros.append(clear_mc(MC_KEY_ALL_POSTS % i))
 
         for tag in await self.tags:
-            await clear_mc(MC_KEY_TAG % tag.id)
+            coros.append(clear_mc(MC_KEY_TAG % tag.id))
+        await asyncio.gather(*coros, return_exceptions=True)
 
     @classmethod
     @cache(MC_KEY_POST_BY_SLUG % '{slug}')
