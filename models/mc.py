@@ -128,5 +128,5 @@ def cache(key_pattern, expire=0):
 async def clear_mc(*keys):
     memcache = await get_memcache()
     assert memcache is not None
-    for k in keys:
-        await memcache.delete(k.encode('utf-8'))
+    await asyncio.gather(*[memcache.delete(k.encode('utf-8')) for k in keys],
+                         return_exceptions=True)

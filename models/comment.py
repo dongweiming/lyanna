@@ -1,3 +1,5 @@
+import asyncio
+
 import mistune
 from tortoise import fields
 from tortoise.query_utils import Q
@@ -66,9 +68,12 @@ class CommentMixin:
     async def add_comment(self, user_id, content, ref_id=0):
         obj = await Comment.create(github_id=user_id, post_id=self.id,
                                    ref_id=ref_id)
-        await obj.set_content(content)
         redis = await create_pool(RedisSettings.from_url(REDIS_URL))
-        await redis.enqueue_job('mention_users', self.id, content, user_id)
+        await asyncio.gather(
+            obj.set_content(content),
+            redis.enqueue_job('mention_users', self.id, content, user_id),
+            return_exceptions=True
+        )
         return obj
 
     async def del_comment(self, user_id, comment_id):
@@ -104,6 +109,9 @@ class CommentMixin:
 async def update_comment_list_cache(_, user_id, comment_id):
     comment = await Comment.cache(comment_id)
     if comment:
-        await clear_mc(MC_KEY_COMMENT_LIST % comment.post_id)
-        await clear_mc(MC_KEY_COMMNET_IDS_LIKED_BY_USER % (
-            user_id, comment.post_id))
+        asyncio.gather(
+            clear_mc(MC_KEY_COMMENT_LIST % comment.post_id),
+            clear_mc(MC_KEY_COMMNET_IDS_LIKED_BY_USER % (
+                user_id, comment.post_id)),
+            return_exceptions=True
+        )
