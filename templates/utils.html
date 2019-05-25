@@ -30,7 +30,7 @@
     <div>
   % if post.can_comment:
   <div class="gitment-container gitment-editor-container">
-    <a class="gitment-editor-avatar" href="${ github_user['link'] if github_user else f'/oauth/post/{post_id}' }">
+    <a class="gitment-editor-avatar" href="${ f'https://github.com/{github_user["username"]}' if github_user else f'/oauth/post/{post_id}' }">
       % if github_user:
       <img class="gitment-editor-avatar-img" src="${ github_user['picture'] }">
       % else:
@@ -90,7 +90,7 @@
     </a>
     <div class="gitment-comment-main">
       <div class="gitment-comment-header">
-        <a class="gitment-comment-name" href="${ user.link if user else '#' }" target="_blank">
+        <a class="gitment-comment-name" href="${ f'https://github.com/{user.username}' if user else '#' }" target="_blank">
           ${ user.username }
         </a>
         commented on
