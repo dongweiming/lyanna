@@ -50,6 +50,14 @@ Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 * 响应式设计
 * 支持评论提及邮件
 
+## Showcase
+
+这些博客使用了Lyanna:
+
+- [薄荷盐的博客](https://www.boheyan.cn/)
+- [Yaoyao's Blog](http://www.liu-yao.com/)
+- [熊清亮的博客](https://seealso.cn/)
+
 ## Video
 
 [My blog](https://youtu.be/rHYvrefjZwg)
