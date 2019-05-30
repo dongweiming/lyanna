@@ -122,8 +122,8 @@
           <img src="${ app.url_for('static', filename=f'img/{name}.png') }">
           <div class="reaction-item__text">${ name.capitalize() }</div>
         </div>
-        % if not reaction_enable:
-          <div class="reaction-item__votes">${ getattr(stats, f'{name}_count') }</div>
+        % if total:
+        <div class="reaction-item__votes">${ getattr(stats, f'{name}_count') }</div>
         % endif
       </div>
       % endfor
