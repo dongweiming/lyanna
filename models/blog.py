@@ -224,11 +224,11 @@ class Post(CommentMixin, ReactMixin, BaseModel):
         if not tag_ids:
             return []
         post_ids = set(await PostTag.filter(
-            Q(post_id__not=self.id), Q(tag_id__in=tag_ids),
-            Q(created_at__gte=(datetime.now() - timedelta(days=180)))).values_list(  # noqa
+            Q(post_id__not=self.id), Q(tag_id__in=tag_ids)).values_list(
                 'post_id', flat=True))
 
         excluded_ids = await self.filter(
+            Q(created_at__lt=(datetime.now() - timedelta(days=180))) |
             Q(status__not=self.STATUS_ONLINE)).values_list('id', flat=True)
 
         post_ids -= set(excluded_ids)
