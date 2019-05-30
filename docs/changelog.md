@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.4 (2019-05-30)
+
+1. Fix some issues
+2. Perf: use asyncio.gather
+
 ## 2.3 (2019-04-19)
 
 1. Support @mentions, and send an email
