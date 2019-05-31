@@ -57,6 +57,7 @@ Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 - [薄荷盐的博客](https://www.boheyan.cn/)
 - [Yaoyao's Blog](http://www.liu-yao.com/)
 - [熊清亮的博客](https://seealso.cn/)
+- [Vimiix's Blog](https://vimiix.com)
 
 ## Video
 
