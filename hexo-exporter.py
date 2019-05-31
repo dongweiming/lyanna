@@ -3,6 +3,7 @@ import argparse
 
 from tortoise import run_async
 from tortoise.exceptions import IntegrityError
+import yaml
 
 from ext import init_db
 from models import Post
@@ -28,10 +29,8 @@ files = sorted(files, reverse=False)
 
 
 async def write_post(file):
-    title = None
-    date = None
-    tags = []
     flag = False
+    meta_info = ''
 
     with open(file) as f:
         for i in f:
@@ -41,19 +40,22 @@ async def write_post(file):
             if i == '---':
                 flag = True
                 continue
-            if 'title:' in i:
-                title = i.split(':')[1].strip().replace('"', '')
-            elif 'date:' in i:
-                date = i.split(':')[1].strip()
-            elif 'tags' in i:
-                i = i.split(':')[1].strip()[1:-1] if '[' in i else i.split(':')[1]  # noqa
-                tags = filter(None, map(lambda x: x.strip(), i.split(',')))
+            meta_info += i + '\n'
+
+        meta_dict = yaml.load(meta_info, yaml.SafeLoader)
+        title = meta_dict['title']
+        date = meta_dict.get('date') or meta_dict.get('created')
+        tags = meta_dict.get('tags', [])
+        if not (title and date):
+            print(f"[Fail] Parse meta failed in {file.name}")
+            return
         content = ''.join(f.readlines())
 
         try:
             await Post.create(title=title, content=content, tags=tags,
                               author_id=args.uid, slug='', summary='',
                               status=Post.STATUS_ONLINE, created_at=date)
+            print(f"[Success] Load post: {file.name}")
         except IntegrityError:
             ...
 
