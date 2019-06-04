@@ -44,3 +44,9 @@
 #related {
     max-width: 800px;
 }
+
+@media screen and (max-width: 576px) {
+  .nav-container .home-menu {
+    padding: 5px;
+  }
+}
