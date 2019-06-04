@@ -212,12 +212,6 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
-@media screen and (max-width: 615px) {
-  .nav-container .home-menu {
-    -ms-flex-pack: center;
-        justify-content: center;
-  }
-}
 @media screen and (min-width: 1280px) {
   .nav-container .home-menu {
     max-width: 1040px;

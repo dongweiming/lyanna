@@ -211,12 +211,7 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
-@media screen and (max-width: 615px) {
-  .nav-container .home-menu {
-    -ms-flex-pack: center;
-        justify-content: center;
-  }
-}
+
 @media screen and (min-width: 1280px) {
   .nav-container .home-menu {
     max-width: 1040px;
@@ -998,7 +993,7 @@ hr {
     padding: 10px 20px;
   }
   .recent-posts {
-    padding: 30px;
+    padding: 0 30px 30px 30px;
   }
   #sidebar {
       display: none;
@@ -1006,15 +1001,15 @@ hr {
 }
 
 @media screen and (max-width: 576px) {
-    .post-container, #related, #reactions-container, .gitment-root-container {
-        margin: 0 10px !important;
-    }
-    .post-container, #related, #reactions-container {
-        padding: 0 !important;
-    }
+  .post-container, #related, #reactions-container, .gitment-root-container {
+    margin: 0 10px !important;
+  }
+  .post-container, #related, #reactions-container {
+    padding: 0 !important;
+  }
 
   .post {
-    padding: 10px 10px;
+    padding: 10px;
   }
 
   .reaction-item__text {
