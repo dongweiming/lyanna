@@ -177,5 +177,6 @@ class RedisSettings(_RedisSettings):
     @classmethod
     def from_url(cls, db_url):
         url = _parse_rfc1738_args(db_url)
-        return cls(url['host'], url['port'], int(url['database']),
+        return cls(url['host'], url['port'],
+                   url['database'] and int(url['database']) or 0,
                    url['password'], 1, 5, 1)
