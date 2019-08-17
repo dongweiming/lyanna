@@ -1,15 +1,14 @@
 <template>
-  <div :id="id"/>
+  <div id="editor">
+    <textarea v-model="value" @input="update" v-bind:style="{ height: editorHeight}" @keyup="$emit('update:value', value);"></textarea>
+    <div v-html="compiledMarkdown"></div>
+  </div>
 </template>
 
 <script>
-// deps for editor
-import 'codemirror/lib/codemirror.css' // codemirror
-import 'tui-editor/dist/tui-editor.css' // editor ui
-import 'tui-editor/dist/tui-editor-contents.css' // editor content
-
-import Editor from 'tui-editor'
-import defaultOptions from './defaultOptions'
+// import _ from 'lodash'
+import marked from 'marked'
+import debounce from 'lodash/debounce'
 
 export default {
   name: 'MarddownEditor',
@@ -18,101 +17,55 @@ export default {
       type: String,
       default: ''
     },
-    id: {
-      type: String,
-      required: false,
-      default() {
-        return 'markdown-editor-' + +new Date() + ((Math.random() * 1000).toFixed(0) + '')
-      }
-    },
-    options: {
-      type: Object,
-      default() {
-        return defaultOptions
-      }
-    },
-    mode: {
-      type: String,
-      default: 'markdown'
-    },
     height: {
       type: String,
       required: false,
       default: '300px'
-    },
-    language: {
-      type: String,
-      required: false,
-      default: 'en_US' // https://github.com/nhnent/tui.editor/tree/master/src/js/langs
-    }
-  },
-  data() {
-    return {
-      editor: null
     }
   },
   computed: {
-    editorOptions() {
-      const options = Object.assign({}, defaultOptions, this.options)
-      options.initialEditType = this.mode
-      options.height = this.height
-      options.language = this.language
-      return options
-    }
-  },
-  watch: {
-    value(newValue, preValue) {
-      if (newValue !== preValue && newValue !== this.editor.getValue()) {
-        this.editor.setValue(newValue)
-      }
+    compiledMarkdown() {
+      return marked(this.value)
     },
-    language() {
-      this.destroyEditor()
-      this.initEditor()
+    editorHeight() {
+      return this.height
     },
-    height(newValue) {
-      this.editor.height(newValue)
-    },
-    mode(newValue) {
-      this.editor.changeMode(newValue)
-    }
-  },
-  mounted() {
-    this.initEditor()
-  },
-  destroyed() {
-    this.destroyEditor()
   },
   methods: {
-    initEditor() {
-      this.editor = new Editor({
-        el: document.getElementById(this.id),
-        ...this.editorOptions
-      })
-      if (this.value) {
-        this.editor.setValue(this.value)
-      }
-      this.editor.on('change', () => {
-        this.$emit('input', this.editor.getValue())
-      })
-    },
-    destroyEditor() {
-      if (!this.editor) return
-      this.editor.off('change')
-      this.editor.remove()
-    },
-    setValue(value) {
-      this.editor.setValue(value)
-    },
-    getValue() {
-      return this.editor.getValue()
-    },
-    setHtml(value) {
-      this.editor.setHtml(value)
-    },
-    getHtml() {
-      return this.editor.getHtml()
+    update() {
+      debounce((e) => {
+        this.value = e.target.value
+      }, 300)
     }
   }
 }
 </script>
+<style>
+#editor {
+  margin: 0;
+  color: #333;
+}
+
+textarea, #editor div {
+  display: inline-block;
+  width: 49%;
+  height: 100%;
+  vertical-align: top;
+  box-sizing: border-box;
+  padding: 0 20px;
+}
+
+textarea {
+  border: none;
+  resize: none;
+  outline: none;
+  background-color: #f6f6f6;
+  font-size: 14px;
+  font-family: 'Monaco', courier, monospace;
+  padding: 20px;
+}
+
+code {
+  color: #f66;
+}
+</style>
