@@ -5,6 +5,15 @@ import store from './store'
 import Layout from '@/views/layout/Layout'
 import { getToken } from '@/utils/auth'
 
+import Home from '@/views/home'
+import Profile from '@/views/profile'
+import CreateUser from '@/views/user/create'
+import EditUser from '@/views/user/edit'
+import UserList from '@/views/user/list'
+import CreatePost from '@/views/post/create'
+import EditPost from '@/views/post/edit'
+import PostList from '@/views/post/list'
+
 Vue.use(Router)
 const whiteList = ['/login']
 
@@ -33,7 +42,7 @@ export const constantRouterMap = [
         children: [
             {
                 path: 'home',
-                component: () => import('@/views/home'),
+                component: Home,
                 name: 'Home',
                 meta: { title: 'Home', icon: 'dashboard', affix: true }
             }
@@ -51,20 +60,20 @@ export const constantRouterMap = [
         children: [
             {
                 path: 'create',
-                component: () => import('@/views/user/create'),
+                component: CreateUser,
                 name: 'CreateUser',
                 meta: { title: 'CreateUser', icon: 'edit' }
             },
             {
                 path: ':id(\\d+)/edit',
-                component: () => import('@/views/user/edit'),
+                component: EditUser,
                 name: 'EditUser',
                 meta: { title: 'EditUser', noCache: true },
                 hidden: true
             },
             {
                 path: 'list',
-                component: () => import('@/views/user/list'),
+                component: UserList,
                 name: 'UserList',
                 meta: { title: 'UserList', icon: 'list' }
             }
@@ -82,20 +91,20 @@ export const constantRouterMap = [
         children: [
             {
                 path: 'create',
-                component: () => import('@/views/post/create'),
+                component: CreatePost,
                 name: 'CreatePost',
                 meta: { title: 'CreatePost', icon: 'edit' }
             },
             {
                 path: ':id(\\d+)/edit',
-                component: () => import('@/views/post/edit'),
+                component: EditPost,
                 name: 'EditPost',
                 meta: { title: 'EditPost', noCache: true },
                 hidden: true
             },
             {
                 path: 'list',
-                component: () => import('@/views/post/list'),
+                component: PostList,
                 name: 'PostList',
               meta: { title: 'PostList', icon: 'list' }
             }
@@ -108,7 +117,7 @@ export const constantRouterMap = [
         children: [
             {
                 path: 'index',
-                component: () => import('@/views/profile'),
+                component: Profile,
                 name: 'Profile',
                 meta: { title: 'Profile', icon: 'profile', affix: true }
             }
