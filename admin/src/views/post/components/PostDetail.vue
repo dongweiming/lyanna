@@ -60,7 +60,7 @@
         </el-row>
 
         <el-row>
-          <markdown-editor ref="markdownEditor" v-model="postForm.content" :options="{hideModeSwitch:true,previewStyle:'tab'}" height="500px" />
+          <markdown-editor ref="markdownEditor" :value.sync="postForm.content" height="500px" />
         </el-row>
       </div>
     </el-form>
