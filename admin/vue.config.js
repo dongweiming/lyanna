@@ -6,6 +6,10 @@ module.exports = {
         output: {
             filename: 'static/js/admin/[name].js',
             chunkFilename: 'static/js/admin/[name].js'
+        },
+        externals: {
+            'vue': 'Vue',
+            'element-ui': 'ELEMENT'
         }
     },
     css: {
