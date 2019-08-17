@@ -6,7 +6,7 @@
 import PostDetail from './components/PostDetail'
 
 export default {
-  name: 'CreatePostForm',
+  name: 'CreatePost',
   components: { PostDetail }
 }
 </script>
