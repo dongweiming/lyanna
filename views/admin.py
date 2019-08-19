@@ -176,6 +176,7 @@ async def _user(request, user_id=None):
             user.active = active
             await user.save()
         else:
+            password = generate_password(password)
             user = await User.create(name=name, email=email,
                                      password=password, active=active)
         ok = True
