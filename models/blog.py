@@ -101,6 +101,8 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
         return '<pre><code>%s</code></pre>\n' % mistune.escape(text)
 
     try:
+        if lang in ('py', 'python'):
+            lang = 'python3'
         lexer = get_lexer_by_name(lang, stripall=True)
         formatter = BlogHtmlFormatter(
             noclasses=inlinestyles, linenos=linenos,

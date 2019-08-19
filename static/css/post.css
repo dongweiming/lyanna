@@ -16,7 +16,7 @@
 }
 
 .post-content figure {
-    background: #f8f8f8;
+    background: #3C4556;
     padding: 0 10px;
     border-radius: 2px;
     margin: 20px 0;
@@ -38,7 +38,7 @@
     font-weight: 500;
 }
 .hljs {
-  background: #f8f8f8 !important;
+  background: #3C4556 !important;
 }
 
 #related {
