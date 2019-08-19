@@ -111,7 +111,7 @@ async def tags(request):
     tags_ = await Tag.get_multi(counter.keys())
     tags = [(tags_[index], count)
             for index, count in enumerate(counter.values())]
-    return {'tags': tags}
+    return {'tags': sorted(tags, key=lambda x: x[1], reverse=True)}
 
 
 @bp.route('/tag/<tag_id>')
