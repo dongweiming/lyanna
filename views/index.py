@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from urllib.parse import unquote
 
@@ -16,6 +17,7 @@ from models.user import create_github_user
 import config
 
 bp = Blueprint('index', url_prefix='/')
+CODE_RE = re.compile('```([A-Za-z]+\n)?|#+')
 
 
 @bp.route(config.oauth_redirect_path)
@@ -101,13 +103,13 @@ async def search(request):
     return {'q': q}
 
 
-@cache(MC_KEY_SEARCH)
+#@cache(MC_KEY_SEARCH)
 async def _search_json(request):
     posts = await Post.get_all()
     return [{
         'url': post.url,
         'title': post.title,
-        'content': post.content
+        'content': CODE_RE.sub('', post.content)
     } for post in posts]
 
 
