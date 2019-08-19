@@ -163,7 +163,6 @@ $(document).ready(function() {
     var figure = $(this).parents('figure');
     var lang = figure.attr('class').split(' ')[1] || 'code';
     figure.attr('data-lang', lang.toUpperCase());
-    hljs.highlightBlock(block);
   });
 });
 
