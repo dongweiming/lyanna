@@ -66,7 +66,7 @@ class TocMixin:
                 while last_level > l:
                     yield '</ol>\n</li>\n'
                     last_level -= 1
-                yield '<li><a href="#toc-%d">%s</a>' % (index, text)
+                yield f'<li class="toc-item toc-level-{l - 1}"><a class="toc-link" href="#{title}"><span class="toc-text">{text}</span></a>'  # noqa
 
         # close tags
         yield '</li>\n'
