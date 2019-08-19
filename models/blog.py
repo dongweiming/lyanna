@@ -290,6 +290,12 @@ class Post(CommentMixin, ReactMixin, BaseModel):
     def url(self):
         return f'/page/{self.slug}' if self.is_page else super().url
 
+    async def to_sync_dict(self):
+        attrdict = await super().to_sync_dict()
+        for comment in attrdict['comments']:
+            comment['user'] = await comment['user'].to_sync_dict()
+        return attrdict
+
 
 class Tag(BaseModel):
     name = fields.CharField(max_length=100, unique=True)
