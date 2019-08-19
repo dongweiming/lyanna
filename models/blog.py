@@ -4,6 +4,7 @@ import asyncio
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
 
+import pangu
 import mistune
 from tortoise import fields
 from tortoise.query_utils import Q
@@ -189,7 +190,8 @@ class Post(CommentMixin, ReactMixin, BaseModel):
         return f'/{self.__class__.__name__.lower()}/{self.id}/preview'
 
     async def set_content(self, content):
-        return await self.set_props_by_key('content', content)
+        return await self.set_props_by_key(
+            'content', pangu.spacing_text(content))
 
     async def save(self, *args, **kwargs):
         content = kwargs.pop('content', None)

@@ -103,7 +103,7 @@ async def search(request):
     return {'q': q}
 
 
-#@cache(MC_KEY_SEARCH)
+@cache(MC_KEY_SEARCH)
 async def _search_json(request):
     posts = await Post.get_all()
     return [{
