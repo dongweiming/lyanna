@@ -490,13 +490,9 @@ body {
   margin-bottom: 1rem;
   line-height: 2rem;
 }
-.post .post-header .time {
+.post .post-header .time, .post .post-header .read {
   color: #999;
   font-size: 14px;
-}
-.post .post-header .read {
-  font-size: 14px;
-  color: #999;
 }
 .post .post-meta {
   display: inline-block;

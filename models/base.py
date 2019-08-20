@@ -13,7 +13,7 @@ from .utils import AttrDict
 from ._compat import PY36
 from .var import redis_var
 
-MC_KEY_ITEM_BY_ID = '%s:%s'
+MC_KEY_ITEM_BY_ID = '%s:%s:v2'
 IGNORE_ATTRS = ['redis', 'stats']
 _redis = None
 
