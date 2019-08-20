@@ -7,6 +7,7 @@ from html.parser import HTMLParser
 import pangu
 import mistune
 from tortoise import fields
+from aioredis.errors import RedisError
 from tortoise.query_utils import Q
 
 from pygments import highlight
@@ -34,6 +35,7 @@ MC_KEY_ARCHIVE = 'core:archive:%s'
 MC_KEY_TAGS = 'core:tags:%s'
 MC_KEY_TAG = 'core:tag:%s'
 RK_PAGEVIEW = 'lyanna:pageview:{}'
+VISITED_POST_IDS = 'lyanna:visited_post_ids'
 BQ_REGEX = re.compile(r'<blockquote>.*?</blockquote>')
 
 
@@ -296,13 +298,20 @@ class Post(CommentMixin, ReactMixin, BaseModel):
     def url(self):
         return f'/page/{self.slug}' if self.is_page else super().url
 
+    async def incr_pageview(self, increment=1):
+        redis = await self.redis
+        try:
+            await redis.sadd(VISITED_POST_IDS, self.id)
+            return await redis.incrby(RK_PAGEVIEW.format(self.id), increment)
+        except RedisError:
+            return self._pageview
+
     @property
     async def pageview(self):
         try:
             return int(await (await self.redis).get(
                 RK_PAGEVIEW.format(self.id)) or 0)
-        except:
-            raise
+        except RedisError:
             return self._pageview
 
 
