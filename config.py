@@ -24,6 +24,7 @@ PER_PAGE = 10
 GOOGLE_ANALYTICS = ''
 SENTRY_DSN = ''
 REQUEST_TIMEOUT = 15
+SHOW_PAGEVIEW = False
 
 SITE_NAV_MENUS = [('blog.index', '首页'), ('blog.archives', '归档'),
                   ('blog.tags', '标签'), ('index.search', '搜索'),

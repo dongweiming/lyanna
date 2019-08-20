@@ -4,15 +4,18 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import aiosmtplib
+from arq import cron, create_pool
 from mako.lookup import TemplateLookup
 
 from ext import init_db
-from models.blog import Post
+from models.blog import Post, RK_PAGEVIEW
 from models.mention import Mention, EMAIL_SUBJECT
 from config import (MAIL_SERVER, MAIL_PORT, MAIL_USERNAME,
-                    MAIL_PASSWORD, SITE_TITLE, BLOG_URL)
+                    MAIL_PASSWORD, SITE_TITLE, BLOG_URL, REDIS_URL)
+from models.utils import RedisSettings
 
 CAN_SEND = all((MAIL_SERVER, MAIL_USERNAME, MAIL_PASSWORD))
+VISITED_POST_IDS = 'lyanna:visited_post_ids'
 
 
 def with_context(f):
@@ -64,5 +67,31 @@ async def mention_users(ctx, post_id, content, author_id):
         await send_email(subject, html.decode(), email)
 
 
+@with_context
+async def incr_pageview(ctx, post_id, increment=1):
+    redis = await create_pool(RedisSettings.from_url(REDIS_URL))
+    await asyncio.gather(
+        redis.incrby(RK_PAGEVIEW.format(post_id), increment),
+        redis.sadd(VISITED_POST_IDS, post_id)
+    )
+
+
+@with_context
+async def flush_to_db(ctx):
+    redis = await create_pool(RedisSettings.from_url(REDIS_URL))
+    while 1:
+        post_id = await redis.spop(VISITED_POST_IDS)
+        if post_id is None:
+            break
+
+        post = await Post.get(post_id)
+        if post:
+            post._pageview = int(await redis.get(
+                RK_PAGEVIEW.format(post_id)) or 0)
+            await post.save()
+
+
 class WorkerSettings:
     functions = [mention_users]
+
+    cron_jobs = [cron(flush_to_db, hour=None)]

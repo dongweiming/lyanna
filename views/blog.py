@@ -1,15 +1,16 @@
 from itertools import groupby
 from collections import Counter
 
+from arq import create_pool
 from sanic import Blueprint
 from sanic.exceptions import abort
 from tortoise.query_utils import Q
 
 from ext import mako
-from config import PER_PAGE
+from config import PER_PAGE, REDIS_URL
 from models.mc import cache
 from models.profile import Profile
-from models.utils import Pagination
+from models.utils import Pagination, RedisSettings
 from models.blog import (
     MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG)
 from models import Post, Tag, PostTag
@@ -66,6 +67,9 @@ async def _post(request, ident, is_preview=False):
 
     related_posts = await post.get_related()
     post = await post.to_sync_dict()
+    redis = await create_pool(RedisSettings.from_url(REDIS_URL))
+    redis.enqueue_job('incr_pageview', post['id'])
+    print(post)
     return {'post': post, 'github_user': github_user, 'stats': stats,
             'reaction_type': reaction_type, 'related_posts': related_posts,
             'liked_comment_ids': liked_comment_ids}
