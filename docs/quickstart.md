@@ -59,7 +59,7 @@ tortoise.exceptions.OperationalError: (1054, "Unknown column 'pageview' in 'fiel
 可以通过如下命令修改:
 
 ```bash
-python manage.py migrate-for-25v
+python manage.py migrate-for-v25
 ```
 
 ## 联系我

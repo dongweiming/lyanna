@@ -32,7 +32,7 @@ async def init():
         await migrate_for_v25()
 
 
-async def migrate_for_v25():
+async def _migrate_for_v25():
     await init_db(create_db=False)
     client = Tortoise.get_connection('default')
     await client.execute_script(
@@ -51,8 +51,8 @@ def initdb():
 
 
 @cli.command()
-def migrate_for_25v():
-    run_async(migrate_for_v25())
+def migrate_for_v25():
+    run_async(_migrate_for_v25())
     click.echo('Migrate Finished!')
 
 
