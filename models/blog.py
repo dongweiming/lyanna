@@ -36,7 +36,7 @@ MC_KEY_ARCHIVE = 'core:archive:%s'
 MC_KEY_TAGS = 'core:tags:%s'
 MC_KEY_TAG = 'core:tag:%s'
 RK_PAGEVIEW = 'lyanna:pageview:{}'
-VISITED_POST_IDS = 'lyanna:visited_post_ids'
+RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
 BQ_REGEX = re.compile(r'<blockquote>.*?</blockquote>')
 
 
@@ -305,7 +305,7 @@ class Post(CommentMixin, ReactMixin, BaseModel):
     async def incr_pageview(self, increment=1):
         redis = await self.redis
         try:
-            await redis.sadd(VISITED_POST_IDS, self.id)
+            await redis.sadd(RK_VISITED_POST_IDS, self.id)
             return await redis.incrby(RK_PAGEVIEW.format(self.id), increment)
         except RedisError:
             return self._pageview
