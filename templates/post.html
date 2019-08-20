@@ -2,7 +2,7 @@
 <%namespace name="utils" file="/utils.html"/>
 
 <%!
-from config import SITE_TITLE
+from config import SITE_TITLE, SHOW_PAGEVIEW
 %>
 
 <%def name="doc_head()">
@@ -47,6 +47,10 @@ from config import SITE_TITLE
           </ul>
         </span>
       </span>
+      % if SHOW_PAGEVIEW:
+      <span class="slash">/</span>
+      <span class="post-meta">阅读数: ${ post.pageview }</span>
+      % endif
     </header>
 
     <div class="post-content">

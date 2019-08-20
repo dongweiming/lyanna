@@ -33,6 +33,7 @@ MC_KEY_ARCHIVES = 'core:archives'
 MC_KEY_ARCHIVE = 'core:archive:%s'
 MC_KEY_TAGS = 'core:tags:%s'
 MC_KEY_TAG = 'core:tag:%s'
+RK_PAGEVIEW = 'lyanna:pageview:{}'
 BQ_REGEX = re.compile(r'<blockquote>.*?</blockquote>')
 
 
@@ -153,6 +154,7 @@ class Post(CommentMixin, ReactMixin, BaseModel):
     can_comment = fields.BooleanField(default=True)
     status = fields.IntField(default=STATUS_UNPUBLISHED)
     type = fields.IntField(default=TYPE_ARTICLE)
+    _pageview = fields.IntField(source_field='pageview', default=0)
     kind = K_POST
 
     class Meta:
@@ -293,6 +295,15 @@ class Post(CommentMixin, ReactMixin, BaseModel):
     @property
     def url(self):
         return f'/page/{self.slug}' if self.is_page else super().url
+
+    @property
+    async def pageview(self):
+        try:
+            return int(await (await self.redis).get(
+                RK_PAGEVIEW.format(self.id)) or 0)
+        except:
+            raise
+            return self._pageview
 
 
 class Tag(BaseModel):

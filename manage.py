@@ -27,6 +27,17 @@ async def init():
     await client.execute_script(
         'alter table react_items add index `idx_id_kind_user` (`target_id`, `target_kind`, `user_id`)')  # noqa
 
+    if not await client.execute_query(
+            'show columns from `posts` like "pageview"'):
+        await migrate_for_v25()
+
+
+async def migrate_for_v25():
+    await init_db(create_db=False)
+    client = Tortoise.get_connection('default')
+    await client.execute_script(
+        'alter table posts add column `pageview` int(11) DEFAULT "0"')
+
 
 @click.group()
 def cli():
@@ -37,6 +48,12 @@ def cli():
 def initdb():
     run_async(init())
     click.echo('Init Finished!')
+
+
+@cli.command()
+def migrate_for_25v():
+    run_async(migrate_for_v25())
+    click.echo('Migrate Finished!')
 
 
 async def _adduser(**kwargs):
