@@ -25,6 +25,7 @@ GOOGLE_ANALYTICS = ''
 SENTRY_DSN = ''
 REQUEST_TIMEOUT = 15
 SHOW_PAGEVIEW = False
+PERMALINK_TYPE = 'slug'  # 可选 id、slug、title
 
 SITE_NAV_MENUS = [('blog.index', '首页'), ('blog.archives', '归档'),
                   ('blog.tags', '标签'), ('index.search', '搜索'),

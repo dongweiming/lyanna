@@ -14,10 +14,11 @@ from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
 
+from config import PERMALINK_TYPE
 from .mc import cache, clear_mc
 from .base import BaseModel
 from .user import User
-from .consts import K_POST, ONE_HOUR
+from .consts import K_POST, ONE_HOUR, PERMALINK_TYPES
 from .utils import trunc_utf8
 from .comment import CommentMixin
 from .react import ReactMixin
@@ -26,7 +27,7 @@ from .toc import TocMixin
 MC_KEY_TAGS_BY_POST_ID = 'post:%s:tags'
 MC_KEY_RELATED = 'post:related_posts:%s'
 MC_KEY_POST_BY_SLUG = 'post:%s:slug'
-MC_KEY_ALL_POSTS = 'core:posts:%s'
+MC_KEY_ALL_POSTS = 'core:posts:%s:v2'
 MC_KEY_FEED = 'core:feed'
 MC_KEY_SITEMAP = 'core:sitemap'
 MC_KEY_SEARCH = 'core:search.json'
@@ -296,7 +297,10 @@ class Post(CommentMixin, ReactMixin, BaseModel):
 
     @property
     def url(self):
-        return f'/page/{self.slug}' if self.is_page else super().url
+        if self.is_page:
+            return f'/page/{self.slug}'
+        assert PERMALINK_TYPE in PERMALINK_TYPES
+        return f'/post/{getattr(self, PERMALINK_TYPE)}/'
 
     async def incr_pageview(self, increment=1):
         redis = await self.redis
