@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.5 (2019-08-20)
+
+1. Fix some issues
+2. Support permalink types
+3. Show pageview
+4. Optimize bundle files
+5. Use simple marked editor
+
 ## 2.4 (2019-05-30)
 
 1. Fix some issues

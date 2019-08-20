@@ -143,3 +143,15 @@ JWT的超时时间
 - 默认值: `https://example.com`
 
 博客的地址，在提及邮件中可以直接访问博客对应文章页面
+
+## SHOW_PAGEVIEW
+
+- 默认值: `False`
+
+是否显示文章阅读量(PV)，建议有一定访问量后再显示出来
+
+## PERMALINK_TYPE
+
+- 默认值: `slug`
+
+文章页面URL的类型。可选值: id、slug、title。举个例子, PERMALINK_TYPE为id时，首页、分类页、标签页等页面都会使用`https://example.com/post/{id}`这样效果的URL，帮助SEO。

@@ -39,7 +39,6 @@ python hexo-exporter.py Markdown文件目录1 Markdown文件目录1 --uid=1  # u
 
 添加自己的配置项到local_settings.py文件中，具体选项可以看👉 [配置项](configuration.md)
 
-
 最后启动应用就好啦:
 
 ```bash
@@ -47,6 +46,21 @@ python app.py
 ```
 
 如果你要部署到自己的服务器上，可以参考 [部署](deploying.md)
+
+## v2.5不兼容问题
+
+在v2.5时修改了`posts`表结构，如果之前你已经使用了lyanna，升级后会找不到新加的字段，报错如下:
+
+```python
+...
+tortoise.exceptions.OperationalError: (1054, "Unknown column 'pageview' in 'field list'")
+```
+
+可以通过如下命令修改:
+
+```bash
+python manage.py migrate-for-25v
+```
 
 ## 联系我
 
