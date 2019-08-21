@@ -109,7 +109,7 @@ async def _search_json(request):
     return [{
         'url': post.url,
         'title': post.title,
-        'content': CODE_RE.sub('', post.content)
+        'content': CODE_RE.sub('', post.content) if post.content else ''
     } for post in posts]
 
 
