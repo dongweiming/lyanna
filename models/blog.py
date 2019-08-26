@@ -300,7 +300,7 @@ class Post(CommentMixin, ReactMixin, BaseModel):
         if self.is_page:
             return f'/page/{self.slug}'
         assert PERMALINK_TYPE in PERMALINK_TYPES
-        return f'/post/{getattr(self, PERMALINK_TYPE)}/'
+        return f'/post/{getattr(self, PERMALINK_TYPE) or self.id}/'
 
     async def incr_pageview(self, increment=1):
         redis = await self.redis
