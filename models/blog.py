@@ -1,5 +1,7 @@
 import re
+import types
 import random
+import inspect
 import asyncio
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
@@ -55,6 +57,28 @@ class MLStripper(HTMLParser):
     def get_data(self):
         return ''.join(self.fed)
 
+class PanguMeta(type):
+    def __new__(cls, name, bases, attrs):
+        for base in bases:
+            for name, fn in inspect.getmembers(base):
+                if (isinstance(fn, types.FunctionType) and
+                    name not in ('codespan', 'paragraph')):
+                    try:
+                        idx = inspect.getfullargspec(fn).args.index('text')
+                    except ValueError:
+                        continue
+                    setattr(base, name, cls.deco(fn, idx))
+
+        return super().__new__(cls, name, bases, attrs)
+
+    @classmethod
+    def deco(cls, func, index):
+        def wrapper(*args, **kwargs):
+            _args = list(args)
+            _args[index] = pangu.spacing_text(_args[index])
+            result = func(*_args, **kwargs)
+            return result
+        return wrapper
 
 class BlogHtmlFormatter(HtmlFormatter):
 
@@ -120,16 +144,15 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
         )
 
 
-class BlogRenderer(mistune.Renderer):
-
+class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):
     def header(self, text, level, raw=None):
         hid = text.replace(' ', '')
         return f'<h{level} id="{hid}">{text}</h{level}>\n'
 
-    def block_code(self, text, lang):
+    def block_code(self, code, lang):
         inlinestyles = self.options.get('inlinestyles')
         linenos = self.options.get('linenos')
-        return block_code(text, lang, inlinestyles, linenos)
+        return block_code(code, lang, inlinestyles, linenos)
 
 
 class TocRenderer(TocMixin, mistune.Renderer):
@@ -197,8 +220,7 @@ class Post(CommentMixin, ReactMixin, BaseModel):
         return f'/{self.__class__.__name__.lower()}/{self.id}/preview'
 
     async def set_content(self, content):
-        return await self.set_props_by_key(
-            'content', pangu.spacing_text(content))
+        return await self.set_props_by_key('content', content)
 
     async def save(self, *args, **kwargs):
         content = kwargs.pop('content', None)
