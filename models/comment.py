@@ -1,6 +1,7 @@
 import asyncio
 
 import mistune
+import markupsafe
 from tortoise import fields
 from tortoise.query_utils import Q
 from arq import create_pool
@@ -46,7 +47,7 @@ class Comment(ReactMixin, BaseModel):
 
     @property
     async def html_content(self):
-        content = await self.content
+        content = markupsafe.escape(await self.content)
         if not content:
             return ''
         return markdown(content)
