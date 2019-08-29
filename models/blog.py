@@ -57,12 +57,13 @@ class MLStripper(HTMLParser):
     def get_data(self):
         return ''.join(self.fed)
 
+
 class PanguMeta(type):
     def __new__(cls, name, bases, attrs):
         for base in bases:
             for name, fn in inspect.getmembers(base):
                 if (isinstance(fn, types.FunctionType) and
-                    name not in ('codespan', 'paragraph')):
+                        name not in ('codespan', 'paragraph')):
                     try:
                         idx = inspect.getfullargspec(fn).args.index('text')
                     except ValueError:
@@ -79,6 +80,7 @@ class PanguMeta(type):
             result = func(*_args, **kwargs)
             return result
         return wrapper
+
 
 class BlogHtmlFormatter(HtmlFormatter):
 
