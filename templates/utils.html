@@ -12,10 +12,12 @@
 %>
 <div class="gitment-container gitment-root-container">
   <div class="gitment-container gitment-comments-container">
-    % if comments:
     <ul class="gitment-comments-list">
+    % if comments:
       ${ render_comments(comments, github_user, liked_comment_ids) }
+    % endif
     </ul>
+    % if comments:
     <ul class="gitment-comments-pagination">
       <li class="gitment-comments-page-item gitment-hidden prev">Previous</li>
       <%  n_pages = n_comments // comment_per_page %>
