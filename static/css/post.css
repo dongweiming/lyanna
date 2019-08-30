@@ -50,3 +50,7 @@
     padding: 5px;
   }
 }
+
+.card-right {
+  text-align: right;
+}

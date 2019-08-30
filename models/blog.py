@@ -1,4 +1,5 @@
 import re
+import ast
 import types
 import random
 import inspect
@@ -141,6 +142,20 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
         code = highlight(text, lexer, formatter)
         return code
     except Exception:
+        # Github Card
+        if lang == 'card':
+            try:
+                dct = ast.literal_eval(text)
+                user = dct.get('user')
+                if user:
+                    repo = dct.get('repo')
+                    card_html = f'''<div class="github-card" data-user="{ user }" { f'data-repo="{ repo }"' if repo else "" }></div>'''  # noqa
+                    if dct.get('right'):
+                        card_html = f'<div class="card-right">{card_html}</div>'
+                    return card_html
+            except (ValueError, SyntaxError):
+                ...
+
         return '<pre class="%s"><code>%s</code></pre>\n' % (
             lang, mistune.escape(text)
         )
