@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.6 (2019-08-31)
+
+1. Support github-cards
+2. Fix comment's reflected xss vulnerability
+3. Use Pangu
+4. Fix some issues
+
 ## 2.5 (2019-08-20)
 
 1. Fix some issues

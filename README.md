@@ -49,6 +49,26 @@ Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 * 相关文章推荐(根据相似标签)
 * 响应式设计
 * 支持评论提及邮件
+* 支持 Github Cards. 具体用法请看 [这里](#github-cards)
+* 文章内容(除代码部分之外)自动「盘古之白」
+
+## Github Cards
+
+文章中支持引用Github User/Repo Card，代码源于[Github Cards](https://github.com/lepture/github-cards)，对样式做了微调，感恩~
+
+在文章中可以这么用:
+
+<pre>
+```card
+{
+  'user': 'dongweiming',
+  'repo': 'lyanna',
+  'right': 1
+}
+```
+</pre>
+
+card是lang，内容是json数据，你需要确保它可以作为参数让`ast.literal_eval`正常执行。其中`user`是必选键值对，包含`repo`会从`user`里面搜索这个`repo`，找不到的话会「Not Found」。`right`项是为了让Card向右对齐(默认向左对齐)
 
 ## Showcase
 
