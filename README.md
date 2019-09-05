@@ -56,6 +56,8 @@ Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 
 文章中支持引用Github User/Repo Card，代码源于[Github Cards](https://github.com/lepture/github-cards)，对样式做了微调，感恩~
 
+效果: [我的博客](https://www.dongwm.com/page/about-blog)
+
 在文章中可以这么用:
 
 <pre>
