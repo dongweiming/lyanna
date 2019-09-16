@@ -170,6 +170,9 @@ class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):
         linenos = self.options.get('linenos')
         return block_code(code, lang, inlinestyles, linenos)
 
+    def link(self, link, title, text):
+        return f' {super().link(link, title, text) } '
+
 
 class TocRenderer(TocMixin, mistune.Renderer):
     ...
