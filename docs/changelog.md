@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.6.1 (2019-09-17)
+
+1. Text spacing for link
+2. Fix tag cache
+
 ## 2.6 (2019-08-31)
 
 1. Support github-cards
