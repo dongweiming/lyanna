@@ -3,7 +3,6 @@ import ast
 import types
 import random
 import inspect
-import asyncio
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
 
@@ -36,7 +35,7 @@ MC_KEY_SITEMAP = 'core:sitemap'
 MC_KEY_SEARCH = 'core:search.json'
 MC_KEY_ARCHIVES = 'core:archives'
 MC_KEY_ARCHIVE = 'core:archive:%s'
-MC_KEY_TAGS = 'core:tags:%s'
+MC_KEY_TAGS = 'core:tags'
 MC_KEY_TAG = 'core:tag:%s'
 RK_PAGEVIEW = 'lyanna:pageview:{}'
 RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
@@ -151,7 +150,7 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
                     repo = dct.get('repo')
                     card_html = f'''<div class="github-card" data-user="{ user }" { f'data-repo="{ repo }"' if repo else "" }></div>'''  # noqa
                     if dct.get('right'):
-                        card_html = f'<div class="card-right">{card_html}</div>'
+                        card_html = f'<div class="card-right">{card_html}</div>'  # noqa
                     return card_html
             except (ValueError, SyntaxError):
                 ...
@@ -287,18 +286,17 @@ class Post(CommentMixin, ReactMixin, BaseModel):
         return await self.get_multi(post_ids)
 
     async def clear_mc(self):
-        coros = [clear_mc(MC_KEY_RELATED % self.id),
-                 clear_mc(MC_KEY_POST_BY_SLUG % self.slug),
-                 clear_mc(MC_KEY_ARCHIVE % self.created_at.year)]
-        for key in [MC_KEY_FEED, MC_KEY_SITEMAP, MC_KEY_SEARCH,
-                    MC_KEY_ARCHIVES, MC_KEY_TAGS]:
-            coros.append(clear_mc(key))
+        keys = [
+            MC_KEY_FEED, MC_KEY_SITEMAP, MC_KEY_SEARCH, MC_KEY_ARCHIVES,
+            MC_KEY_TAGS, MC_KEY_RELATED % self.id,
+            MC_KEY_POST_BY_SLUG % self.slug,
+            MC_KEY_ARCHIVE % self.created_at.year]
         for i in [True, False]:
-            coros.append(clear_mc(MC_KEY_ALL_POSTS % i))
+            keys.append(MC_KEY_ALL_POSTS % i)
 
         for tag in await self.tags:
-            coros.append(clear_mc(MC_KEY_TAG % tag.id))
-        await asyncio.gather(*coros, return_exceptions=True)
+            keys.append(MC_KEY_TAG % tag.id)
+        await clear_mc(*keys)
 
     @classmethod
     @cache(MC_KEY_POST_BY_SLUG % '{slug}')
