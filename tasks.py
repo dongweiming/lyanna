@@ -83,5 +83,5 @@ async def flush_to_db(ctx):
 
 class WorkerSettings:
     functions = [mention_users]
-
+    redis_settings = RedisSettings.from_url(REDIS_URL)
     cron_jobs = [cron(flush_to_db, hour=None)]
