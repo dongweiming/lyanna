@@ -6,6 +6,7 @@ from email.mime.text import MIMEText
 import aiosmtplib
 from arq import cron, create_pool
 from mako.lookup import TemplateLookup
+from tortoise.query_utils import Q
 
 from ext import init_db
 from models.blog import Post, RK_PAGEVIEW, RK_VISITED_POST_IDS
@@ -74,7 +75,7 @@ async def flush_to_db(ctx):
         if post_id is None:
             break
 
-        post = await Post.get(post_id)
+        post = await Post.get(Q(id=post_id))
         if post:
             post._pageview = int(await redis.get(
                 RK_PAGEVIEW.format(post_id)) or 0)
