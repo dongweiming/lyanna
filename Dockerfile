@@ -10,6 +10,6 @@ RUN pip install -i https://mirrors.ustc.edu.cn/pypi/web/simple -r /requirements.
 
 FROM python:3.7-alpine
 COPY --from=build /install/lib /usr/local/lib
-COPY --from=build /install/src /app/src
+COPY --from=build /install/src /usr/local/src
 WORKDIR /app
 COPY . /app

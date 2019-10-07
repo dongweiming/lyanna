@@ -1,0 +1,52 @@
+version: '3'
+services:
+  db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: 'test'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: ''
+      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+    volumes:
+      - my-datavolume:/var/lib/mysql
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+  redis:
+    image: redis:alpine
+    deploy:
+       mode: replicated
+       replicas: 3
+  memcached:
+    image: memcached:1.5-alpine
+    deploy:
+       mode: replicated
+       replicas: 3
+  web:
+    image: 127.0.0.1:5000/lyanna-app
+    build: .
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app
+      - ./local_settings.py.tmpl:/app/local_settings.py
+    depends_on:
+      - db
+      - redis
+      - memcached
+    environment:
+      PYTHONPATH: $PYTHONPATH:/usr/local/src/aiomcache:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src
+    command: sh -c './setup.sh && python app.py'
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    stop_grace_period: 1m30s
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+volumes:
+  my-datavolume:
