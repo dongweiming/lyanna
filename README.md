@@ -86,3 +86,7 @@ card是lang，内容是json数据，你需要确保它可以作为参数让`ast.
 [My blog](https://youtu.be/rHYvrefjZwg)
 
 [My blog's Admin page](https://youtu.be/iZCGTvC1NPo)
+
+## Thanks
+
+[![PyCharm](docs/pycharm.svg)](https://www.jetbrains.com/?from=lyanna)
