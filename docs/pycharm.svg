@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41 (35326) - http://www.bohemiancoding.com/sketch -->
+    <title>icon_PyCharm</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="-46.5647482%" y1="50%" x2="90.4496403%" y2="50%" id="linearGradient-1">
+            <stop stop-color="#21D789" offset="0%"></stop>
+            <stop stop-color="#07C3F2" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="-53.6961722%" y1="105.498047%" x2="133.923445%" y2="-7.578125%" id="linearGradient-2">
+            <stop stop-color="#FCF84A" offset="1%"></stop>
+            <stop stop-color="#A7EB62" offset="11%"></stop>
+            <stop stop-color="#5FE077" offset="21%"></stop>
+            <stop stop-color="#32DA84" offset="27%"></stop>
+            <stop stop-color="#21D789" offset="31%"></stop>
+            <stop stop-color="#21D789" offset="58%"></stop>
+            <stop stop-color="#21D789" offset="60%"></stop>
+            <stop stop-color="#20D68C" offset="69%"></stop>
+            <stop stop-color="#1ED497" offset="76%"></stop>
+            <stop stop-color="#19D1A9" offset="83%"></stop>
+            <stop stop-color="#13CCC2" offset="90%"></stop>
+            <stop stop-color="#0BC6E1" offset="97%"></stop>
+            <stop stop-color="#07C3F2" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="30.7014388%" y1="115.958904%" x2="77.7517986%" y2="22.2488584%" id="linearGradient-3">
+            <stop stop-color="#21D789" offset="0%"></stop>
+            <stop stop-color="#24D788" offset="16%"></stop>
+            <stop stop-color="#2FD886" offset="30%"></stop>
+            <stop stop-color="#41DA82" offset="44%"></stop>
+            <stop stop-color="#5ADC7D" offset="56%"></stop>
+            <stop stop-color="#7AE077" offset="69%"></stop>
+            <stop stop-color="#A1E36E" offset="81%"></stop>
+            <stop stop-color="#CFE865" offset="93%"></stop>
+            <stop stop-color="#F1EB5E" offset="100%"></stop>
+        </linearGradient>
+        <linearGradient x1="-9.66216216%" y1="201.742857%" x2="118.558559%" y2="-16.9428571%" id="linearGradient-4">
+            <stop stop-color="#21D789" offset="0%"></stop>
+            <stop stop-color="#24D788" offset="6%"></stop>
+            <stop stop-color="#2FD886" offset="11%"></stop>
+            <stop stop-color="#41DA82" offset="16%"></stop>
+            <stop stop-color="#5ADD7D" offset="21%"></stop>
+            <stop stop-color="#79E077" offset="25%"></stop>
+            <stop stop-color="#7CE076" offset="26%"></stop>
+            <stop stop-color="#8CE173" offset="50%"></stop>
+            <stop stop-color="#B2E56B" offset="92%"></stop>
+        </linearGradient>
+        <linearGradient x1="111.835165%" y1="50.480167%" x2="-14.2197802%" y2="49.3632568%" id="linearGradient-5">
+            <stop stop-color="#FCF84A" offset="39%"></stop>
+            <stop stop-color="#ECF451" offset="54%"></stop>
+            <stop stop-color="#C2E964" offset="83%"></stop>
+            <stop stop-color="#B2E56B" offset="92%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon_PyCharm">
+            <g id="Group">
+                <polygon id="Shape" fill="url(#linearGradient-1)" points="89.8 20.2 127.2 51.2 113.6 78.6 91.2 72.4 71.6 72.4"></polygon>
+                <polygon id="Shape" fill="url(#linearGradient-2)" points="52 40.4 44.8 78.6 44.2 91.8 25.8 99.6 0 102.4 7.8 19.6 54.8 0 83.6 19"></polygon>
+                <polygon id="Shape" fill="url(#linearGradient-3)" points="52 40.4 55.6 114.2 43.8 128 0 102.4 36 48.6"></polygon>
+                <polygon id="Shape" fill="url(#linearGradient-4)" points="100.4 35 56 35 95.2 0"></polygon>
+                <polygon id="Shape" fill="url(#linearGradient-5)" points="128 114.4 89 127.8 37 113.2 52 40.4 58 35 89.8 32 86.8 63.8 112 54"></polygon>
+            </g>
+            <g id="Group" transform="translate(24.000000, 24.000000)">
+                <rect id="Rectangle-path" fill="#000000" x="0" y="0" width="80" height="80"></rect>
+                <rect id="Rectangle-path" fill="#FFFFFF" x="7.6" y="65" width="30" height="5"></rect>
+                <path d="M7.4,10.4 L21,10.4 C29,10.4 33.6,15 33.6,21.8 L33.6,21.8 C33.6,29.4 27.6,33.4 20.2,33.4 L14.6,33.4 L14.6,43.4 L7.4,43.4 L7.4,10.4 L7.4,10.4 L7.4,10.4 Z M26.2,22.2 L26.2,22.2 C26.2,19 24,17.2 20.2,17.2 L14.6,17.2 L14.6,27.4 L20.4,27.4 C24.33,27.4 26.2,25 26.2,22.2 Z" id="Shape" fill="#FFFFFF"></path>
+                <path d="M36.4,27.2 L36.4,27.2 C36.2978808,22.6077317 38.0772064,18.1732601 41.3252333,14.9252333 C44.5732601,11.6772064 49.0077317,9.8978808 53.6,10 C59.8,10 63.6,12 66.6,15.2 L62,20.6 C59.4,18.2 56.8,16.8 53.6,16.8 C48,16.8 44,21.4 44,27.2 L44,27.2 C44,32.8 48,37.6 53.6,37.6 C57.4,37.6 59.8,36 62.4,33.8 L67,38.4 C63.6,42 59.8,44.4 53.4,44.4 C48.8564525,44.4003144 44.5018483,42.5818199 41.3079178,39.3503138 C38.1139873,36.1188077 36.3465465,31.743233 36.4,27.2" id="Shape" fill="#FFFFFF"></path>
+            </g>
+        </g>
+    </g>
+</svg>
