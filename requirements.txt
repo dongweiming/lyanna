@@ -1,6 +1,6 @@
-sanic==19.6.3
+sanic==19.9.0
 click==7.0
-aiohttp==3.6.1
+aiohttp==3.6.2
 sanic_oauth==0.4.0
 sanic_mako==0.4.0
 aiomysql==0.0.20
@@ -20,6 +20,7 @@ sanic-sentry==0.1.7
 sanic-jwt==1.2.1
 attrs==19.1.0
 pangu==4.0.6.1
+redis==3.3.11
 aiosmtplib==1.1.0
 dataclasses==0.6;python_version == '3.6'
 contextvars==2.4;python_version == '3.6'

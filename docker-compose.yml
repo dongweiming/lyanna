@@ -31,12 +31,15 @@ services:
       - '8000:8000'
     volumes:
       - .:/app
-      - ./local_settings.py.tmpl:/app/local_settings.py
     depends_on:
       - db
       - redis
       - memcached
     environment:
+      DEBUG: 1
+      REDIS_URL: 'redis://redis:6379'
+      MEMCACHED_HOST: 'memcached'
+      DB_URL: 'mysql://root:@db:3306/test?charset=utf8'
       PYTHONPATH: $PYTHONPATH:/usr/local/src/aiomcache:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src
     command: sh -c './setup.sh && python app.py'
 volumes:

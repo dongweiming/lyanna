@@ -1,0 +1,43 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: lyanna-arq
+  labels:
+     app.kubernetes.io/name: lyanna-arq
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lyanna-arq
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lyanna-arq
+    spec:
+      containers:
+      - image: dongweiming/lyanna:latest
+        #imagePullPolicy: Always
+        name: lyanna-web
+        command: ['sh', '-c', './arq tasks.WorkerSettings']
+        env:
+        - name: MEMCACHED_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: lyanna-cfg
+              key: memcached_host
+        - name: DB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: lyanna-cfg
+              key: db_url
+        - name: REDIS_SENTINEL_SVC_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: lyanna-cfg
+              key: redis_sentinel_host
+        - name: REDIS_SENTINEL_SVC_POST
+          valueFrom:
+             configMapKeyRef:
+               name: lyanna-cfg
+               key: redis_sentinel_port
+        - name: PYTHONPATH
+          value: $PYTHONPATH:/usr/local/src/aiomcache:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src

@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lyanna-deployment
+  labels:
+    app.kubernetes.io/name: lyanna
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lyanna
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: lyanna
+    spec:
+      containers:
+      - image: dongweiming/lyanna:latest
+        name: lyanna-web
+        command: ['sh', '-c', './gunicorn app:app --bind 0.0.0.0:8000 --worker-class sanic.worker.GunicornWorker --threads=2']
+        env:
+        - name: MEMCACHED_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: lyanna-cfg
+              key: memcached_host
+        - name: DB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: lyanna-cfg
+              key: db_url
+        - name: REDIS_SENTINEL_SVC_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: lyanna-cfg
+              key: redis_sentinel_host
+        - name: REDIS_SENTINEL_SVC_POST
+          valueFrom:
+             configMapKeyRef:
+               name: lyanna-cfg
+               key: redis_sentinel_port
+        - name: PYTHONPATH
+          value: $PYTHONPATH:/usr/local/src/aiomcache:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src
+        #imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
+#        livenessProbe:
+#          failureThreshold: 3
+#          httpGet:
+#            path: /
+#            port: 8000
+#            scheme: HTTP
+#          periodSeconds: 10
+#          successThreshold: 1
+#          timeoutSeconds: 1
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+#        readinessProbe:
+#          failureThreshold: 3
+#          httpGet:
+#            path: /
+#            port: 8000
+#            scheme: HTTP
+#          periodSeconds: 10
+#          successThreshold: 1
+#          timeoutSeconds: 1
+      initContainers:
+      - name: init-memcached
+        image: busybox
+        command: ['sh', '-c', 'until nslookup lyanna-memcached; do echo waiting for Memcached; sleep 0.5; done;']
+      - name: init-redis
+        image: busybox
+        command: ['sh', '-c', 'until nslookup redis-sentinel; do echo waiting for Redis; sleep 0.5; done;']
+      - name: init-mariadb
+        image: busybox
+        command: ['sh', '-c', 'until nslookup lyanna-mariadb; do echo waiting for MariaDB; sleep 0.5; done;']
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lyanna-svc
+  labels:
+    app.kubernetes.io/name: lyanna
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 8000
+  selector:
+    app.kubernetes.io/name: lyanna
+  sessionAffinity: ClientIP
+  type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: lyanna-ing
+  labels:
+    app.kubernetes.io/name: lyanna
+spec:
+  rules:
+  - host: lyanna.local
+    http:
+      paths:
+      - backend:
+          serviceName: lyanna-svc
+          servicePort: 80
+        path: /
