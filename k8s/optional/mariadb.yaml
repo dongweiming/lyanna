@@ -1,0 +1,353 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mariadb-master
+  labels:
+    type: local
+spec:
+  storageClassName: lyanna-mariadb-master
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /var/lib/mariadb
+  persistentVolumeReclaimPolicy: Retain
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mariadb-slave
+  labels:
+    type: local
+spec:
+  storageClassName: lyanna-mariadb-slave
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /var/lib/redis-slave
+  persistentVolumeReclaimPolicy: Retain
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: mariadb
+    app.kubernetes.io/component: master
+  name: lyanna-mariadb-master
+data:
+  my.cnf: |-
+    [mysqld]
+    skip-name-resolve
+    explicit_defaults_for_timestamp
+    basedir=/data/mariadb
+    port=3306
+    socket=/data/mariadb/tmp/mysql.sock
+    tmpdir=/data/mariadb/tmp
+    max_allowed_packet=16M
+    bind-address=0.0.0.0
+    pid-file=/data/mariadb/tmp/mysqld.pid
+    log-error=/data/mariadb/logs/mysqld.log
+    character-set-server=UTF8
+    collation-server=utf8_general_ci
+
+    [client]
+    port=3306
+    socket=/data/mariadb/tmp/mysql.sock
+    default-character-set=UTF8
+
+    [manager]
+    port=3306
+    socket=/data/mariadb/tmp/mysql.sock
+    pid-file=/data/mariadb/tmp/mysqld.pid
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: mariadb
+    app.kubernetes.io/component: slave
+  name: lyanna-mariadb-slave
+data:
+  my.cnf: |-
+    [mysqld]
+    skip-name-resolve
+    explicit_defaults_for_timestamp
+    basedir=/data/mariadb
+    port=3306
+    socket=/data/mariadb/tmp/mysql.sock
+    tmpdir=/data/mariadb/tmp
+    max_allowed_packet=16M
+    bind-address=0.0.0.0
+    pid-file=/data/mariadb/tmp/mysqld.pid
+    log-error=/data/mariadb/logs/mysqld.log
+    character-set-server=UTF8
+    collation-server=utf8_general_ci
+
+    [client]
+    port=3306
+    socket=/data/mariadb/tmp/mysql.sock
+    default-character-set=UTF8
+
+    [manager]
+    port=3306
+    socket=/data/mariadb/tmp/mysql.sock
+    pid-file=/data/mariadb/tmp/mysqld.pid
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/name: mariadb
+    app.kubernetes.io/component: master
+  name: lyanna-mariadb-master
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mariadb
+      app.kubernetes.io/component: master
+  serviceName: lyanna-mariadb-master
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mariadb
+        app.kubernetes.io/component: master
+    spec:
+      containers:
+      - env:
+        - name: MARIADB_USER
+          valueFrom:
+            configMapKeyRef:
+              key: user
+              name: lyanna-cfg
+        - name: MARIADB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: password
+              name: lyanna-cfg
+        - name: MARIADB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              key: database
+              name: lyanna-cfg
+        - name: MARIADB_REPLICATION_MODE
+          value: master
+        - name: MARIADB_REPLICATION_USER
+          value: replicator
+        - name: MARIADB_REPLICATION_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: replication-password
+              name: lyanna-cfg
+        - name: MARIADB_ROOT_PASSWORD
+          value: passwd
+        image: bitnami/mariadb:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec mysqladmin status -uroot -p$MARIADB_ROOT_PASSWORD
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: mariadb
+        ports:
+        - containerPort: 3306
+          name: mysql
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec mysqladmin status -uroot -p$MARIADB_ROOT_PASSWORD
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /data/mariadb
+          name: data
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: lyanna-mariadb-master
+        name: config
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/name: mariadb
+        app.kubernetes.io/component: master
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      volumeMode: Filesystem
+      storageClassName: lyanna-mariadb-master
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/name: mariadb
+    app.kubernetes.io/component: slave
+  name: lyanna-mariadb-slave
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mariadb
+      app.kubernetes.io/component: slave
+  serviceName: lyanna-mariadb-slave
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mariadb
+        app.kubernetes.io/component: slave
+    spec:
+      containers:
+      - env:
+        - name: MARIADB_REPLICATION_MODE
+          value: slave
+        - name: MARIADB_MASTER_HOST
+          value: lyanna-mariadb
+        - name: MARIADB_MASTER_PORT_NUMBER
+          valueFrom:
+            configMapKeyRef:
+              key: port
+              name: lyanna-cfg
+        - name: MARIADB_MASTER_USER
+          valueFrom:
+            configMapKeyRef:
+              key: user
+              name: lyanna-cfg
+        - name: MARIADB_MASTER_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: password
+              name: lyanna-cfg
+        - name: MARIADB_REPLICATION_USER
+          value: replicator
+        - name: MARIADB_REPLICATION_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: replication-password
+              name: lyanna-cfg
+        - name: MARIADB_MASTER_ROOT_PASSWORD
+          value: passwd
+        image: bitnami/mariadb:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec mysqladmin status -uroot -p$MARIADB_MASTER_ROOT_PASSWORD
+          failureThreshold: 3
+          initialDelaySeconds: 120
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: mariadb
+        ports:
+        - containerPort: 3306
+          name: mysql
+          protocol: TCP
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - exec mysqladmin status -uroot -p$MARIADB_MASTER_ROOT_PASSWORD
+          failureThreshold: 3
+          initialDelaySeconds: 45
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        volumeMounts:
+        - mountPath: /data/mariadb
+          name: data
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1001
+        runAsUser: 1001
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: lyanna-mariadb-slave
+        name: config
+  updateStrategy:
+    type: RollingUpdate
+  volumeClaimTemplates:
+  - metadata:
+      labels:
+        app.kubernetes.io/name: mariadb
+        app.kubernetes.io/component: slave
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi
+      volumeMode: Filesystem
+      storageClassName: lyanna-mariadb-slave
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: mariadb
+    app.kubernetes.io/component: master
+  name: lyanna-mariadb
+spec:
+  clusterIP: None
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+    targetPort: mysql
+  selector:
+    app.kubernetes.io/name: mariadb
+    app.kubernetes.io/component: master
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: mariadb
+    app.kubernetes.io/component: slave
+  name: lyanna-mariadb-slave
+spec:
+  clusterIP: None
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+    targetPort: mysql
+  selector:
+    app.kubernetes.io/name: mariadb
+    app.kubernetes.io/component: slave
+  type: ClusterIP

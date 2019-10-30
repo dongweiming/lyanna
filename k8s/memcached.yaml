@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: lyanna-memcached
+  labels:
+    app.kubernetes.io/name: memcached
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: memcached
+  serviceName: lyanna-memcached
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: memcached
+    spec:
+      containers:
+      - command:
+        - memcached
+        - -o
+        - modern
+        - -v
+        - -I
+        - 20m
+        image: memcached:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: memcache
+          timeoutSeconds: 5
+        name: lyanna-memcached
+        ports:
+        - containerPort: 11211
+          name: memcache
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: memcache
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        securityContext:
+          runAsUser: 1001
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1001
+      terminationGracePeriodSeconds: 30
+  updateStrategy:
+    type: RollingUpdate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: memcached
+  name: lyanna-memcached
+spec:
+  clusterIP: None
+  ports:
+  - name: memcache
+    port: 11211
+    protocol: TCP
+    targetPort: memcache
+  selector:
+    app.kubernetes.io/name: memcached
+  sessionAffinity: ClientIP

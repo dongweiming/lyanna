@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lyanna-cfg
+data:
+  port: "3306"
+  database: test
+  user: lyanna
+  password: lyanna
+  memcached_host: lyanna-memcached
+  replication-password: lyanna
+  redis_sentinel_host: redis-sentinel
+  redis_sentinel_port: "26379"
+  db_url: mysql://lyanna:lyanna@lyanna-mariadb:3306/test?charset=utf8
