@@ -1,8 +1,20 @@
-<%! from config import SHOW_PROFILE %>
+<%! from config import SHOW_PROFILE, BLOG_URL %>
 <%inherit file="/base.html" />
 
 <%def name="doc_head()">
-  <link rel="stylesheet" href="${ app.url_for('static', filename='css/index.min.css') } ">
+<link rel="stylesheet" href="${ app.url_for('static', filename='css/index.min.css') } ">
+<script type="application/ld+json">
+ {
+   "@context": "https://schema.org",
+   "@type": "WebSite",
+   "url": "${ BLOG_URL }",
+   "potentialAction": {
+     "@type": "SearchAction",
+     "target": "${ BLOG_URL }/search?q={search_term_string}",
+     "query-input": "required name=search_term_string"
+   }
+ }
+</script>
 </%def>
 
 <%def name="content()">
