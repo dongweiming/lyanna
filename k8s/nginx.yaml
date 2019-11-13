@@ -1,0 +1,15 @@
+apiVersion: v1
+data:
+  keep-alive: "5"
+  http-snippet: |
+      proxy_cache_path /tmp/nginx-cache levels=1:2 keys_zone=static-cache:2m max_size=100m inactive=7d use_temp_path=off;
+      proxy_cache_key $scheme$proxy_host$request_uri;
+      proxy_cache_lock on;
+      proxy_cache_use_stale updating;
+kind: ConfigMap
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
