@@ -97,20 +97,71 @@ spec:
   selector:
     app.kubernetes.io/name: lyanna
   sessionAffinity: ClientIP
-  type: NodePort
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: lyanna-ing
-  labels:
-    app.kubernetes.io/name: lyanna
+  name: lyanna-ing-static
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-buffering: "on"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      include /etc/nginx/mime.types;
+      proxy_cache static-cache;
+      proxy_ignore_headers Cache-Control;
+      proxy_cache_valid any 30m;
+      add_header X-Cache-Status $upstream_cache_status;
 spec:
   rules:
   - host: lyanna.local
     http:
       paths:
-      - backend:
-          serviceName: lyanna-svc
-          servicePort: 80
-        path: /
+        - path: /static
+          backend:
+            serviceName: lyanna-svc
+            servicePort: 80
+        - path: /img
+          backend:
+            serviceName: lyanna-svc
+            servicePort: 80
+        - path: /fonts
+          backend:
+            serviceName: lyanna-svc
+            servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: lyanna-ing-admin
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      allow "1.2.3.4";
+      deny all;
+spec:
+  rules:
+  - host: lyanna.local
+    http:
+      paths:
+        - path: /admin
+          backend:
+            serviceName: lyanna-svc
+            servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: lyanna-ing
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: lyanna.local
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: lyanna-svc
+            servicePort: 80
