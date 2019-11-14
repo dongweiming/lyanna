@@ -5,7 +5,7 @@ metadata:
   labels:
     app.kubernetes.io/name: lyanna
 spec:
-  replicas: 4
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: lyanna
@@ -23,6 +23,13 @@ spec:
       - image: dongweiming/lyanna:latest
         name: lyanna-web
         command: ['sh', '-c', './gunicorn app:app --bind 0.0.0.0:8000 --worker-class sanic.worker.GunicornWorker --threads=2']
+        resources:
+          limits:
+            cpu: 300m
+            memory: 200Mi
+          requests:
+            cpu: 200m
+            memory: 100Mi
         env:
         - name: MEMCACHED_HOST
           valueFrom:
@@ -74,12 +81,9 @@ spec:
       - name: init-memcached
         image: busybox
         command: ['sh', '-c', 'until nslookup lyanna-memcached; do echo waiting for Memcached; sleep 0.5; done;']
-      - name: init-redis
-        image: busybox
-        command: ['sh', '-c', 'until nslookup redis-sentinel; do echo waiting for Redis; sleep 0.5; done;']
-      - name: init-mariadb
-        image: busybox
-        command: ['sh', '-c', 'until nslookup lyanna-mariadb; do echo waiting for MariaDB; sleep 0.5; done;']
+      #- name: init-mariadb
+      #  image: busybox
+      #  command: ['sh', '-c', 'until nslookup lyanna-mariadb; do echo waiting for MariaDB; sleep 0.5; done;']
       restartPolicy: Always
 ---
 apiVersion: v1
@@ -97,71 +101,3 @@ spec:
   selector:
     app.kubernetes.io/name: lyanna
   sessionAffinity: ClientIP
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: lyanna-ing-static
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/proxy-buffering: "on"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      include /etc/nginx/mime.types;
-      proxy_cache static-cache;
-      proxy_ignore_headers Cache-Control;
-      proxy_cache_valid any 30m;
-      add_header X-Cache-Status $upstream_cache_status;
-spec:
-  rules:
-  - host: lyanna.local
-    http:
-      paths:
-        - path: /static
-          backend:
-            serviceName: lyanna-svc
-            servicePort: 80
-        - path: /img
-          backend:
-            serviceName: lyanna-svc
-            servicePort: 80
-        - path: /fonts
-          backend:
-            serviceName: lyanna-svc
-            servicePort: 80
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: lyanna-ing-admin
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      allow "1.2.3.4";
-      deny all;
-spec:
-  rules:
-  - host: lyanna.local
-    http:
-      paths:
-        - path: /admin
-          backend:
-            serviceName: lyanna-svc
-            servicePort: 80
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: lyanna-ing
-  annotations:
-    kubernetes.io/ingress.class: "nginx"
-spec:
-  rules:
-  - host: lyanna.local
-    http:
-      paths:
-        - path: /
-          backend:
-            serviceName: lyanna-svc
-            servicePort: 80
