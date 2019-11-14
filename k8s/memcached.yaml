@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: memcached
 spec:
   podManagementPolicy: OrderedReady
-  replicas: 3
+  replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
@@ -27,6 +27,13 @@ spec:
         - 20m
         image: memcached:latest
         imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            cpu: 200m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
         livenessProbe:
           failureThreshold: 3
           initialDelaySeconds: 10

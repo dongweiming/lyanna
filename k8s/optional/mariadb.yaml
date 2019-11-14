@@ -234,17 +234,17 @@ spec:
         - name: MARIADB_MASTER_PORT_NUMBER
           valueFrom:
             configMapKeyRef:
-              key: port
+              key: db_port
               name: lyanna-cfg
         - name: MARIADB_MASTER_USER
           valueFrom:
             configMapKeyRef:
-              key: user
+              key: db_user
               name: lyanna-cfg
         - name: MARIADB_MASTER_PASSWORD
           valueFrom:
             configMapKeyRef:
-              key: password
+              key: db_password
               name: lyanna-cfg
         - name: MARIADB_REPLICATION_USER
           value: replicator

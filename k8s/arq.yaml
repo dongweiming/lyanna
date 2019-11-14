@@ -18,6 +18,13 @@ spec:
         #imagePullPolicy: Always
         name: lyanna-web
         command: ['sh', '-c', './arq tasks.WorkerSettings']
+        resources:
+          limits:
+            cpu: 300m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
         env:
         - name: MEMCACHED_HOST
           valueFrom:

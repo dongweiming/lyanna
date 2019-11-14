@@ -72,4 +72,4 @@ deploy
 srv/deploy.retry
 .idea/
 # K8s
-k8s/local.yaml
+k8s/config.yaml

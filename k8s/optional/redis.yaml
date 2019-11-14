@@ -21,6 +21,13 @@ spec:
       volumeMounts:
         - mountPath: /redis-master-data
           name: data
+      resources:
+        limits:
+          cpu: 200m
+          memory: 100Mi
+        requests:
+          cpu: 100m
+          memory: 50Mi
     - name: sentinel
       image: dongweiming/redis-sentinel:latest
       env:
@@ -28,6 +35,13 @@ spec:
           value: "true"
       ports:
         - containerPort: 26379
+      resources:
+        limits:
+          cpu: 200m
+          memory: 100Mi
+        requests:
+          cpu: 100m
+          memory: 50Mi
   volumes:
     - name: data
       hostPath:
@@ -65,6 +79,13 @@ spec:
       containers:
       - name: redis
         image: dongweiming/redis-sentinel:latest
+        resources:
+          limits:
+            cpu: 200m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
         ports:
         - containerPort: 6379
         volumeMounts:
@@ -94,6 +115,13 @@ spec:
       containers:
       - name: sentinel
         image: dongweiming/redis-sentinel:latest
+        resources:
+          limits:
+            cpu: 200m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 50Mi
         env:
           - name: SENTINEL
             value: "true"
