@@ -51,6 +51,11 @@ spec:
              configMapKeyRef:
                name: lyanna-cfg
                key: redis_sentinel_port
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: lyanna-cfg
+              key: redis_url
         - name: PYTHONPATH
           value: $PYTHONPATH:/usr/local/src/aiomcache:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src
         #imagePullPolicy: Always
@@ -77,6 +82,14 @@ spec:
 #          periodSeconds: 10
 #          successThreshold: 1
 #          timeoutSeconds: 1
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/local_settings.py
+          subPath: local_settings.py
+      volumes:
+      - name: config-volume
+        configMap:
+          name: lyanna-cfg
       initContainers:
       - name: init-memcached
         image: busybox
