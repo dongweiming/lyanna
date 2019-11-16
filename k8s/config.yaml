@@ -12,6 +12,9 @@ data:
   redis_sentinel_host: redis-sentinel
   redis_sentinel_port: "26379"
   db_url: mysql://lyanna:lyanna@lyanna-mariadb:3306/test?charset=utf8
+  local_settings.py: |
+    SITE_TITLE = '小明明s à domicile(Kubernetes版)'
+    BLOG_URL = 'https://blog.dongwm.com'
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
