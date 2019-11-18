@@ -39,6 +39,13 @@ async def _migrate_for_v25():
         'alter table posts add column `pageview` int(11) DEFAULT "0"')
 
 
+async def _migrate_for_v27():
+    await init_db(create_db=False)
+    client = Tortoise.get_connection('default')
+    await client.execute_script(
+        'alter table posts add column `pageview` int(11) DEFAULT "0"')
+
+
 @click.group()
 def cli():
     ...
@@ -53,6 +60,12 @@ def initdb():
 @cli.command()
 def migrate_for_v25():
     run_async(_migrate_for_v25())
+    click.echo('Migrate Finished!')
+
+
+@cli.command()
+def migrate_for_v27():
+    run_async(_migrate_for_v27())
     click.echo('Migrate Finished!')
 
 
@@ -78,8 +91,7 @@ def adduser(name, email, password):
 @cli.command()
 def build_css():
     build_map = {
-        'main.min.css': ['pure-min.css', 'base.css'],
-        'index.min.css': ['main.min.css', 'fontawesome.min.css'],
+        'main.min.css': ['pure-min.css', 'base.css', 'fontawesome.min.css'],
         'post.min.css': ['main.min.css', 'post.css', 'react.css',
                          'dracula.css', 'gitment.css', 'social-sharer.css']
     }

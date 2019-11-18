@@ -2,6 +2,7 @@ import re
 import ast
 import types
 import random
+import asyncio
 import inspect
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
@@ -37,6 +38,8 @@ MC_KEY_ARCHIVES = 'core:archives'
 MC_KEY_ARCHIVE = 'core:archive:%s'
 MC_KEY_TAGS = 'core:tags'
 MC_KEY_TAG = 'core:tag:%s'
+MC_KEY_SPECIAL_ITEMS = 'special:%s:items'
+MC_KEY_SPECIAL_BY_PID = 'special:by_pid:%s'
 RK_PAGEVIEW = 'lyanna:pageview:{}'
 RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
 BQ_REGEX = re.compile(r'<blockquote>.*?</blockquote>')
@@ -300,6 +303,7 @@ class Post(CommentMixin, ReactMixin, BaseModel):
         for tag in await self.tags:
             keys.append(MC_KEY_TAG % tag.id)
         await clear_mc(*keys)
+        await Special.flush_by_pid(self.id)
 
     @classmethod
     @cache(MC_KEY_POST_BY_SLUG % '{slug}')
@@ -406,3 +410,37 @@ class PostTag(BaseModel):
             await cls.get_or_create(post_id=post_id, tag_id=tag_id)
 
         await clear_mc(MC_KEY_TAGS_BY_POST_ID % post_id)
+
+
+class SpecialItem(BaseModel):
+    post_id = fields.IntField()
+    index = fields.SmallIntField()
+    special_id = fields.SmallIntField()
+
+    @classmethod
+    @cache(MC_KEY_SPECIAL_BY_PID % ('{post_id}'))
+    async def get_special_id_by_pid(cls, post_id):
+        return await SpecialItem.filter(post_id=self.id).values_list(
+            'special_id', flat=True)
+
+
+class Special(BaseModel):
+    id = fields.SmallIntField()
+    intro = fields.CharField(max_length=2000)
+    title = fields.CharField(max_length=100, unique=True)
+
+    @property
+    @cache(MC_KEY_SPECIAL_ITEMS % ('{self.id}'))
+    async def items(self):
+        items = await SpecialItem.filter(special_id=self.id).order_by('-index')
+        post_ids = [s.post_id for s in items]
+        return await Post.filter(id__in=post_ids).all()
+
+    async def set_indexes(self, indexes):
+        origin_items = self.items
+        await clear_mc(MC_KEY_SPECIAL_ITEMS % self.id)
+
+    @classmethod
+    async def flush_by_pid(cls, post_id):
+        special_ids = SpecialItem.get_special_id_by_pid(post_id)
+        await asyncio.gather(*[MC_KEY_SPECIAL_ITEMS % i for i in special_ids])
