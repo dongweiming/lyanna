@@ -96,7 +96,7 @@ Github申请的应用client_secret，如果只是使用默认的 http://127.0.0.
 
 ## SITE_NAV_MENUS
 
-可以定制导航栏，具体默认值可以看 config.py
+可以定制导航栏，每项参数最少2个(Endpoint, Name)，最多5个(Endpoint, Name, FontAwesome icon, 颜色)，具体默认值可以看 config.py
 
 ## BEIAN_ID
 
