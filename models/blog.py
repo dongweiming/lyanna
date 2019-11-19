@@ -2,7 +2,6 @@ import re
 import ast
 import types
 import random
-import asyncio
 import inspect
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
@@ -39,6 +38,7 @@ MC_KEY_ARCHIVE = 'core:archive:%s'
 MC_KEY_TAGS = 'core:tags'
 MC_KEY_TAG = 'core:tag:%s'
 MC_KEY_SPECIAL_ITEMS = 'special:%s:items'
+MC_KEY_SPECIAL_POST_ITEMS = 'special:%s:post_items'
 MC_KEY_SPECIAL_BY_PID = 'special:by_pid:%s'
 RK_PAGEVIEW = 'lyanna:pageview:{}'
 RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
@@ -420,7 +420,7 @@ class SpecialItem(BaseModel):
     @classmethod
     @cache(MC_KEY_SPECIAL_BY_PID % ('{post_id}'))
     async def get_special_id_by_pid(cls, post_id):
-        return await SpecialItem.filter(post_id=self.id).values_list(
+        return await SpecialItem.filter(post_id=post_id).values_list(
             'special_id', flat=True)
 
 
@@ -430,17 +430,41 @@ class Special(BaseModel):
     title = fields.CharField(max_length=100, unique=True)
 
     @property
-    @cache(MC_KEY_SPECIAL_ITEMS % ('{self.id}'))
-    async def items(self):
-        items = await SpecialItem.filter(special_id=self.id).order_by('-index')
+    @cache(MC_KEY_SPECIAL_POST_ITEMS % ('{self.id}'))
+    async def post_items(self):
+        items = await self.items
         post_ids = [s.post_id for s in items]
         return await Post.filter(id__in=post_ids).all()
 
+    @property
+    @cache(MC_KEY_SPECIAL_ITEMS % ('{self.id}'))
+    async def items(self):
+        return await SpecialItem.filter(special_id=self.id).order_by('-index')
+
     async def set_indexes(self, indexes):
-        origin_items = self.items
+        origin_map = {i.post_id: i for i in await self.items}
+        pids = [pid for pid, index in indexes]
+        need_del_pids = set(origin_map) - set(pids)
+
+        if need_del_pids:
+            await SpecialItem.filter(Q(special_id=self.id),
+                                     Q(post_id__in=need_del_pids)).delete()
+        for pid, index in indexes:
+            if pid in origin_map:
+                special = origin_map[pid]
+                if index != special.index:
+                    special.index = index
+                    await special.save()
+                else:
+                    await SpecialItem.get_or_create(
+                        post_id=pid, special_id=self.id, index=index)
+
         await clear_mc(MC_KEY_SPECIAL_ITEMS % self.id)
 
     @classmethod
     async def flush_by_pid(cls, post_id):
         special_ids = SpecialItem.get_special_id_by_pid(post_id)
-        await asyncio.gather(*[MC_KEY_SPECIAL_ITEMS % i for i in special_ids])
+        keys = [MC_KEY_SPECIAL_ITEMS % i for i in special_ids]
+        keys.extend([MC_KEY_SPECIAL_POST_ITEMS % i for i in special_ids])
+        keys.append(MC_KEY_SPECIAL_BY_PID % post_id)
+        await clear_mc(*keys)
