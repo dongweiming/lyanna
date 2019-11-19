@@ -1,17 +1,21 @@
-import aiohttp
+import sys
 import asyncio
-import aioredis
+import traceback
 from pathlib import Path
 from datetime import datetime, timedelta
 
+import aiohttp
+import aioredis
 import aiomcache
 from sanic import Sanic
+from sanic.handlers import ErrorHandler as _ErrorHandler
 from sanic.request import Request as _Request
-from sanic.exceptions import NotFound
+from sanic.exceptions import NotFound, ServerError
 from sanic.response import HTTPResponse, text
 from sanic_mako import render_string
 from sanic_jwt import Initialize
 from sanic_session import Session, MemcacheSessionInterface
+from werkzeug.utils import find_modules, import_string, ImportStringError
 
 import config
 from ext import mako, init_db, sentry
@@ -19,8 +23,6 @@ from models.mc import cache
 from models import jwt_authenticate, User
 from models.var import redis_var, memcache_var
 from models.blog import Post, Tag, MC_KEY_SITEMAP
-
-from werkzeug.utils import find_modules, import_string, ImportStringError
 
 
 async def retrieve_user(request, payload, *args, **kwargs):
@@ -59,7 +61,16 @@ class Request(_Request):
     user = None
 
 
+class ErrorHandler(_ErrorHandler):
+    def default(self, request, exception):
+        exc = '\n'.join(traceback.format_tb(sys.exc_info()[-1]))
+        if 'Connection refused' in str(exception) and 'memcache' in exc:
+            exception = ServerError(f'Please confirm that memcached is running!\n{exc}')
+        return super().default(request, exception)
+
+
 app = Sanic(__name__, request_class=Request)
+app.error_handler = ErrorHandler()
 app.config.from_object(config)
 mako.init_app(app, context_processors=())
 if sentry is not None:
