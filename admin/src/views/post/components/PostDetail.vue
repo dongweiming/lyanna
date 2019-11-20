@@ -72,7 +72,7 @@
 import MarkdownEditor from '@/components/MarkdownEditor'
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky'
-import Dropdown from './Dropdown'
+import Dropdown from '@/components/Dropdown'
 import { fetchPost, updatePost, createPost, userSearch, fetchTags } from '@/api'
 
 const defaultForm = {

@@ -11,6 +11,7 @@ import mistune
 from tortoise import fields
 from aioredis.errors import RedisError
 from tortoise.query_utils import Q
+from tortoise.models import ModelMeta
 
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
@@ -40,6 +41,7 @@ MC_KEY_TAG = 'core:tag:%s'
 MC_KEY_SPECIAL_ITEMS = 'special:%s:items'
 MC_KEY_SPECIAL_POST_ITEMS = 'special:%s:post_items'
 MC_KEY_SPECIAL_BY_PID = 'special:by_pid:%s'
+MC_KEY_SPECIAL_BY_SLUG = 'special:%s:slug'
 RK_PAGEVIEW = 'lyanna:pageview:{}'
 RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
 BQ_REGEX = re.compile(r'<blockquote>.*?</blockquote>')
@@ -187,11 +189,15 @@ markdown = mistune.Markdown(escape=True, renderer=renderer)
 toc_md = mistune.Markdown(renderer=toc)
 
 
-class Post(CommentMixin, ReactMixin, BaseModel):
+class StatusMixin(metaclass=ModelMeta):
     STATUSES = (
         STATUS_UNPUBLISHED,
         STATUS_ONLINE
     ) = range(2)
+    status = fields.SmallIntField(default=STATUS_UNPUBLISHED)
+
+
+class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
 
     TYPES = (TYPE_ARTICLE, TYPE_PAGE) = range(2)
 
@@ -200,7 +206,6 @@ class Post(CommentMixin, ReactMixin, BaseModel):
     slug = fields.CharField(max_length=100)
     summary = fields.CharField(max_length=255)
     can_comment = fields.BooleanField(default=True)
-    status = fields.IntField(default=STATUS_UNPUBLISHED)
     type = fields.IntField(default=TYPE_ARTICLE)
     _pageview = fields.IntField(source_field='pageview', default=0)
     kind = K_POST
@@ -303,7 +308,7 @@ class Post(CommentMixin, ReactMixin, BaseModel):
         for tag in await self.tags:
             keys.append(MC_KEY_TAG % tag.id)
         await clear_mc(*keys)
-        await Special.flush_by_pid(self.id)
+        await SpecialTopic.flush_by_pid(self.id)
 
     @classmethod
     @cache(MC_KEY_POST_BY_SLUG % '{slug}')
@@ -417,6 +422,9 @@ class SpecialItem(BaseModel):
     index = fields.SmallIntField()
     special_id = fields.SmallIntField()
 
+    class Meta:
+        table = 'special_item'
+
     @classmethod
     @cache(MC_KEY_SPECIAL_BY_PID % ('{post_id}'))
     async def get_special_id_by_pid(cls, post_id):
@@ -424,25 +432,30 @@ class SpecialItem(BaseModel):
             'special_id', flat=True)
 
 
-class Special(BaseModel):
+class SpecialTopic(StatusMixin, BaseModel):
     id = fields.SmallIntField()
     intro = fields.CharField(max_length=2000)
+    slug = fields.CharField(max_length=100)
     title = fields.CharField(max_length=100, unique=True)
 
-    @property
-    @cache(MC_KEY_SPECIAL_POST_ITEMS % ('{self.id}'))
-    async def post_items(self):
-        items = await self.items
-        post_ids = [s.post_id for s in items]
-        return await Post.filter(id__in=post_ids).all()
+    class Meta:
+        table = 'special_topic'
 
-    @property
+    @cache(MC_KEY_SPECIAL_POST_ITEMS % ('{self.id}'))
+    async def get_post_items(self):
+        items = await self.get_items()
+        post_ids = [s.post_id for s in items]
+        if not post_ids:
+            return []
+        posts = await Post.filter(id__in=post_ids).all()
+        return sorted(posts, key=lambda p: post_ids.index(p.id))
+
     @cache(MC_KEY_SPECIAL_ITEMS % ('{self.id}'))
-    async def items(self):
-        return await SpecialItem.filter(special_id=self.id).order_by('-index')
+    async def get_items(self):
+        return await SpecialItem.filter(special_id=self.id).order_by('index').all()
 
     async def set_indexes(self, indexes):
-        origin_map = {i.post_id: i for i in await self.items}
+        origin_map = {i.post_id: i for i in await self.get_items()}
         pids = [pid for pid, index in indexes]
         need_del_pids = set(origin_map) - set(pids)
 
@@ -455,11 +468,12 @@ class Special(BaseModel):
                 if index != special.index:
                     special.index = index
                     await special.save()
-                else:
-                    await SpecialItem.get_or_create(
-                        post_id=pid, special_id=self.id, index=index)
+            else:
+                await SpecialItem.get_or_create(
+                    post_id=pid, special_id=self.id, index=index)
 
-        await clear_mc(MC_KEY_SPECIAL_ITEMS % self.id)
+        await clear_mc(MC_KEY_SPECIAL_ITEMS % self.id,
+                       MC_KEY_SPECIAL_POST_ITEMS % self.id)
 
     @classmethod
     async def flush_by_pid(cls, post_id):
@@ -467,4 +481,36 @@ class Special(BaseModel):
         keys = [MC_KEY_SPECIAL_ITEMS % i for i in special_ids]
         keys.extend([MC_KEY_SPECIAL_POST_ITEMS % i for i in special_ids])
         keys.append(MC_KEY_SPECIAL_BY_PID % post_id)
+        await clear_mc(*keys)
+
+    @property
+    async def n_posts(self):
+        return len(await self.get_post_items())
+
+    @property
+    async def posts(self):
+        return [{'id': p.id, 'title': p.title}
+                for p in await self.get_post_items()]
+
+    @property
+    def url(self):
+        return f'/special/{self.slug or self.id}'
+
+    @classmethod
+    @cache(MC_KEY_SPECIAL_BY_SLUG % '{slug}')
+    async def get_by_slug(cls, slug):
+        return await cls.filter(slug=slug).first()
+
+    @classmethod
+    async def cache(cls, ident):
+        if str(ident).isdigit():
+            return await super().cache(ident)
+        return await cls.get_by_slug(ident)
+
+    async def clear_mc(self):
+        keys = [
+            MC_KEY_SPECIAL_BY_SLUG % self.slug,
+            MC_KEY_SPECIAL_POST_ITEMS % self.id,
+            MC_KEY_SPECIAL_ITEMS % self.id
+        ]
         await clear_mc(*keys)
