@@ -77,3 +77,10 @@ class ProfileForm(SanicForm):
     github_url = StringField('Github URL', default='')
     linkedin_url = StringField('Linkedin URL', default='')
     submit = SubmitField('Submit')
+
+
+class TopicForm(SanicForm):
+    slug = StringField('Slug')
+    intro = StringField('Intro', validators=[DataRequired()])
+    title = StringField('Title', validators=[DataRequired()])
+    status = SwitchField('Published', choices=[(0, 0), (1, 1)], default=1)

@@ -65,7 +65,8 @@ class ErrorHandler(_ErrorHandler):
     def default(self, request, exception):
         exc = '\n'.join(traceback.format_tb(sys.exc_info()[-1]))
         if 'Connection refused' in str(exception) and 'memcache' in exc:
-            exception = ServerError(f'Please confirm that memcached is running!\n{exc}')
+            exception = ServerError(
+                f'Please confirm that memcached is running!\n{exc}')
         return super().default(request, exception)
 
 

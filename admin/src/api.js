@@ -131,6 +131,47 @@ const fetchTags = () => {
     })
 }
 
+const getTopicList = () => {
+    return request({
+        url: '/api/topics',
+        method: 'get'
+    })
+}
+
+const updateTopicStatus = (id, method) => {
+    return request({
+        url: `/api/topic/${id}/status`,
+        method: method
+    })
+}
+
+const createTopic = (data) => {
+    return request({
+        url: '/api/topic/new',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+const updateTopic = (id, data) => {
+    return request({
+        url: `/api/topic/${id}`,
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        method: 'put',
+        data: qs.stringify(data)
+    })
+}
+
+const fetchTopic = (id) => {
+    return request({
+        url: `/api/topic/${id}`,
+        method: 'get'
+    })
+}
+
 export {loginByUsername, getUserInfo, getUserList, createPost, getProfile,
         getPostList, createUser, updatePost, updatePostStatus, updateUser,
-        updateProfile, deletePost, fetchUser, fetchPost, userSearch, fetchTags}
+        updateProfile, deletePost, fetchUser, fetchPost, userSearch, fetchTags,
+        getTopicList, updateTopicStatus, createTopic, updateTopic,
+        fetchTopic}

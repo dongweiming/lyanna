@@ -30,6 +30,7 @@ async def init():
     if not await client.execute_query(
             'show columns from `posts` like "pageview"'):
         await migrate_for_v25()
+    await migrate_for_v27()
 
 
 async def _migrate_for_v25():
@@ -43,7 +44,27 @@ async def _migrate_for_v27():
     await init_db(create_db=False)
     client = Tortoise.get_connection('default')
     await client.execute_script(
-        'alter table posts add column `pageview` int(11) DEFAULT "0"')
+        '''CREATE TABLE `special_item` (
+        `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `post_id` int(11) NOT NULL,
+        `index` smallint(6) NOT NULL,
+        `special_id` smallint(6) NOT NULL,
+        `created_at` datetime(6) NOT NULL,
+        PRIMARY KEY (`id`),
+        KEY `idx_special_post` (`special_id`,`post_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8''')
+    await client.execute_script(
+        '''CREATE TABLE `special_topic` (
+        `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+        `intro` varchar(2000) NOT NULL,
+        `title` varchar(100) NOT NULL,
+        `created_at` datetime(6) NOT NULL,
+        `status` smallint(6) NOT NULL DEFAULT '0',
+        `slug` varchar(100) NOT NULL,
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `title` (`title`),
+        KEY `idx_slug` (`slug`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8''')
 
 
 @click.group()

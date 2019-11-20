@@ -13,6 +13,9 @@ import UserList from '@/views/user/list'
 import CreatePost from '@/views/post/create'
 import EditPost from '@/views/post/edit'
 import PostList from '@/views/post/list'
+import CreateTopic from '@/views/topic/create'
+import EditTopic from '@/views/topic/edit'
+import TopicList from '@/views/topic/list'
 
 Vue.use(Router)
 const whiteList = ['/login']
@@ -106,7 +109,38 @@ export const constantRouterMap = [
                 path: 'list',
                 component: PostList,
                 name: 'PostList',
-              meta: { title: 'PostList', icon: 'list' }
+                meta: { title: 'PostList', icon: 'list' }
+            }
+        ]
+    },
+    {
+        path: '/topic',
+        component: Layout,
+        redirect: '/topics/list',
+        name: 'Topic',
+        meta: {
+            title: 'Topic',
+            icon: 'edit'
+        },
+        children: [
+            {
+                path: 'create',
+                component: CreateTopic,
+                name: 'CreateTopic',
+                meta: { title: 'CreateTopic', icon: 'edit' }
+            },
+            {
+                path: ':id(\\d+)/edit',
+                component: EditTopic,
+                name: 'EditTopic',
+                meta: { title: 'EditTopic', noCache: true },
+                hidden: true
+            },
+            {
+                path: 'list',
+                component: TopicList,
+                name: 'TopicList',
+                meta: { title: 'TopicList', icon: 'list' }
             }
         ]
     },

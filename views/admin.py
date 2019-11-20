@@ -1,6 +1,9 @@
+import re
+import copy
 import base64
 import mimetypes
 from pathlib import Path
+from collections import defaultdict
 
 from sanic import Blueprint, response
 from sanic.exceptions import abort
@@ -11,11 +14,13 @@ from sanic_jwt.utils import call as jwt_call
 from ext import mako
 from tortoise.query_utils import Q
 from config import PER_PAGE, SHOW_PROFILE
-from models import Post, User, Tag, PostTag
+from models import Post, User, Tag, PostTag, SpecialTopic
 from models.user import generate_password
 from models.profile import Profile
-from forms import UserForm, PostForm, ProfileForm
+from forms import UserForm, PostForm, ProfileForm, TopicForm
 from views.utils import json
+
+FORM_REGEX = re.compile('posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')
 
 bp = Blueprint('admin', url_prefix='/')
 bp.static('img', './static/img')
@@ -58,12 +63,21 @@ async def admin(request):
 async def list_posts(request):
     limit = int(request.args.get('limit')) or PER_PAGE
     page = int(request.args.get('page')) or 1
+    special_id = int(request.args.get('special_id') or 0)
     offset = (page - 1) * limit
     _posts = await Post.sync_filter(limit=limit, offset=offset,
                                     orderings='-id')
     total = await Post.filter().count()
     posts = []
+    exclude_ids = []
+    if special_id:
+        topic = await SpecialTopic.cache(special_id)
+        if topic:
+            items = await topic.get_items()
+            exclude_ids = [s.post_id for s in items]
     for post in _posts:
+        if post.id in exclude_ids:
+            continue
         post['author_name'] = post['author'].name
         post['tags'] = [t.name for t in post['tags']]
         posts.append(post)
@@ -235,19 +249,20 @@ async def profile(request):
     return response.json({'on': True, 'profile': profile})
 
 
-@bp.route('/api/post/<post_id>/status', methods=['POST', 'DELETE'])
+@bp.route('/api/<target_kind>/<target_id>/status', methods=['POST', 'DELETE'])
 @protected(bp)
-async def status(request, post_id):
-    if not post_id:
+async def status(request, target_kind, target_id):
+    if not target_id:
         abort(404)
-    post = await Post.get(id=post_id)
-    if not post:
-        return response.json({'r': 0, 'msg': 'Post not exist'})
+    kls = Post if target_kind == 'post' else SpecialTopic
+    obj = await kls.get(id=target_id)
+    if not obj:
+        return response.json({'r': 0, 'msg': 'item not exist'})
     if request.method == 'POST':
-        post.status = Post.STATUS_ONLINE
+        obj.status = kls.STATUS_ONLINE
     elif request.method == 'DELETE':
-        post.status = Post.STATUS_UNPUBLISHED
-    await post.save()
+        obj.status = kls.STATUS_UNPUBLISHED
+    await obj.save()
     return response.json({'r': 1})
 
 
@@ -270,3 +285,70 @@ async def list_tags(request):
     return response.json({
         'items': [t.name for t in tags]
     })
+
+
+@bp.route('/api/topics')
+@protected(bp)
+async def list_topics(request):
+    topics = await SpecialTopic.sync_all()
+    total = len(topics)
+    return response.json({'items': topics, 'total': total})
+
+
+@bp.route('/api/topic/new', methods=['POST'])
+@protected(bp)
+async def new_topic(request):
+    return await _topic(request)
+
+
+@bp.route('/api/topic/<topic_id>', methods=['GET', 'PUT'])
+@protected(bp)
+async def topic(request, topic_id):
+    if request.method == 'PUT':
+        return await _topic(request, topic_id=topic_id)
+    topic = await SpecialTopic.get_or_404(topic_id)
+    topic = await topic.to_sync_dict()
+    topic['status'] = str(topic['status'])
+    return response.json(topic)
+
+
+async def _topic(request, topic_id=None):
+    form = TopicForm(request)
+    form.status.data = int(form.status.data)
+
+    topic = None
+    if topic_id is not None:
+        topic = await SpecialTopic.get_or_404(topic_id)
+
+    if request.method in ('POST', 'PUT') and form.validate():
+        dct = defaultdict(dict)
+        for k in copy.copy(request.form):
+            if k.startswith('posts'):
+                match = FORM_REGEX.search(k)
+                if match:
+                    key = match['key']
+                    val = request.form[k][0]
+                    dct[match['index']][key] = int(val) if key == 'id' else val
+                    del request.form[k]
+
+        title = form.title.data
+        if topic_id is None:
+            topic = await SpecialTopic.filter(title=title).first()
+        if not topic:
+            topic = SpecialTopic()
+
+        form.populate_obj(topic)
+        if dct:
+            indexes = [
+                (i['id'], int(index))
+                for index, i in sorted(dct.items(), key=lambda i: i[0])
+            ]
+        else:
+            indexes = []
+        await topic.set_indexes(indexes)
+        await topic.save()
+        ok = True
+    else:
+        ok = False
+    topic = await topic.to_sync_dict()
+    return json({'topic': topic if topic else None, 'ok': ok})
