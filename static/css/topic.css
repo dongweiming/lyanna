@@ -1,0 +1,74 @@
+html {
+  font-family: josefin sans,BlinkMacSystemFont,helvetica neue,pingfang sc,hiragino sans gb,STHeiti,microsoft yahei,wenquanyi micro hei,Arial,Verdana,sans-serif;
+}
+
+.recent-topics {
+  margin: 0 auto;
+  max-width: 800px;
+  font-size: 11pt;
+  font-weight: 400;
+  line-height: 2em;
+  background-color: #fff;
+}
+
+.recent-topics .topic-item {
+  margin: 15px auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  border-top: none;
+}
+
+.recent-topics .title {
+  display: inline-block;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 95%;
+  font-size: 1.2rem;
+  margin-top: 25px;
+}
+.recent-topics .intro {
+  font-size: 14px;
+  color: darkgray;
+}
+.recent-topics .time {
+  float: right;
+  text-align: right;
+  color: #a9a9b3;
+}
+
+@media (max-width: 576px) {
+  .recent-topics {
+    padding: 10px;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  .recent-topics .title {
+    font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .recent-topics {
+    padding: 0 30px 30px 30px;
+  }
+}
+
+.topic-title {
+  font-size: 2em;
+  line-height: 1.5em;
+  text-align: right;
+  padding-bottom: 1rem;
+  padding-top: 1rem;
+}
+
+.topic-intro {
+  overflow: hidden;
+  font-size: 13px;
+  margin-bottom: 1rem;
+  background: #F5F5F5;
+  padding: .5rem;
+  border-radius: 5px;
+}

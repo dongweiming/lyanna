@@ -12,7 +12,7 @@ from models.profile import Profile
 from models.utils import Pagination
 from models.blog import (
     MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG)
-from models import Post, Tag, PostTag
+from models import Post, Tag, PostTag, SpecialTopic
 
 bp = Blueprint('blog', url_prefix='/')
 
@@ -127,3 +127,23 @@ async def tag(request, tag_id):
     posts = await Post.filter(Q(status=Post.STATUS_ONLINE),
                               Q(id__in=post_ids)).order_by('-id').all()
     return {'tag': tag, 'posts': posts}
+
+
+@bp.route('/topics')
+@bp.route('/topics/<ident>')
+@mako.template('topics.html')
+async def topics(request, ident=1):
+    start = (ident - 1) * PER_PAGE
+    topics = await SpecialTopic.get_all()
+    total = len(topics)
+    topics = topics[start: start + PER_PAGE]
+    paginatior = Pagination(ident, PER_PAGE, total, topics)
+    return {'paginatior': paginatior}
+
+
+@bp.route('/special/<ident>')
+@mako.template('topic.html')
+async def topic(request, ident):
+    topic = await SpecialTopic.cache(ident)
+    posts = await topic.get_post_items()
+    return {'topic': topic, 'posts': [await p.to_sync_dict() for p in posts]}
