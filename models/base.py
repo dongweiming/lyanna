@@ -93,9 +93,9 @@ class BaseModel(Model, metaclass=ModelMeta):
         return items
 
     @classmethod
-    async def sync_all(cls):
+    async def sync_all(cls, ordering='-id'):
         items = []
-        for item in await super().all():
+        for item in await cls.filter().order_by(ordering).all():
             items.append(await item.to_sync_dict())
         return items
 

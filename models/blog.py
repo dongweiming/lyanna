@@ -42,6 +42,7 @@ MC_KEY_SPECIAL_ITEMS = 'special:%s:items'
 MC_KEY_SPECIAL_POST_ITEMS = 'special:%s:post_items'
 MC_KEY_SPECIAL_BY_PID = 'special:by_pid:%s'
 MC_KEY_SPECIAL_BY_SLUG = 'special:%s:slug'
+MC_KEY_ALL_SPECIAL_TOPICS = 'special:topics'
 RK_PAGEVIEW = 'lyanna:pageview:{}'
 RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
 BQ_REGEX = re.compile(r'<blockquote>.*?</blockquote>')
@@ -452,7 +453,8 @@ class SpecialTopic(StatusMixin, BaseModel):
 
     @cache(MC_KEY_SPECIAL_ITEMS % ('{self.id}'))
     async def get_items(self):
-        return await SpecialItem.filter(special_id=self.id).order_by('index').all()
+        return await SpecialItem.filter(special_id=self.id).order_by(
+            'index').all()
 
     async def set_indexes(self, indexes):
         origin_map = {i.post_id: i for i in await self.get_items()}
@@ -502,6 +504,12 @@ class SpecialTopic(StatusMixin, BaseModel):
         return await cls.filter(slug=slug).first()
 
     @classmethod
+    @cache(MC_KEY_ALL_SPECIAL_TOPICS)
+    async def get_all(cls):
+        return await cls.sync_filter(status=cls.STATUS_ONLINE,
+                                     orderings=['-id'], limit=None)
+
+    @classmethod
     async def cache(cls, ident):
         if str(ident).isdigit():
             return await super().cache(ident)
@@ -511,6 +519,7 @@ class SpecialTopic(StatusMixin, BaseModel):
         keys = [
             MC_KEY_SPECIAL_BY_SLUG % self.slug,
             MC_KEY_SPECIAL_POST_ITEMS % self.id,
-            MC_KEY_SPECIAL_ITEMS % self.id
+            MC_KEY_SPECIAL_ITEMS % self.id,
+            MC_KEY_ALL_SPECIAL_TOPICS
         ]
         await clear_mc(*keys)

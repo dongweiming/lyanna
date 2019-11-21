@@ -1,0 +1,35 @@
+<%inherit file="/base.html" />
+<%namespace name="utils" file="/utils.html"/>
+
+<%def name="doc_head()">
+<link rel="stylesheet" href="${ app.url_for('static', filename='css/topic.min.css') } ">
+</%def>
+
+<%def name="content()">
+  <div>
+    <div class="recent-posts">
+      <h2 class="topic-title">-&nbsp;&nbsp;${ topic.title }&nbsp;-</h2>
+      <div class="topic-intro">${ topic.intro }</div>
+      % for post in posts:
+      <article class="recent-post-item">
+        <a class="title" href="${ post.url }"><h2>${ post.title }</h2></a>
+          <div class="post-meta">
+            <time class="time" datetime="${ post.created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ') }">
+              ${ post.created_at.strftime('%Y-%m-%d')  }
+            </time>
+            <span class="slash">/</span>
+
+            <ul class="index-tag-list">
+              % for tag in post.tags:
+                <li class="index-tag-list-item"><a class="index-tag-list-link" href="${ tag.url }">${ tag.name }</a></li>
+              % endfor
+            </ul>
+          </div>
+            <div class="post-excerpt">
+              <p>${ post.excerpt }</p>
+            </div>
+      </article>
+      % endfor
+    </div>
+  </div>
+</%def>
