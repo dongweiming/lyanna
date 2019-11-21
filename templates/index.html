@@ -1,5 +1,6 @@
 <%! from config import SHOW_PROFILE, BLOG_URL %>
 <%inherit file="/base.html" />
+<%namespace name="utils" file="/utils.html"/>
 
 <%def name="more_header()">
 <script type="application/ld+json">
@@ -73,26 +74,5 @@
 </%def>
 
 <%def name="pagination()">
-  <nav class="page-nav text-center">
-    % if paginatior.has_prev:
-    <a class="extend prev" rel="prev" href="${ app.url_for('blog.page', ident=paginatior.prev_num) }">〈</a>
-    % endif
-
-    % for page in paginatior.iter_pages():
-      % if page:
-        % if page == paginatior.page:
-        <span class="page-number current">${ page }</span>
-        % else:
-        <a class="page-number" href="${ app.url_for('blog.page', ident=page) }">${ page }</a>
-        % endif
-      % else:
-        <span class=ellipsis>…</span>
-      % endif
-    % endfor
-
-    % if paginatior.has_next:
-      <a class="extend next" rel="next" href="${ app.url_for('blog.page', ident=paginatior.next_num) }">〉</a>
-    % endif
-    </ul>
-  </nav>
+${ utils.pagination('blog.page', paginatior) }
 </%def>

@@ -28,9 +28,9 @@ SHOW_PAGEVIEW = False
 PERMALINK_TYPE = 'slug'  # 可选 id、slug、title
 
 # [(Endpoint, Name, IconName, Color), ...]
-SITE_NAV_MENUS = [('blog.index', '首页'), ('blog.archives', '归档'),
-                  ('blog.tags', '标签'), ('index.search', '搜索'),
-                  ('/page/aboutme', '关于我'),
+SITE_NAV_MENUS = [('blog.index', '首页'), ('blog.topics', '专题'),
+                  ('blog.archives', '归档'), ('blog.tags', '标签'),
+                  ('index.search', '搜索'), ('/page/aboutme', '关于我'),
                   ('index.feed', 'RSS', 'rss', '#fc6423')]
 BEIAN_ID = ''
 JWT_SECRET = 'lyanna'

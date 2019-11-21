@@ -1,0 +1,24 @@
+<%inherit file="/base.html" />
+<%namespace name="utils" file="/utils.html"/>
+
+<%def name="doc_head()">
+  <link rel="stylesheet" href="${ app.url_for('static', filename='css/topic.min.css') } ">
+</%def>
+
+<%def name="content()">
+  <div>
+    <div class="recent-topics">
+      % for topic in paginatior.items:
+      <article class="topic-item">
+        <a class="title" href="${ topic.url }">${ topic.title }</a>
+        <div class="intro">${ topic.intro }</div>
+        <span class="time">${ topic.created_at.strftime('%Y年%m月%d日')  }</span>
+      </article>
+      % endfor
+    </div>
+  </div>
+</%def>
+
+<%def name="pagination()">
+${ utils.pagination('blog.topics', paginatior) }
+</%def>
