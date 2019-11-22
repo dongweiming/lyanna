@@ -8,7 +8,6 @@ from tortoise.query_utils import Q
 from ext import mako
 from config import PER_PAGE
 from models.mc import cache
-from models.profile import Profile
 from models.utils import Pagination
 from models.blog import (
     MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG)
@@ -40,8 +39,7 @@ async def _posts(request, page=1):
     total = len(posts)
     posts = posts[start: start + PER_PAGE]
     paginatior = Pagination(page, PER_PAGE, total, posts)
-    profile = await Profile.get()
-    return {'paginatior': paginatior, 'profile': profile}
+    return {'paginatior': paginatior}
 
 
 @bp.route('/post/<ident>')
