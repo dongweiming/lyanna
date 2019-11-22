@@ -13,11 +13,10 @@ from sanic_jwt.utils import call as jwt_call
 
 from ext import mako
 from tortoise.query_utils import Q
-from config import PER_PAGE, SHOW_PROFILE
+from config import PER_PAGE
 from models import Post, User, Tag, PostTag, SpecialTopic
 from models.user import generate_password
-from models.profile import Profile
-from forms import UserForm, PostForm, ProfileForm, TopicForm
+from forms import UserForm, PostForm, TopicForm
 from views.utils import json
 
 FORM_REGEX = re.compile('posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')
@@ -36,20 +35,6 @@ async def inject_user(request):
         )
         if user:
             request.user = user
-
-
-@bp.route('/api/user/info')
-@protected(bp)
-async def user_info(request):
-    profile = await Profile.get()
-    avatar = profile.get('avatar')
-    data = {
-        'name': request.user.name,
-        'avatar': (
-            request.app.url_for('static', filename=f'upload/{avatar}')
-            if avatar else '')
-    }
-    return response.json(data)
 
 
 @bp.route('/admin')
@@ -213,40 +198,6 @@ async def upload(request):
 
     return response.json({'files': {'avatar': f'data:{mime};base64,{encoded}'},
                           'avatar_path': avatar_path})
-
-
-@bp.route('/api/profile', methods=['GET', 'PUT'])
-async def profile(request):
-    if not SHOW_PROFILE:
-        return response.json({'on': False})
-    if request.method == 'PUT':
-        profile = {'avatar': ''}
-        form = ProfileForm(request)
-        if form.validate():
-            intro = form.intro.data
-            avatar = form.avatar.data
-            github_url = form.github_url.data
-            linkedin_url = form.linkedin_url.data
-            profile = {'intro': intro, 'github_url': github_url,
-                       'linkedin_url': linkedin_url}
-            if avatar:
-                profile.update(avatar=avatar)
-            await Profile.set(**profile)
-        if not profile.get('avatar'):
-            try:
-                profile['avatar'] = (await Profile.get()).avatar
-            except AttributeError:
-                ...
-    elif request.method == 'GET':
-        profile = await Profile.get()
-
-    avatar = profile.get('avatar')
-    if avatar:
-        profile['avatar_url'] = request.app.url_for(
-            'static', filename=f'upload/{avatar}')
-    else:
-        profile['avatar_url'] = ''
-    return response.json({'on': True, 'profile': profile})
 
 
 @bp.route('/api/<target_kind>/<target_id>/status', methods=['POST', 'DELETE'])

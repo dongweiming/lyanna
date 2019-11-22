@@ -72,22 +72,6 @@ const updateUser = (id, data) => {
     })
 }
 
-const getProfile = () => {
-    return request({
-        url: '/api/profile',
-        method: 'get'
-    })
-}
-
-const updateProfile = (data) => {
-    return request({
-        url: '/api/profile',
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        method: 'put',
-        data: qs.stringify(data)
-    })
-}
-
 const updatePostStatus = (id, method) => {
     return request({
         url: `/api/post/${id}/status`,
@@ -170,8 +154,8 @@ const fetchTopic = (id) => {
     })
 }
 
-export {loginByUsername, getUserInfo, getUserList, createPost, getProfile,
+export {loginByUsername, getUserInfo, getUserList, createPost,
         getPostList, createUser, updatePost, updatePostStatus, updateUser,
-        updateProfile, deletePost, fetchUser, fetchPost, userSearch, fetchTags,
+        deletePost, fetchUser, fetchPost, userSearch, fetchTags,
         getTopicList, updateTopicStatus, createTopic, updateTopic,
         fetchTopic}

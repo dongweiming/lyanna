@@ -17,7 +17,6 @@ client_secret = "854cc0d86e61a83bb1dd00c3b23a3cc5b832d45c"
 REACT_PROMPT = '喜欢这篇文章吗? 记得给我留言或订阅哦'
 HERE = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(HERE, 'static/upload')
-SHOW_PROFILE = False
 AUTHOR = 'xiaoming'
 SITE_TITLE = 'My Blog'
 PER_PAGE = 10
@@ -47,6 +46,14 @@ BLOG_URL = 'https://example.com'
 # Redis sentinel
 REDIS_SENTINEL_SERVICE_HOST = None
 REDIS_SENTINEL_SERVICE_PORT = 26379
+
+# AboutMe
+INTRO = ''
+AVATAR = ''  # 'upload/me.jpg' (= /static/upload/me.jpg)
+# Social
+# twitter/github/douban/linkedin/instagram/stack-overflow/medium/zhihu/email/wechat/weixingongzhonghao
+# you can choose someone to display, the recommend number is 8 icons.
+SHOW_PROFILE = []  # e.g. [('twitter', 'example'), ('wechat', 'static/upload/qrcode.jpg')]
 
 try:
     from local_settings import *  # noqa
