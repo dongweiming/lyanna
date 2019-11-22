@@ -6,7 +6,6 @@ import Layout from '@/views/layout/Layout'
 import { getToken } from '@/utils/auth'
 
 import Home from '@/views/home'
-import Profile from '@/views/profile'
 import CreateUser from '@/views/user/create'
 import EditUser from '@/views/user/edit'
 import UserList from '@/views/user/list'
@@ -141,19 +140,6 @@ export const constantRouterMap = [
                 component: TopicList,
                 name: 'TopicList',
                 meta: { title: 'TopicList', icon: 'list' }
-            }
-        ]
-    },
-    {
-        path: '/profile',
-        component: Layout,
-        redirect: '/profile/index',
-        children: [
-            {
-                path: 'index',
-                component: Profile,
-                name: 'Profile',
-                meta: { title: 'Profile', icon: 'profile', affix: true }
             }
         ]
     },

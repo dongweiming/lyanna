@@ -1,4 +1,4 @@
-<%! from config import SHOW_PROFILE, BLOG_URL %>
+<%! from config import SHOW_PROFILE, AVATAR, INTRO, BLOG_URL %>
 <%inherit file="/base.html" />
 <%namespace name="utils" file="/utils.html"/>
 
@@ -48,19 +48,28 @@
   % if SHOW_PROFILE:
   <section id="sidebar">
     <div class="short-about">
-      <img id="avatar_pic" src="${ app.url_for('static', filename=f'upload/{ profile.get("avatar") }') }">
-      <p>${ profile.get('intro') }</p>
+      <img id="avatar_pic" src="${ app.url_for('static', filename=f'{ AVATAR }') }">
+      <p>${ INTRO }</p>
 
       <!-- SNS Link -->
       <ul class="list-inline">
-        % for sns in ('github', 'linkedin'):
-          <% url = profile.get(f'{sns}_url') %>
+        <%
+        sns_map = {
+            'douban': 'https://www.douban.com/people/{}',
+            'linkedin': 'https://www.linkedin.com/in/{}',
+            'stack-overflow': 'https://stackoverflow.com/users/{}',
+            'medium': 'https://medium.com/@{}',
+            'zhihu': 'https://www.zhihu.com/people/{}',
+            'email': 'mailto:{}'
+        }
+        %>
+        % for sns, id in SHOW_PROFILE:
+        <% url = sns_map.get(sns, 'https://%s.com/{}' % sns).format(id) %>
           % if url:
             <li>
-              <a target="_blank" href="${ f'https://{url}' }">
-                <span class="fa-stack fa-lg">
-                  <i class="fa fa-circle fa-stack-2x"></i>
-                  <i class="fa fa-${ sns } fa-stack-1x fa-inverse"></i>
+              <a target="_blank" href="${ url }">
+                <span>
+                  <i class="iconfont icon-${ sns }"></i>
                 </span>
               </a>
             </li>
