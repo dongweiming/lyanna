@@ -19,7 +19,7 @@ from models.user import generate_password
 from forms import UserForm, PostForm, TopicForm
 from views.utils import json
 
-FORM_REGEX = re.compile('posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')
+FORM_REGEX = re.compile('posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')  # noqa
 
 bp = Blueprint('admin', url_prefix='/')
 bp.static('img', './static/img')
@@ -152,7 +152,11 @@ async def user(request, user_id):
     if request.method == 'PUT':
         return await _user(request, user_id=user_id)
     user = await User.get_or_404(user_id)
-    return response.json(await user.to_sync_dict())
+    user = await user.to_sync_dict()
+    avatar = user.avatar
+    user['avatar_url'] = (request.app.url_for('static', filename=f'upload/{avatar}')  # noqa
+                          if avatar else '')
+    return response.json(user)
 
 
 async def _user(request, user_id=None):
@@ -167,22 +171,24 @@ async def _user(request, user_id=None):
         email = form.email.data
         password = form.password.data
         active = form.active.data
+        avatar = form.avatar.data
         user = await User.filter(name=name).first()
         if user:
             user.email = email
             if password:
                 user.password = generate_password(password)
+            user.avatar = avatar
             user.active = active
             await user.save()
         else:
             password = generate_password(password)
-            user = await User.create(name=name, email=email,
+            user = await User.create(name=name, email=email, avatar=avatar,
                                      password=password, active=active)
         ok = True
     else:
         ok = False
-    return response.json({'user': await user.to_sync_dict()
-                          if user else None, 'ok': ok})
+
+    return response.json({'user': await user.to_sync_dict(), 'ok': ok})
 
 
 @bp.route('/api/upload', methods=['POST', 'OPTIONS'])
@@ -303,3 +309,17 @@ async def _topic(request, topic_id=None):
         ok = False
     topic = await topic.to_sync_dict()
     return json({'topic': topic if topic else None, 'ok': ok})
+
+
+@bp.route('/api/user/info')
+@protected(bp)
+async def user_info(request):
+    user = request.user
+    avatar = user.avatar
+    data = {
+        'name': request.user.name,
+        'avatar': (
+            request.app.url_for('static', filename=f'upload/{avatar}')
+            if avatar else '')
+    }
+    return response.json(data)

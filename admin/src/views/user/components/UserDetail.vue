@@ -20,6 +20,22 @@
         </el-row>
 
         <el-row>
+          <div class="avatar">
+            <img :src="image" class="avatar">
+            <el-button type="primary" icon="upload" style="position: absolute;bottom: 15px;margin-left: 40px;" @click="imagecropperShow=true">改变头像</el-button>
+            <image-cropper
+              v-show="imagecropperShow"
+              :width="300"
+              :height="300"
+              :key="imagecropperKey"
+              url="/api/upload"
+              lang-type="en"
+              @close="close"
+              @crop-upload-success="cropSuccess"/>
+          </div>
+        </el-row>
+
+        <el-row>
           <el-col :span="24">
             <el-form-item style="margin-bottom: 40px;" prop="email">
               <MDinput v-model="userForm.email" :maxlength="100" name="email" required>
@@ -46,7 +62,8 @@
 
 <script>
 import MDinput from '@/components/MDinput'
-import Sticky from '@/components/Sticky' // 粘性header组件
+import Sticky from '@/components/Sticky'
+import ImageCropper from '@/components/ImageCropper'
 import { fetchUser, updateUser, createUser } from '@/api'
 
 const defaultForm = {
@@ -54,12 +71,13 @@ const defaultForm = {
   name: '',
   email: '',
   password: '',
-  id: undefined
+  id: undefined,
+  avatar: '/static/img/default-avatar.jpg'
 }
 
 export default {
   name: 'UserDetail',
-  components: { MDinput, Sticky },
+  components: { MDinput, Sticky, ImageCropper },
   props: {
     isEdit: {
       type: Boolean,
@@ -86,7 +104,10 @@ export default {
         name: [{ validator: validateRequire }],
         email: [{ validator: validateRequire }]
       },
-      tempRoute: {}
+      tempRoute: {},
+      imagecropperShow: false,
+      imagecropperKey: 0,
+      image: '',
     }
   },
   created() {
@@ -104,6 +125,9 @@ export default {
       fetchUser(id).then(response => {
         this.userForm = response.data
         this.userForm.password = ''
+        if (this.userForm.avatar) {
+          this.image = this.userForm.avatar_url
+        }
         this.setTagsViewTitle()
       }).catch(err => {
         console.log(err)
@@ -113,6 +137,12 @@ export default {
       const title = '编辑用户'
       const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.userForm.id}` })
       this.$store.dispatch('updateVisitedView', route)
+    },
+    cropSuccess(resData) {
+      this.imagecropperShow = false
+      this.imagecropperKey = this.imagecropperKey + 1
+      this.image = resData.files.avatar
+      this.userForm.avatar = resData.avatar_path
     },
     submitForm() {
       this.$refs.userForm.validate(valid => {
@@ -137,6 +167,7 @@ export default {
             if (!this.isEdit) {
               this.$router.push('/user/list?refresh=1')
             }
+            this.$store.dispatch('SetNewAvatar', [this.userForm.name, self.image])
           }).catch(err => {
             console.log(err)
           })
@@ -157,5 +188,10 @@ export default {
   .createPost-main-container {
     padding: 40px 45px 20px 50px;
   }
+}
+.avatar {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
 }
 </style>
