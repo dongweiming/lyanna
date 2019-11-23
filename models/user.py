@@ -7,6 +7,7 @@ from .base import BaseModel
 class User(BaseModel):
     email = fields.CharField(max_length=100)
     name = fields.CharField(max_length=100, unique=True)
+    avatar = fields.CharField(max_length=100)
     password = fields.TextField()
     active = fields.BooleanField(default=True)
 

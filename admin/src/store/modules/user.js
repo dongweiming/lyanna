@@ -64,6 +64,13 @@ const user = {
       })
     },
 
+    // 设置新的头像
+    SetNewAvatar({ commit, state }, args) {
+      if (state.name == args[0]) {
+        commit('SET_AVATAR', args[1])
+      }
+    },
+
     // 前端 登出
     FedLogOut({ commit }) {
       return new Promise(resolve => {

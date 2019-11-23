@@ -1,3 +1,4 @@
+import Tribute from "tributejs";
 import SocialSharer from './social-sharer';
 
 let $commentContainer = $('.gitment-comments-list')
@@ -167,3 +168,7 @@ $(document).ready(function() {
 });
 
 let socialSharer = new SocialSharer('.social-sharer');
+let tribute = new Tribute({
+    values: JSON.parse(document.getElementById('suggesters').textContent)
+});
+tribute.attach(document.getElementById("textarea"));

@@ -53,7 +53,10 @@ AVATAR = ''  # 'me.jpg' (= /static/upload/me.jpg)
 # Social
 # twitter/github/douban/linkedin/instagram/stack-overflow/medium/zhihu/email/wechat/weixingongzhonghao
 # you can choose someone to display, the recommend number is 8 icons.
-SHOW_PROFILE = []  # e.g. [('twitter', 'example'), ('wechat', 'static/upload/qrcode.jpg')]
+SHOW_PROFILE = []
+# e.g. [('twitter', 'example'), ('wechat', 'static/upload/qrcode.jpg')]
+
+SHOW_AUTHOR = False
 
 try:
     from local_settings import *  # noqa

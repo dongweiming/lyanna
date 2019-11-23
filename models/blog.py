@@ -232,7 +232,8 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
     @property
     @cache(MC_KEY_TAGS_BY_POST_ID % ('{self.id}'))
     async def tags(self):
-        pts = await PostTag.filter(post_id=self.id).order_by('updated_at').all()
+        pts = await PostTag.filter(post_id=self.id).order_by(
+            'updated_at').all()
         if not pts:
             return []
         ids = [pt.tag_id for pt in pts]
@@ -415,7 +416,6 @@ class PostTag(BaseModel):
                              Q(tag_id__in=need_del_tag_ids)).delete()
         for tag_id, _ in sorted(need_add_tag_ids,
                                 key=lambda x: tags.index(x[1])):
-            print(tag_id, _)
             await cls.get_or_create(post_id=post_id, tag_id=tag_id)
 
         await clear_mc(MC_KEY_TAGS_BY_POST_ID % post_id)
