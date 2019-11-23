@@ -65,6 +65,9 @@ async def _migrate_for_v27():
         UNIQUE KEY `title` (`title`),
         KEY `idx_slug` (`slug`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8''')
+    await client.execute_script(
+        ('alter table post_tags add column `updated_at` datetime(6) '
+         'DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)')
 
 
 @click.group()

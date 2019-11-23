@@ -232,11 +232,12 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
     @property
     @cache(MC_KEY_TAGS_BY_POST_ID % ('{self.id}'))
     async def tags(self):
-        pts = await PostTag.filter(post_id=self.id)
+        pts = await PostTag.filter(post_id=self.id).order_by('updated_at').all()
         if not pts:
             return []
         ids = [pt.tag_id for pt in pts]
-        return await Tag.filter(id__in=ids).all()
+        tags = await Tag.filter(id__in=ids).all()
+        return sorted(tags, key=lambda t: ids.index(t.id))
 
     @property
     async def author(self):
@@ -389,22 +390,22 @@ class Tag(BaseModel):
 class PostTag(BaseModel):
     post_id = fields.IntField()
     tag_id = fields.IntField()
+    updated_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
         table = 'post_tags'
 
     @classmethod
     async def update_multi(cls, post_id, tags):
-        tags = set(tags)
         origin_tags = set([t.name for t in (
             await Post.sync_get(id=post_id)).tags])
-        need_add = tags - origin_tags
-        need_del = origin_tags - tags
-        need_add_tag_ids = set()
+        need_add = set(tags) - origin_tags
+        need_del = origin_tags - set(tags)
+        need_add_tag_ids = []
         need_del_tag_ids = set()
         for tag_name in need_add:
             tag, _ = await Tag.get_or_create(name=tag_name)
-            need_add_tag_ids.add(tag.id)
+            need_add_tag_ids.append([tag.id, tag_name])
         for tag_name in need_del:
             tag, _ = await Tag.get_or_create(name=tag_name)
             need_del_tag_ids.add(tag.id)
@@ -412,7 +413,9 @@ class PostTag(BaseModel):
         if need_del_tag_ids:
             await cls.filter(Q(post_id=post_id),
                              Q(tag_id__in=need_del_tag_ids)).delete()
-        for tag_id in need_add_tag_ids:
+        for tag_id, _ in sorted(need_add_tag_ids,
+                                key=lambda x: tags.index(x[1])):
+            print(tag_id, _)
             await cls.get_or_create(post_id=post_id, tag_id=tag_id)
 
         await clear_mc(MC_KEY_TAGS_BY_POST_ID % post_id)
