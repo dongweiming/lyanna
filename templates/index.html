@@ -2,7 +2,8 @@
 <%inherit file="/base.html" />
 <%namespace name="utils" file="/utils.html"/>
 
-<%def name="more_header()">
+<%def name="doc_head()">
+<link rel="stylesheet" href="${ app.url_for('static', filename='css/index.min.css') } ">
 <script type="application/ld+json">
  {
    "@context": "https://schema.org",
@@ -48,10 +49,18 @@
   % if SHOW_PROFILE:
   <section id="sidebar">
     <div class="short-about">
+      % if AVATAR:
       <img id="avatar_pic" src="${ app.url_for('static', filename=f'{ AVATAR }') }">
+      % endif
       <p>${ INTRO }</p>
 
       <!-- SNS Link -->
+      <div id="lightbox" style="display: none;" class="lightbox" onclick="document.getElementById('lightbox').style.display='none';">
+        <div class="center">
+          <i class="iconfont icon-close"></i>
+          <img src="">
+        </div>
+      </div>
       <ul class="list-inline">
         <%
         sns_map = {
@@ -64,15 +73,36 @@
         }
         %>
         % for sns, id in SHOW_PROFILE:
-        <% url = sns_map.get(sns, 'https://%s.com/{}' % sns).format(id) %>
-          % if url:
-            <li>
-              <a target="_blank" href="${ url }">
-                <span>
-                  <i class="iconfont icon-${ sns }"></i>
-                </span>
-              </a>
-            </li>
+        <%
+            tpl = sns_map.get(sns)
+            if tpl:
+                url = tpl.format(id)
+            elif sns in ('wechat', 'weixingongzhonghao'):
+                url = app.url_for('static', filename=f'upload/{ id }')
+            else:
+                url = f'https://{sns}.com/{id}'
+
+            if sns == 'weixingongzhonghao':
+                label = '微信公众号'
+            elif sns == 'wechat':
+                label = '微信'
+            else:
+                label = sns.replace('-' , '').capitalize()
+        %>
+        % if url:
+          <li class="tooltip-box">
+            <a target="_blank" href="${ url }" data-balloon-pos="up" aria-label="${ label }">
+              <span>
+                <i class="iconfont icon-${ sns }
+                  % if sns in ('wechat', 'weixingongzhonghao'):
+                      show-pic" data-href="${ url }"
+                  % else:
+                      "
+                  % endif
+                ></i>
+              </span>
+            </a>
+          </li>
           % endif
         % endfor
       </ul>
@@ -84,4 +114,8 @@
 
 <%def name="pagination()">
 ${ utils.pagination('blog.page', paginatior) }
+</%def>
+
+<%def name="bottom_script()">
+  <script src="${ app.url_for('static', filename='dist/blog/index.js')}"></script>
 </%def>
