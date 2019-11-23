@@ -2,7 +2,8 @@
 <%namespace name="utils" file="/utils.html"/>
 
 <%!
-from config import SITE_TITLE, SHOW_PAGEVIEW
+    import json
+    from config import SITE_TITLE, SHOW_PAGEVIEW, SHOW_AUTHOR
 %>
 
 <%def name="doc_head()">
@@ -30,6 +31,15 @@ from config import SITE_TITLE, SHOW_PAGEVIEW
       <h1 class="title">
         ${ post.title }
       </h1>
+      % if SHOW_AUTHOR:
+      <div class="author">
+        <a href="#" rel="nofollow">
+          <img src="${ app.url_for('static', filename=f'upload/{ post.author.avatar }') }">
+          <span>${ post.author.name }</span>
+        </a>
+      </div>
+      <span class="slash">/</span>
+      % endif
       <span>
         <time class="time" datetime="${ post.created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ') }">
           ${ post.created_at.strftime('%Y-%m-%d') }
@@ -97,6 +107,9 @@ ${ utils.render_comment_container(post, 10, github_user, liked_comment_ids) }
 <%def name="title()">${ post.title } - ${ SITE_TITLE }</%def>
 
 <%def name="bottom_script()">
+  <script id="suggesters" type="application/json">
+    ${ json.dumps([{'key': name, 'value': name} for name in set([c.user.username for c in post.comments])]) | n }
+  </script>
   <script src="${ app.url_for('static', filename='dist/blog/blog.js')}"></script>
   <script src="${ app.url_for('static', filename='js/github-widget.js')}"></script>
 </%def>

@@ -53,6 +53,7 @@ class SanicForm(_SanicForm):
 class UserForm(SanicForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired()])
+    avatar = StringField('Email', default='')
     password = PasswordField('Password')
     active = BooleanField('Active')
     submit = SubmitField('Submit')

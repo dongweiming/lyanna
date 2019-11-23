@@ -67,7 +67,8 @@ async def _migrate_for_v27():
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8''')
     await client.execute_script(
         ('alter table post_tags add column `updated_at` datetime(6) '
-         'DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)')
+         'DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)'))
+    await client.execute_script('alter table users add column `avatar` varchar(100) NOT NULL')  # noqa
 
 
 @click.group()
@@ -119,7 +120,7 @@ def build_css():
         'index.min.css': ['main.min.css', 'balloon.min.css', 'index.css'],
         'topic.min.css': ['main.min.css', 'topic.css'],
         'post.min.css': ['main.min.css', 'post.css', 'react.css',
-                         'dracula.css', 'gitment.css', 'social-sharer.css']
+                         'gitment.css', 'dracula.css', 'social-sharer.css']
     }
     css_map = {}
     css_dir = Path(HERE) / 'static/css/'
