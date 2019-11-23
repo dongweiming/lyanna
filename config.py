@@ -49,7 +49,7 @@ REDIS_SENTINEL_SERVICE_PORT = 26379
 
 # AboutMe
 INTRO = ''
-AVATAR = ''  # 'upload/me.jpg' (= /static/upload/me.jpg)
+AVATAR = ''  # 'me.jpg' (= /static/upload/me.jpg)
 # Social
 # twitter/github/douban/linkedin/instagram/stack-overflow/medium/zhihu/email/wechat/weixingongzhonghao
 # you can choose someone to display, the recommend number is 8 icons.
