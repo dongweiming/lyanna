@@ -1,0 +1,8 @@
+<%page args="partial"/>
+<section class="widget">
+  % if 'title' in partial:
+  <h5>${ partial.title }</h5>
+  % endif
+
+  ${ partial.body | n }
+</section>
