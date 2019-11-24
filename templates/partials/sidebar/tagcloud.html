@@ -1,0 +1,12 @@
+<% import math %>
+<%page args="partial"/>
+<section class="widget">
+  <h5>${ partial.title if 'title' in partial else 'TagCloud' }</h5>
+
+  <ul class="tagcloud list-inline">
+    % for tag, count in tags:
+      <% size = 3 * math.log(count) + 1 %>
+      <li><a target="_blank" href="${ tag.url }" style="font-size: ${ size }pt;">${ tag.name }</a></li>
+    % endfor
+  </ul>
+</section>

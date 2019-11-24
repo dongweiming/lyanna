@@ -1,3 +1,4 @@
+import random
 from itertools import groupby
 from collections import Counter
 
@@ -6,11 +7,13 @@ from sanic.exceptions import abort
 from tortoise.query_utils import Q
 
 from ext import mako
-from config import PER_PAGE
+from config import PER_PAGE, AttrDict, partials
 from models.mc import cache
 from models.utils import Pagination
 from models.blog import (
-    MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG)
+    MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG,
+    get_most_viewed_posts)
+from models.comment import get_latest_comments
 from models import Post, Tag, PostTag, SpecialTopic
 
 bp = Blueprint('blog', url_prefix='/')
@@ -39,7 +42,42 @@ async def _posts(request, page=1):
     total = len(posts)
     posts = posts[start: start + PER_PAGE]
     paginatior = Pagination(page, PER_PAGE, total, posts)
-    return {'paginatior': paginatior}
+    json = {'paginatior': paginatior}
+
+    for partial in partials:
+        partial = AttrDict(partial)
+        if partial.name == 'most_viewed':
+            json.update({
+                'most_viewed_posts': await get_most_viewed_posts(
+                    partial.count)
+            })
+        elif partial.name == 'latest_comments':
+            comments = await get_latest_comments(partial.count)
+            latest_comments = []
+            for c in comments:
+                user = await c.user
+                post = await Post.cache(c.post_id)
+                user = AttrDict({
+                    'name': user.username,
+                    'link': user.link,
+                    'avatar': user.picture,
+                })
+                post = AttrDict({
+                    'title': post.title if post else '[已删除]',
+                })
+                dct = {
+                    'user': user,
+                    'post': post,
+                    'content': await c.content,
+                    'date': c.created_at.strftime('%Y-%m-%d')
+                }
+                latest_comments.append(AttrDict(dct))
+            json.update({'latest_comments': latest_comments})
+        elif partial.name == 'tagcloud':
+            tags = await _tags()
+            random.shuffle(tags)
+            json.update({'tags': tags})
+    return json
 
 
 @bp.route('/post/<ident>')
@@ -105,12 +143,16 @@ async def archive(request, year):
 @mako.template('tags.html')
 @cache(MC_KEY_TAGS)
 async def tags(request):
+    tags = await _tags()
+    return {'tags': sorted(tags, key=lambda x: x[1], reverse=True)}
+
+
+async def _tags():
     tag_ids = await PostTag.filter().values_list('tag_id', flat=True)
     counter = Counter(tag_ids)
     tags_ = await Tag.get_multi(counter.keys())
-    tags = [(tags_[index], count)
+    return [(tags_[index], count)
             for index, count in enumerate(counter.values())]
-    return {'tags': sorted(tags, key=lambda x: x[1], reverse=True)}
 
 
 @bp.route('/tag/<tag_id>')

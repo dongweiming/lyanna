@@ -1,0 +1,15 @@
+<%page args="partial"/>
+<section class="widget blogroll">
+  % if 'title' in partial:
+  <h5>${ partial.title }</h5>
+  % endif
+
+  <ul class="list-inline">
+    % for site in partial.links:
+      % if 'url' in site:
+        <% url = site['url'] %>
+        <li class="block"><a target="_blank" href="${ url }">${ site.get('title') or url }</a></li>
+      % endif
+    % endfor
+  </ul>
+</section>

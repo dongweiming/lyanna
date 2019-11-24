@@ -19,7 +19,7 @@ from pygments.formatters import HtmlFormatter
 
 from config import PERMALINK_TYPE
 from .mc import cache, clear_mc
-from .base import BaseModel
+from .base import BaseModel, get_redis
 from .user import User
 from .consts import K_POST, ONE_HOUR, PERMALINK_TYPES
 from .utils import trunc_utf8
@@ -43,9 +43,11 @@ MC_KEY_SPECIAL_POST_ITEMS = 'special:%s:post_items'
 MC_KEY_SPECIAL_BY_PID = 'special:by_pid:%s'
 MC_KEY_SPECIAL_BY_SLUG = 'special:%s:slug'
 MC_KEY_ALL_SPECIAL_TOPICS = 'special:topics'
-RK_PAGEVIEW = 'lyanna:pageview:{}'
+RK_PAGEVIEW = 'lyanna:pageview:{}:v2'
+RK_ALL_POST_IDS = 'lyanna:all_post_ids'
 RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
 BQ_REGEX = re.compile(r'<blockquote>.*?</blockquote>')
+PAGEVIEW_FIELD = 'pv'
 
 
 class MLStripper(HTMLParser):
@@ -357,16 +359,18 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
     async def incr_pageview(self, increment=1):
         redis = await self.redis
         try:
+            await redis.sadd(RK_ALL_POST_IDS, self.id)
             await redis.sadd(RK_VISITED_POST_IDS, self.id)
-            return await redis.incrby(RK_PAGEVIEW.format(self.id), increment)
+            return await redis.hincrby(RK_PAGEVIEW.format(self.id),
+                                       PAGEVIEW_FIELD, increment)
         except RedisError:
             return self._pageview
 
     @property
     async def pageview(self):
         try:
-            return int(await (await self.redis).get(
-                RK_PAGEVIEW.format(self.id)) or 0)
+            return int(await (await self.redis).hget(
+                RK_PAGEVIEW.format(self.id), PAGEVIEW_FIELD) or 0)
         except RedisError:
             return self._pageview
 
@@ -526,3 +530,20 @@ class SpecialTopic(StatusMixin, BaseModel):
             MC_KEY_ALL_SPECIAL_TOPICS
         ]
         await clear_mc(*keys)
+
+
+async def get_most_viewed_posts(count, offset=0):
+    redis = await get_redis()
+    key_pattern = RK_PAGEVIEW.replace('{}', '*')
+    keys = await redis.sort(RK_ALL_POST_IDS, by=key_pattern,
+                            offset=offset, count=count)
+    p = redis.pipeline()
+    for k in keys:
+        p.hgetall(RK_PAGEVIEW.format(k.decode()))
+    counts = [int(d.get(PAGEVIEW_FIELD.encode(), 0))
+              for d in await p.execute()]
+    posts = await Post.get_multi([k.decode() for k in keys])
+    items = []
+    for index, p in enumerate(posts):
+        items.append((counts[index], p))
+    return items
