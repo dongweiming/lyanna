@@ -20,6 +20,7 @@ sanic-sentry==0.1.7
 sanic-jwt==1.2.1
 pangu==4.0.6.1
 redis==3.3.11
+PyYAML==5.1.2
 aiosmtplib==1.1.0
 dataclasses==0.6;python_version == '3.6'
 contextvars==2.4;python_version == '3.6'
