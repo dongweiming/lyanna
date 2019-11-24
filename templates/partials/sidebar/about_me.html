@@ -1,0 +1,65 @@
+<%page args="partial"/>
+<section class="widget">
+  % if 'title' in partial:
+  <h5>${ partial.title }</h5>
+  % endif
+  % if partial.avatar:
+  <img id="avatar_pic" src="${ app.url_for('static', filename=f'upload/{ partial.avatar }') }">
+  % endif
+  <p>${ partial.intro }</p>
+
+  <!-- SNS Link -->
+  <div id="lightbox" style="display: none;" class="lightbox" onclick="document.getElementById('lightbox').style.display='none';">
+    <div class="center">
+      <i class="iconfont icon-close"></i>
+      <img src="">
+    </div>
+  </div>
+  <ul class="list-inline">
+    <%
+    sns_map = {
+        'douban': 'https://www.douban.com/people/{}',
+        'linkedin': 'https://www.linkedin.com/in/{}',
+        'stack-overflow': 'https://stackoverflow.com/users/{}',
+        'medium': 'https://medium.com/@{}',
+        'zhihu': 'https://www.zhihu.com/people/{}',
+        'email': 'mailto:{}'
+    }
+    %>
+    % for site in partial.sns:
+    <%
+        sns = list(site)[0]
+        id = site[sns]
+        tpl = sns_map.get(sns)
+        if tpl:
+            url = tpl.format(id)
+        elif sns in ('wechat', 'weixingongzhonghao'):
+            url = app.url_for('static', filename=f'upload/{ id }')
+        else:
+            url = f'https://{sns}.com/{id}'
+
+        if sns == 'weixingongzhonghao':
+            label = '微信公众号'
+        elif sns == 'wechat':
+            label = '微信'
+        else:
+            label = sns.replace('-' , '').capitalize()
+    %>
+    % if url:
+      <li class="tooltip-box">
+        <a target="_blank" href="${ url }" data-balloon-pos="up" aria-label="${ label }">
+          <span>
+            <i class="iconfont icon-${ sns }
+              % if sns in ('wechat', 'weixingongzhonghao'):
+                  show-pic" data-href="${ url }"
+              % else:
+                  "
+              % endif
+            ></i>
+          </span>
+        </a>
+      </li>
+      % endif
+    % endfor
+  </ul>
+</section>

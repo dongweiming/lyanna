@@ -59,6 +59,7 @@ def register_blueprints(root, app):
 
 class Request(_Request):
     user = None
+    partials = config.partials
 
 
 class ErrorHandler(_ErrorHandler):

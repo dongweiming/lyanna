@@ -74,13 +74,6 @@ class Empty:
 empty = Empty()
 
 
-class AttrDict(dict):
-
-    def __init__(self, *args, **kwargs):
-        super(AttrDict, self).__init__(*args, **kwargs)
-        self.__dict__ = self
-
-
 class Pagination:
 
     def __init__(self, page, per_page, total, items):

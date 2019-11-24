@@ -1,0 +1,33 @@
+.widget {
+  margin-top: 2rem;
+}
+
+.widget h5 {
+  color: gray;
+  padding-bottom: 1em;
+}
+
+.widget p {
+  margin-top: 0;
+  margin: 1rem 0;
+}
+
+.widget .list-inline {
+  margin-left: -5px;
+  list-style: none;
+  padding-left: 0;
+}
+
+.widget .list-inline>li {
+  padding-left: 0;
+  display: inline-block;
+  padding-right: 5px;
+}
+
+.widget .list-inline a {
+  color: #bfbfbf;
+}
+
+.widget .list-inline a:hover, .widget .list-inline a:active {
+  color: #2196F3;
+}

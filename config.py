@@ -1,4 +1,14 @@
 import os
+import yaml
+from pathlib import Path
+
+
+class AttrDict(dict):
+
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
 
 DB_URL = os.getenv('DB_URL', 'mysql://root:@localhost:3306/test?charset=utf8')
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379')
@@ -15,8 +25,8 @@ client_id = "098a2e6da880878e05da"
 client_secret = "854cc0d86e61a83bb1dd00c3b23a3cc5b832d45c"
 
 REACT_PROMPT = '喜欢这篇文章吗? 记得给我留言或订阅哦'
-HERE = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = os.path.join(HERE, 'static/upload')
+HERE = Path(__file__).parent.absolute()
+UPLOAD_FOLDER = HERE / 'static/upload'
 AUTHOR = 'xiaoming'
 SITE_TITLE = 'My Blog'
 PER_PAGE = 10
@@ -47,16 +57,14 @@ BLOG_URL = 'https://example.com'
 REDIS_SENTINEL_SERVICE_HOST = None
 REDIS_SENTINEL_SERVICE_PORT = 26379
 
-# AboutMe
-INTRO = ''
-AVATAR = ''  # 'me.jpg' (= /static/upload/me.jpg)
-# Social
-# twitter/github/douban/linkedin/instagram/stack-overflow/medium/zhihu/email/wechat/weixingongzhonghao
-# you can choose someone to display, the recommend number is 8 icons.
-SHOW_PROFILE = []
-# e.g. [('twitter', 'example'), ('wechat', 'static/upload/qrcode.jpg')]
-
 SHOW_AUTHOR = False
+
+try:
+    with open(HERE / 'config.yaml') as f:
+        partials = AttrDict(yaml.safe_load(f)).partials
+    USE_YAML = True
+except FileNotFoundError:
+    USE_YAML = False
 
 try:
     from local_settings import *  # noqa
