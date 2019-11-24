@@ -934,35 +934,6 @@ footer .href-item:hover {
     width: 70%;
 }
 
-.short-about {
-    margin-top: 5rem;
-}
-
-.short-about p {
-    margin-top: 0;
-    margin: 1rem 0;
-}
-
-.short-about .list-inline {
-    margin-left: -5px;
-    list-style: none;
-    padding-left: 0;
-}
-
-.short-about .list-inline>li {
-    padding-left: 0;
-    display: inline-block;
-    padding-right: 5px;
-}
-
-.short-about .list-inline a {
-    color: #bfbfbf;
-}
-
-.short-about .list-inline a:hover, .short-about .list-inline a:active {
-    color: #2196F3;
-}
-
 hr {
   height: 0;
   -webkit-box-sizing: content-box;

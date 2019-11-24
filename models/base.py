@@ -9,7 +9,6 @@ from tortoise.models import Model, ModelMeta as _ModelMeta
 
 import config
 from .mc import cache, clear_mc
-from .utils import AttrDict
 from ._compat import PY36
 from .var import redis_var
 
@@ -65,7 +64,7 @@ class BaseModel(Model, metaclass=ModelMeta):
             else:
                 rv[field] = coro
         rv['url'] = self.url
-        return AttrDict(rv)
+        return config.AttrDict(rv)
 
     @classmethod
     async def sync_get(cls, *args, **kwargs):
