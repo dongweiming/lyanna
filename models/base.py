@@ -17,6 +17,20 @@ IGNORE_ATTRS = ['redis', 'stats']
 _redis = None
 
 
+async def get_redis():
+    global _redis
+    if _redis is None:
+        try:
+            redis = redis_var.get()
+        except LookupError:
+            # Hack for debug mode
+            loop = asyncio.get_event_loop()
+            redis = await aioredis.create_redis_pool(
+                config.REDIS_URL, minsize=5, maxsize=20, loop=loop)
+        _redis = redis
+    return _redis
+
+
 class PropertyHolder(type):
 
     def __new__(cls, name, bases, attrs):
@@ -100,17 +114,7 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     @property
     async def redis(self):
-        global _redis
-        if _redis is None:
-            try:
-                redis = redis_var.get()
-            except LookupError:
-                # Hack for debug mode
-                loop = asyncio.get_event_loop()
-                redis = await aioredis.create_redis_pool(
-                    config.REDIS_URL, minsize=5, maxsize=20, loop=loop)
-            _redis = redis
-        return _redis
+        return await get_redis()
 
     def get_db_key(self, key):
         return f'{self.__class__.__name__}/{self.id}/props/{key}'

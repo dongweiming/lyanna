@@ -31,3 +31,41 @@
 .widget .list-inline a:hover, .widget .list-inline a:active {
   color: #2196F3;
 }
+
+.block {
+  display: block !important;
+}
+
+.list-item {
+  display: list-item !important;
+}
+
+.comment .avatar {
+  padding-right: 1rem;
+  float: left;
+}
+.comment .body {
+  position: relative;
+  top: -8px;
+  font-size: 14px;
+  min-height: 4em;
+}
+
+.comment .body .content p {
+  margin: 0;
+  color: #000;
+  line-height: 1.5em;
+}
+
+.comment .meta {
+  position: relative;
+  top: -.5em;
+}
+.comment .meta .title, .comment .meta .date {
+  font-size: 12px;
+  color:   #444
+}
+.tagcloud li {
+  line-height: .5rem;
+  padding-right: 0;
+}

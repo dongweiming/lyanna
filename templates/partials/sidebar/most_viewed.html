@@ -1,0 +1,10 @@
+<%page args="partial"/>
+<section class="widget blogroll">
+  <h5>${ partial.title if 'title' in partial else 'Most Viewed' }</h5>
+
+  <ul class="list-inline">
+    % for total, post in most_viewed_posts:
+      <li class="list-item"><a target="_blank" href="${ post.url }">${ post.title } (${ total })</a></li>
+    % endfor
+  </ul>
+</section>

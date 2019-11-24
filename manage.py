@@ -8,6 +8,8 @@ from tortoise.exceptions import IntegrityError
 from config import HERE
 from ext import init_db
 from models import create_user
+from models.base import get_redis
+from models.blog import RK_PAGEVIEW, RK_ALL_POST_IDS, PAGEVIEW_FIELD
 
 
 async def init():
@@ -30,7 +32,6 @@ async def init():
     if not await client.execute_query(
             'show columns from `posts` like "pageview"'):
         await migrate_for_v25()
-    await migrate_for_v27()
 
 
 async def _migrate_for_v25():
@@ -41,6 +42,16 @@ async def _migrate_for_v25():
 
 
 async def _migrate_for_v27():
+    redis = await get_redis()
+    keys = await redis.keys('lyanna:pageview:*')
+    ids = []
+    for k in keys:
+        id = k.split(b':')[-1]
+        if id.isdigit():
+            await redis.hset(RK_PAGEVIEW.format(id.decode()), PAGEVIEW_FIELD,
+                             int(await redis.get(k)))
+            ids.append(id)
+    await redis.sadd(RK_ALL_POST_IDS, *ids)
     await init_db(create_db=False)
     client = Tortoise.get_connection('default')
     await client.execute_script(
@@ -65,10 +76,11 @@ async def _migrate_for_v27():
         UNIQUE KEY `title` (`title`),
         KEY `idx_slug` (`slug`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8''')
+
     await client.execute_script(
         ('alter table post_tags add column `updated_at` datetime(6) '
          'DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6)'))
-    await client.execute_script('alter table users add column `avatar` varchar(100) NOT NULL')  # noqa
+    await client.execute_script('alter table users add column `avatar` varchar(100) DEFAULT ""')  # noqa
 
 
 @click.group()
@@ -117,7 +129,8 @@ def adduser(name, email, password):
 def build_css():
     build_map = {
         'main.min.css': ['pure-min.css', 'base.css', 'iconfont.css'],
-        'index.min.css': ['main.min.css', 'balloon.min.css', 'index.css', 'widget.css'],
+        'index.min.css': ['main.min.css', 'balloon.min.css', 'index.css',
+                          'widget.css'],
         'topic.min.css': ['main.min.css', 'topic.css'],
         'post.min.css': ['main.min.css', 'post.css', 'react.css',
                          'gitment.css', 'dracula.css', 'social-sharer.css']

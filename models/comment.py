@@ -19,6 +19,7 @@ markdown = mistune.Markdown()
 MC_KEY_COMMENT_LIST = 'comment:%s:comment_list'
 MC_KEY_N_COMMENTS = 'comment:%s:n_comments'
 MC_KEY_COMMNET_IDS_LIKED_BY_USER = 'react:comment_ids_liked_by:%s:%s'
+MC_KEY_LATEST_COMMENTS = 'comment:latest_comments:%s'
 
 
 class Comment(ReactMixin, BaseModel):
@@ -116,3 +117,8 @@ async def update_comment_list_cache(_, user_id, comment_id):
                 user_id, comment.post_id)),
             return_exceptions=True
         )
+
+
+@cache(MC_KEY_LATEST_COMMENTS % '{count}', ONE_HOUR)
+async def get_latest_comments(count=5):
+    return await Comment.filter().order_by('-id').limit(count)

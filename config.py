@@ -65,7 +65,7 @@ try:
     USE_YAML = True
 except FileNotFoundError:
     USE_YAML = False
-
+    partials = {}
 try:
     from local_settings import *  # noqa
 except ImportError:
