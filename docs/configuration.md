@@ -6,13 +6,19 @@
 
 - 默认值：`mysql://root:@localhost:3306/test?charset=utf8`
 
-设置数据库的URL
+设置数据库的URL，另外也支持从环境变量读取
 
 ## DEBUG
 
 - 默认值：`False`
 
-是否开启DEBUG模式，开启后可以看到详细错误，修改代码后不用重启就可以autoreload
+是否开启DEBUG模式，开启后可以看到详细错误，修改代码后不用重启就可以autoreload。另外也支持从环境变量读取
+
+## REDIS_URL
+
+- 默认值: `redis://localhost:6379`
+
+Redis服务器地址，另外也支持从环境变量读取
 
 ## WTF_CSRF_SECRET_KEY
 
@@ -24,7 +30,7 @@ Sanic-wtf 需要的 CSRF KEY
 
 - 默认值: `127.0.0.1`
 
-Memcached的主机名或者IP
+Memcached的主机名或者IP，另外也支持从环境变量读取
 
 ## MEMCACHED_PORT
 
@@ -155,3 +161,15 @@ JWT的超时时间
 - 默认值: `slug`
 
 文章页面URL的类型。可选值: id、slug、title。举个例子, PERMALINK_TYPE为id时，首页、分类页、标签页等页面都会使用`https://example.com/post/{id}`这样效果的URL，帮助SEO。
+
+## REDIS_SENTINEL_SERVICE_HOST
+
+- 默认值: `None`
+
+除了用上面提到的`REDIS_URL`指定Redis服务器，还可以用分布式的Redis Sentinel集群架构，本项指定主机地址，默认不开启。另外也支持从环境变量读取
+
+## REDIS_SENTINEL_SERVICE_PORT
+
+- 默认值: `26379`
+
+Redis Sentinel集群架构，本项指定主机端口号。另外也支持从环境变量读取

@@ -50,8 +50,7 @@ async def list_posts(request):
     page = int(request.args.get('page')) or 1
     special_id = int(request.args.get('special_id') or 0)
     offset = (page - 1) * limit
-    _posts = await Post.sync_filter(limit=limit, offset=offset,
-                                    orderings='-id')
+    _posts = await Post.filter().order_by('-id').offset(offset).limit(limit)
     total = await Post.filter().count()
     posts = []
     exclude_ids = []
@@ -60,12 +59,17 @@ async def list_posts(request):
         if topic:
             items = await topic.get_items()
             exclude_ids = [s.post_id for s in items]
+        exclude_ids -= len(exclude_ids)
     for post in _posts:
+        dct = post.to_dict()
         if post.id in exclude_ids:
             continue
-        post['author_name'] = post['author'].name
-        post['tags'] = [t.name for t in post['tags']]
-        posts.append(post)
+        if limit < 100:
+            author = await post.author
+            dct['author_name'] = author.name
+            tags = await post.tags
+            dct['tags'] = [t.name for t in tags]
+        posts.append(dct)
     return json({'items': posts, 'total': total})
 
 
