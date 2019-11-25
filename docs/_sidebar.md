@@ -3,6 +3,8 @@
   - [功能](features.md)
   - [配置项](configuration.md)
   - [部署](deploying.md)
+  - [使用Docker Compose开发](docker-compose.md)
+  - [在kubernetes上运行](kubernetes.md)
 
 - 高级
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.7 (2019-11-26)
+
+1. Sidebar Widgets(with aboutme、blogroll、most\_viewed、latest\_comments、tagcloud、html)
+2. Mention autocomplete
+3. Keep the order of the tags in the article
+4. Remove profile feature
+5. Use iconfont
+6. Add Special topic feature
+7. Custom menu icon & color
+8. Docker compose support
+9. Kubernetes support
+
 ## 2.6.1 (2019-09-17)
 
 1. Text spacing for link
