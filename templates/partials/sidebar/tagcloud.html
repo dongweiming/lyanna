@@ -4,8 +4,14 @@
   <h5>${ partial.title if 'title' in partial else 'TagCloud' }</h5>
 
   <ul class="tagcloud list-inline">
+    <%
+      per_page = 4
+      sorted_tags = sorted(tags, key=lambda x: x[1], reverse=True)
+      max_ = len(sorted_tags[0]) / per_page
+      min_ = len(sorted_tags[-1]) / per_page
+    %>
     % for tag, count in tags:
-      <% size = 3 * math.log(count) + 1 %>
+    <% size = max(math.log(count / per_page) - min_, 1) / ((math.log(max_) - math.log(min_)) or 1) * 4 + 5 %>
       <li><a target="_blank" href="${ tag.url }" style="font-size: ${ size }pt;">${ tag.name }</a></li>
     % endfor
   </ul>

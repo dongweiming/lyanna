@@ -535,8 +535,8 @@ class SpecialTopic(StatusMixin, BaseModel):
 async def get_most_viewed_posts(count, offset=0):
     redis = await get_redis()
     key_pattern = RK_PAGEVIEW.replace('{}', '*')
-    keys = await redis.sort(RK_ALL_POST_IDS, by=key_pattern,
-                            offset=offset, count=count)
+    keys = (await redis.sort(RK_ALL_POST_IDS, by=f'{key_pattern}->pv',
+                             asc=False))[offset:count]
     p = redis.pipeline()
     for k in keys:
         p.hgetall(RK_PAGEVIEW.format(k.decode()))

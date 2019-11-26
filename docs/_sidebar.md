@@ -2,6 +2,7 @@
   - [快速开始](quickstart.md)
   - [功能](features.md)
   - [配置项](configuration.md)
+  - [Widget](widget.md)
   - [部署](deploying.md)
   - [使用Docker Compose开发](docker-compose.md)
   - [在kubernetes上运行](kubernetes.md)

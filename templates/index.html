@@ -62,5 +62,7 @@ ${ utils.pagination('blog.page', paginatior) }
 </%def>
 
 <%def name="bottom_script()">
+% if USE_YAML:
   <script src="${ app.url_for('static', filename='dist/blog/index.js')}"></script>
+% endif
 </%def>

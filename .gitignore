@@ -73,3 +73,4 @@ srv/deploy.retry
 .idea/
 # K8s
 k8s/config.yaml
+config.yaml
