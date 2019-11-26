@@ -3,7 +3,7 @@
 }
 
 .widget h5 {
-  color: gray;
+  color: #4a4a4a;
   padding-bottom: 1em;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .widget .list-inline a {
-  color: #bfbfbf;
+  color: #666;
 }
 
 .widget .list-inline a:hover, .widget .list-inline a:active {

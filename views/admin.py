@@ -59,7 +59,7 @@ async def list_posts(request):
         if topic:
             items = await topic.get_items()
             exclude_ids = [s.post_id for s in items]
-        exclude_ids -= len(exclude_ids)
+        total -= len(exclude_ids)
     for post in _posts:
         dct = post.to_dict()
         if post.id in exclude_ids:
@@ -306,8 +306,11 @@ async def _topic(request, topic_id=None):
             ]
         else:
             indexes = []
-        await topic.set_indexes(indexes)
+        if topic_id is not None:
+            await topic.set_indexes(indexes)
         await topic.save()
+        if topic_id is None:
+            await topic.set_indexes(indexes)
         ok = True
     else:
         ok = False
