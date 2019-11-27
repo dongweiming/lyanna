@@ -170,3 +170,12 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     async def clear_mc(self):
         ...
+
+    async def update(self, **kwargs):
+        fields = self._meta.fields
+        for k, v in kwargs.items():
+            if k not in fields:
+                print(f'WARN: Field `{k}` may not be saved!')
+            setattr(self, k, v)
+        await self.save()
+        return self
