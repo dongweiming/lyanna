@@ -6,7 +6,7 @@ from tortoise import fields
 from tortoise.query_utils import Q
 from arq import create_pool
 
-from config import REDIS_URL
+from config import REDIS_URL, partials
 from .base import BaseModel
 from .mc import cache, clear_mc
 from .user import GithubUser
@@ -54,8 +54,15 @@ class Comment(ReactMixin, BaseModel):
         return markdown(content)
 
     async def clear_mc(self):
-        for key in (MC_KEY_N_COMMENTS, MC_KEY_COMMENT_LIST):
-            await clear_mc(key % self.post_id)
+        keys = [key % self.post_id for key in (
+            MC_KEY_N_COMMENTS, MC_KEY_COMMENT_LIST)]
+        partial_config = next((p for p in partials
+                               if p['name'] == 'latest_comments'), None)
+        if partial_config:
+            count = partial_config.get('count')
+            if count:
+                keys.append(MC_KEY_LATEST_COMMENTS % count)
+        await clear_mc(*keys)
 
     @property
     async def user(self):
