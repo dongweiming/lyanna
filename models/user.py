@@ -56,7 +56,13 @@ async def validate_login(name, password):
 
 
 async def create_github_user(user_info):
-    user, _ = await GithubUser.get_or_create(
-        gid=user_info.id, email=user_info.email or user_info.username,
-        username=user_info.username, picture=user_info.picture, link=user_info.link)  # noqa
+    user = await GithubUser.filter(gid=user_info.id).first()
+    kwargs = {
+        'gid': user_info.id,
+        'link': user_info.link,
+        'picture': user_info.picture,
+        'username': user_info.username,
+        'email': user_info.email or user_info.username,
+    }
+    user = await (user.update(**kwargs) if user else GithubUser.create(**kwargs)) # noqa
     return user
