@@ -47,7 +47,7 @@ async def create_comment(request, user, post):
 
 @bp.route('/post/<post_id>/comments')
 async def comments(request, post_id):
-    post = await Post.cache(id=post_id)
+    post = await Post.cache(post_id)
     if not post:
         return json({'r': 1, 'msg': 'Post not exist'})
 
