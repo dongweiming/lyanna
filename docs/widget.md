@@ -83,6 +83,7 @@ partials:
   - name: latest_comments
     title: 最新评论
     count: 5  # 限制最新评论数量，必选
+    max_length: 65  # 限制评论内容长度
 ```
 
 ## most_viewed

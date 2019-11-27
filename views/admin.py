@@ -49,6 +49,7 @@ async def list_posts(request):
     limit = int(request.args.get('limit')) or PER_PAGE
     page = int(request.args.get('page')) or 1
     special_id = int(request.args.get('special_id') or 0)
+    with_tag = int(request.args.get('with_tag') or 0)
     offset = (page - 1) * limit
     _posts = await Post.filter().order_by('-id').offset(offset).limit(limit)
     total = await Post.filter().count()
@@ -64,7 +65,7 @@ async def list_posts(request):
         dct = post.to_dict()
         if post.id in exclude_ids:
             continue
-        if limit < 100:
+        if with_tag:
             author = await post.author
             dct['author_name'] = author.name
             tags = await post.tags
