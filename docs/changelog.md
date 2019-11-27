@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.1 (2019-11-27)
+
+1. Update recent comments in realtime
+2. Fix github user save
+3. Some minor modifications
+
 ## 2.7 (2019-11-26)
 
 1. Sidebar Widgets(with aboutme、blogroll、most\_viewed、latest\_comments、tagcloud、html)
