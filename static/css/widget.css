@@ -1,10 +1,10 @@
 .widget {
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 .widget h5 {
   color: #4a4a4a;
-  padding-bottom: 1em;
+  padding-bottom: .5em;
 }
 
 .widget p {
@@ -26,6 +26,7 @@
 
 .widget .list-inline a {
   color: #666;
+  font-size: 14px;
 }
 
 .widget .list-inline a:hover, .widget .list-inline a:active {

@@ -77,7 +77,8 @@ export default {
       listLoading: true,
       listQuery: {
         page: 1,
-        limit: 10
+        limit: 10,
+        with_tag: 1
       }
     }
   },

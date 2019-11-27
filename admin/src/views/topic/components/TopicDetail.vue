@@ -104,7 +104,8 @@ export default {
       this.fetchData(id)
       params['special_id'] = id
     } else {
-      this.topicForm = Object.assign({}, defaultForm)
+      // FIXME
+      this.topicForm.posts = []
     }
 
     getPostList(params).then(response => {

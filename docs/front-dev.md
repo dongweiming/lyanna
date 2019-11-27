@@ -7,13 +7,13 @@
 使用 Webpack+ES6+Sass ，首先需要安装依赖:
 
 ```bash
-yarn install
+❯ yarn install
 ```
 
 接着启动开发环境:
 
 ```bash
-yarn start
+❯ yarn start
 ```
 
 修改src目录下代码即可看到效果
@@ -21,7 +21,7 @@ yarn start
 生产环境需要构建：
 
 ```bash
-yarn build
+❯ yarn build
 ```
 
 ## 后台
@@ -29,14 +29,14 @@ yarn build
 使用 ElementUI+Vue-CLI+Vue-Router+Vuex+Webpack+ES6+Sass ，需要安装依赖：
 
 ```bash
-cd admin  # 在 admin 子目录下
-yarn install
+❯ cd admin  # 在 admin 子目录下
+❯ yarn install
 ```
 
 接着启动开发环境:
 
 ```bash
-yarn serve
+❯ yarn serve
 ```
 
 修改src目录下代码即可看到效果
@@ -44,7 +44,8 @@ yarn serve
 生产环境需要构建：
 
 ```
-yarn build
+❯ yarn build
+❯ cp -rp dist/static/* ../static/   # 把新生成的文件拷贝到static目录下
 ```
 
 ## 博客的CSS

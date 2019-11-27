@@ -48,11 +48,20 @@ html {
   .recent-topics .title {
     font-size: 1rem;
   }
+  .topic-title {
+    font-size: 1.2rem;
+  }
+  .topic-intro {
+    font-size: 12px;
+  }
 }
 
 @media screen and (max-width: 768px) {
   .recent-topics {
     padding: 0 30px 30px 30px;
+  }
+  .topic-title {
+    font-size: 1.5em;
   }
 }
 
