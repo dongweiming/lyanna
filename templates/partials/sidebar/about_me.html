@@ -3,7 +3,7 @@
   % if 'title' in partial:
   <h5>${ partial.title }</h5>
   % endif
-  % if partial.avatar2:
+  % if partial.avatar:
   <img id="avatar_pic" src="${ app.url_for('static', filename=f'upload/{ partial.avatar }') }">
   % endif
   <p>${ partial.intro }</p>
