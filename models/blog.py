@@ -441,7 +441,7 @@ class SpecialItem(BaseModel):
 
 
 class SpecialTopic(StatusMixin, BaseModel):
-    id = fields.SmallIntField()
+    id = fields.SmallIntField(pk=True)
     intro = fields.CharField(max_length=2000)
     slug = fields.CharField(max_length=100)
     title = fields.CharField(max_length=100, unique=True)
