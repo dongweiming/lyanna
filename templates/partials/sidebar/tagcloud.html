@@ -3,6 +3,7 @@
 <section class="widget">
   <h5>${ partial.title if 'title' in partial else 'TagCloud' }</h5>
 
+  % if tags:
   <ul class="tagcloud list-inline">
     <%
       per_page = 4
@@ -15,4 +16,5 @@
       <li><a target="_blank" href="${ tag.url }" style="font-size: ${ size }pt;">${ tag.name }</a></li>
     % endfor
   </ul>
+  % endif
 </section>
