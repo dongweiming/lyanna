@@ -11,13 +11,10 @@ bp = Blueprint('j', url_prefix='/j')
 
 def login_required(f):
     async def wrapped(request, **kwargs):
-        user = request['session'].get('user')
-        if not user:
+        if not (user := request['session'].get('user')):
             return json({'r': 403, 'msg': 'Login required.'})
-        post_id = kwargs.pop('post_id', None)
-        if post_id is not None:
-            post = await Post.cache(post_id)
-            if not post:
+        if (post_id := kwargs.pop('post_id', None)) is not None:
+            if not (post := await Post.cache(post_id)):
                 return json({'r': 1, 'msg': 'Post not exist'})
             args = (user, post)
         else:
@@ -29,8 +26,7 @@ def login_required(f):
 @bp.route('/post/<post_id>/comment', methods=['POST'])
 @login_required
 async def create_comment(request, user, post):
-    content = request.form.get('content')
-    if not content:
+    if not (content := request.form.get('content')):
         return json({'r': 1, 'msg': 'Comment content required.'})
     comment = await post.add_comment(user['gid'], content)
     liked_comment_ids = await post.comment_ids_liked_by(user['gid'])
@@ -48,7 +44,7 @@ async def create_comment(request, user, post):
 @bp.route('/post/<post_id>/comments')
 async def comments(request, post_id):
     post = await Post.cache(post_id)
-    if not post:
+    if not (post := await Post.cache(post_id)):
         return json({'r': 1, 'msg': 'Post not exist'})
 
     page = int(request.args.get('page', 1))
@@ -56,10 +52,9 @@ async def comments(request, post_id):
 
     start = (page - 1) * per_page
     comments = (await post.comments)[start: start + per_page]
-    user = request['session'].get('user')
 
     liked_comment_ids = []
-    if user:
+    if (user := request['session'].get('user')):
         liked_comment_ids = await post.comment_ids_liked_by(user['gid'])
 
     return json({
@@ -74,8 +69,7 @@ async def comments(request, post_id):
 @bp.route('/markdown', methods=['POST'])
 @login_required
 async def render_markdown(request, user):
-    text = request.form.get('text')
-    if not text:
+    if not (text := request.form.get('text')):
         return json({'r': 1, 'msg': 'Text required.'})
     return json({'r': 0, 'text':  mistune.markdown(text)})
 
@@ -108,8 +102,7 @@ async def comment_like(request, comment_id):
     user = request['session'].get('user')
     if not user:
         return json({'r': 403, 'msg': 'Login required.'})
-    comment = await Comment.cache(comment_id)
-    if not comment:
+    if not (comment := await Comment.cache(comment_id)):
         return json({'r': 1, 'msg': 'Comment not exist'})
 
     if request.method == 'POST':

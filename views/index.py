@@ -28,8 +28,7 @@ async def oauth(request, post_id=None):
     else:
         url = request.app.url_for('blog.post', ident=post_id)
 
-    user = request['session'].get('user')
-    if user:
+    if (user := request['session'].get('user')):
         return redirect(url)
 
     client = GithubClient(
@@ -109,7 +108,7 @@ async def _search_json(request):
     return [{
         'url': post.url,
         'title': post.title,
-        'content': CODE_RE.sub('', post.content) if post.content else ''
+        'content': CODE_RE.sub('', c) if (c := post.content) else ''
     } for post in posts]
 
 

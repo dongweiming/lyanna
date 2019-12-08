@@ -27,10 +27,8 @@ from models.blog import Post, Tag, MC_KEY_SITEMAP
 
 async def retrieve_user(request, payload, *args, **kwargs):
     if payload:
-        user_id = payload.get('user_id', None)
-        if user_id is None:
-            return
-        return await User.get_or_404(user_id)
+        if (user_id := payload.get('user_id', None)) is not None:
+            return await User.get_or_404(user_id)
 
 
 async def store_refresh_token(user_id, refresh_token, *args, **kwargs):

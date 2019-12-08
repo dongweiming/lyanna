@@ -47,8 +47,7 @@ async def create_user(**data):
 
 
 async def validate_login(name, password):
-    user = await User.filter(name=name).first()
-    if not user:
+    if not (user := await User.filter(name=name).first()):
         return False, None
     if check_password_hash(user.password, password):
         return True, user
