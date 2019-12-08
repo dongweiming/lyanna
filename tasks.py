@@ -71,8 +71,7 @@ async def mention_users(ctx, post_id, content, author_id):
 async def flush_to_db(ctx):
     redis = await create_pool(RedisSettings.from_url(REDIS_URL))
     while 1:
-        post_id = await redis.spop(RK_VISITED_POST_IDS)
-        if post_id is None:
+        if (post_id := await redis.spop(RK_VISITED_POST_IDS)) is None:
             break
 
         post = await Post.get(Q(id=post_id))

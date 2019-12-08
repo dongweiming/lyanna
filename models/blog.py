@@ -153,8 +153,7 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
         if lang == 'card':
             try:
                 dct = ast.literal_eval(text)
-                user = dct.get('user')
-                if user:
+                if (user := dct.get('user')):
                     repo = dct.get('repo')
                     card_html = f'''<div class="github-card" data-user="{ user }" { f'data-repo="{ repo }"' if repo else "" }></div>'''  # noqa
                     if dct.get('right'):
@@ -221,7 +220,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
         tags = kwargs.pop('tags', [])
         content = kwargs.pop('content')
         obj = await super().create(**kwargs)
-        if tags:
+        if (tags := kwargs.pop('tags', [])):
             await PostTag.update_multi(obj.id, tags)
         await obj.set_content(content)
         return obj
@@ -255,21 +254,19 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
         return await self.set_props_by_key('content', content)
 
     async def save(self, *args, **kwargs):
-        content = kwargs.pop('content', None)
-        if content is not None:
+        if (content := kwargs.pop('content', None)) is not None:
             await self.set_content(content)
         return await super().save(*args, **kwargs)
 
     @property
     async def content(self):
-        rv = await self.get_props_by_key('content')
-        if rv:
+        if (rv := await self.get_props_by_key('content')):
             return rv.decode('utf-8')
 
     @property
     async def html_content(self):
         content = await self.content
-        if not content:
+        if not (content := await self.content):
             return ''
         return markdown(content)
 
@@ -284,7 +281,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
     @cache(MC_KEY_RELATED % ('{self.id}'), ONE_HOUR)
     async def get_related(self, limit=4):
         tag_ids = [tag.id for tag in await self.tags]
-        if not tag_ids:
+        if not (tag_ids := [tag.id for tag in await self.tags]):
             return []
         post_ids = set(await PostTag.filter(
             Q(post_id__not=self.id), Q(tag_id__in=tag_ids)).values_list(
@@ -338,8 +335,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
 
     @property
     async def toc(self):
-        content = await self.content
-        if not content:
+        if not (content := await self.content):
             return ''
         toc.reset_toc()
         toc_md.parse(content)
@@ -452,8 +448,7 @@ class SpecialTopic(StatusMixin, BaseModel):
     @cache(MC_KEY_SPECIAL_POST_ITEMS % ('{self.id}'))
     async def get_post_items(self):
         items = await self.get_items()
-        post_ids = [s.post_id for s in items]
-        if not post_ids:
+        if not (post_ids := [s.post_id for s in items]):
             return []
         posts = await Post.filter(id__in=post_ids).all()
         return sorted(posts, key=lambda p: post_ids.index(p.id))

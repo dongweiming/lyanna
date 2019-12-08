@@ -31,8 +31,8 @@ class SanicForm(_SanicForm):
     def validate(self):
         extra_validators = {}
         for name in self._fields:
-            inline = getattr(self.__class__, 'validate_%s' % name, None)
-            if inline is not None:
+            if (inline := getattr(self.__class__, 'validate_%s' % name,
+                                  None)) is not None:
                 extra_validators[name] = [inline]
 
         self._errors = None

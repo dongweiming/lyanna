@@ -35,21 +35,18 @@ class Comment(ReactMixin, BaseModel):
         return await self.set_props_by_key('content', content)
 
     async def save(self, *args, **kwargs):
-        content = kwargs.pop('content', None)
-        if content is not None:
+        if (content := kwargs.pop('content', None)) is not None:
             await self.set_content(content)
         return await super().save(*args, **kwargs)
 
     @property
     async def content(self):
-        rv = await self.get_props_by_key('content')
-        if rv:
+        if (rv := await self.get_props_by_key('content')):
             return rv.decode('utf-8')
 
     @property
     async def html_content(self):
-        content = markupsafe.escape(await self.content)
-        if not content:
+        if not (content := markupsafe.escape(await self.content)):
             return ''
         return markdown(content)
 
@@ -105,8 +102,7 @@ class CommentMixin:
     @cache(MC_KEY_COMMNET_IDS_LIKED_BY_USER % (
         '{user_id}', '{self.id}'), ONE_HOUR)
     async def comment_ids_liked_by(self, user_id):
-        cids = [c.id for c in await self.comments]
-        if not cids:
+        if not (cids := [c.id for c in await self.comments]):
             return []
         queryset = await ReactItem.filter(
             Q(user_id=user_id), Q(target_id__in=cids),
@@ -116,8 +112,7 @@ class CommentMixin:
 
 @comment_reacted.connect
 async def update_comment_list_cache(_, user_id, comment_id):
-    comment = await Comment.cache(comment_id)
-    if comment:
+    if (comment := await Comment.cache(comment_id)):
         asyncio.gather(
             clear_mc(MC_KEY_COMMENT_LIST % comment.post_id),
             clear_mc(MC_KEY_COMMNET_IDS_LIKED_BY_USER % (

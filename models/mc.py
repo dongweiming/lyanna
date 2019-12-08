@@ -65,8 +65,7 @@ def formater(text):
 
 
 def format(text, *a, **kw):
-    f = __formaters.get(text)
-    if f is None:
+    if (f := __formaters.get(text)) is None:
         f = formater(text)
         __formaters[text] = f
     return f(*a, **kw)
