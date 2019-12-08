@@ -9,7 +9,6 @@ from tortoise.models import Model, ModelMeta as _ModelMeta
 
 import config
 from .mc import cache, clear_mc
-from ._compat import PY36
 from .var import redis_var
 
 MC_KEY_ITEM_BY_ID = '%s:%s:v2'
@@ -72,8 +71,7 @@ class BaseModel(Model, metaclass=ModelMeta):
         rv = self.to_dict()
         for field in self.property_fields:
             coro = getattr(self, field)
-            if inspect.iscoroutine(coro) or (
-                    PY36 and isinstance(coro, CoroWrapper)):
+            if inspect.iscoroutine(coro):
                 rv[field] = await coro
             else:
                 rv[field] = coro
@@ -129,8 +127,7 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     @classmethod
     async def get_or_404(cls, id, sync=False):
-        obj = await cls.cache(id)
-        if not obj:
+        if not (obj := await cls.cache(id)):
             abort(404)
         if sync:
             return await obj.to_sync_dict()

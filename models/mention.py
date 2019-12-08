@@ -18,8 +18,7 @@ class Mention:
 
     @classmethod
     async def get_mention_users(cls, content, author_id):
-        author = await GithubUser.cache(author_id)
-        if not author:
+        if not (author := await GithubUser.cache(author_id)):
             return []
         mention_names = cls._parse_mention_names(author, content)
         return await GithubUser.filter(Q(username__in=mention_names))

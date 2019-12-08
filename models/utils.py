@@ -145,8 +145,7 @@ def _parse_rfc1738_args(name):
         re.X,
     )
 
-    m = pattern.match(name)
-    if m is not None:
+    if (m := pattern.match(name)) is not None:
         components = m.groupdict()
         if components['database'] is not None:
             tokens = components['database'].split('?', 2)

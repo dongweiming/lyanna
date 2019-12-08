@@ -159,8 +159,7 @@ async def _tags():
 @mako.template('tag.html')
 @cache(MC_KEY_TAG % '{tag_id}')
 async def tag(request, tag_id):
-    tag = await Tag.cache(tag_id)
-    if not tag:
+    if not (tag := await Tag.cache(tag_id)):
         abort(404)
     post_ids = await PostTag.filter(tag_id=tag_id).values_list(
         'post_id', flat=True)

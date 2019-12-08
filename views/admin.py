@@ -48,16 +48,14 @@ async def admin(request):
 async def list_posts(request):
     limit = int(request.args.get('limit')) or PER_PAGE
     page = int(request.args.get('page')) or 1
-    special_id = int(request.args.get('special_id') or 0)
     with_tag = int(request.args.get('with_tag') or 0)
     offset = (page - 1) * limit
     _posts = await Post.filter().order_by('-id').offset(offset).limit(limit)
     total = await Post.filter().count()
     posts = []
     exclude_ids = []
-    if special_id:
-        topic = await SpecialTopic.cache(special_id)
-        if topic:
+    if (special_id := int(request.args.get('special_id') or 0)):
+        if (topic := await SpecialTopic.cache(special_id)):
             items = await topic.get_items()
             exclude_ids = [s.post_id for s in items]
         total -= len(exclude_ids)
@@ -121,7 +119,7 @@ async def post(request, post_id):
         return await _post(request, post_id=post_id)
 
     post = await Post.get_or_404(id=post_id)
-    if not post:
+    if not (post := await Post.get_or_404(id=post_id)):
         return response.json({'r': 0, 'msg': 'Post not exist'})
 
     if request.method == 'DELETE':
@@ -177,8 +175,7 @@ async def _user(request, user_id=None):
         password = form.password.data
         active = form.active.data
         avatar = form.avatar.data
-        user = await User.filter(name=name).first()
-        if user:
+        if (user := await User.filter(name=name).first()):
             user.email = email
             if password:
                 user.password = generate_password(password)
@@ -217,8 +214,7 @@ async def status(request, target_kind, target_id):
     if not target_id:
         abort(404)
     kls = Post if target_kind == 'post' else SpecialTopic
-    obj = await kls.get(id=target_id)
-    if not obj:
+    if not (obj := await kls.get(id=target_id)):
         return response.json({'r': 0, 'msg': 'item not exist'})
     if request.method == 'POST':
         obj.status = kls.STATUS_ONLINE
@@ -287,7 +283,7 @@ async def _topic(request, topic_id=None):
         for k in copy.copy(request.form):
             if k.startswith('posts'):
                 match = FORM_REGEX.search(k)
-                if match:
+                if (match := FORM_REGEX.search(k)):
                     key = match['key']
                     val = request.form[k][0]
                     dct[match['index']][key] = int(val) if key == 'id' else val
