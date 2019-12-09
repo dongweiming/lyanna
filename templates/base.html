@@ -18,17 +18,20 @@
         <ul class="pure-menu-list clearfix">
           % for menu in SITE_NAV_MENUS:
           <%
-            endpoint_or_url, name, *others = menu
+            endpoint_or_url = menu.get('endpoint')
+            name = menu.get('name')
+            icon = menu.get('icon')
+            color = menu.get('color')
             url = app.url_for(endpoint_or_url) if '.' in endpoint_or_url and 'http' not in endpoint_or_url else endpoint_or_url
           %>
             <li class="pure-menu-item ${ 'actived' if request.path == url else ''  }">
               <a href="${ url }" class="pure-menu-link"
-                % if len(others) > 1:
-                style="color: ${ others[1] }"
+                % if color is not None:
+                style="color: ${ color }"
                 % endif
               >
-                % if others:
-                <i class="iconfont icon-${ others[0] }"></i>
+                % if icon is not None:
+                <i class="iconfont icon-${ icon }"></i>
                 % endif
                 ${ name }
               </a>

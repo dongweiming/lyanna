@@ -70,7 +70,7 @@ Github申请的应用client_secret，如果只是使用默认的 http://127.0.0.
 
 注意: 这会改变主要的布局！
 
-## AUTHOR
+## OWNER
 
 - 默认值: `xiaoming`
 
