@@ -9,7 +9,7 @@ from config import HERE
 from ext import init_db
 from models import create_user
 from models.base import get_redis
-from models.blog import RK_PAGEVIEW, RK_ALL_POST_IDS, PAGEVIEW_FIELD
+from models.blog import PAGEVIEW_FIELD, RK_ALL_POST_IDS, RK_PAGEVIEW
 
 
 async def init():

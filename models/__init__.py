@@ -1,10 +1,9 @@
 from sanic_jwt import exceptions  # noqa
 
-from .blog import Post, Tag, PostTag, SpecialTopic, SpecialItem  # noqa
+from .blog import Post, PostTag, SpecialItem, SpecialTopic, Tag  # noqa
 from .comment import Comment  # noqa
-from .react import ReactItem  # noqa
-from .user import User, create_user, GithubUser, validate_login  # noqa
 from .react import ReactItem, ReactStats  # noqa
+from .user import GithubUser, User, create_user, validate_login  # noqa
 
 
 async def jwt_authenticate(request, *args, **kwargs):

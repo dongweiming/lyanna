@@ -1,8 +1,8 @@
 from tortoise import fields
 
 from .base import BaseModel
-from .mc import cache, clear_mc
 from .consts import K_COMMENT
+from .mc import cache, clear_mc
 from .signals import comment_reacted
 
 MC_KEY_USER_REACT_STAT = 'react:stats:%s:%s'
