@@ -18,16 +18,15 @@ AUTH_LOGIN_ENDPOINT = 'index.login'
 MEMCACHED_HOST = os.getenv('MEMCACHED_HOST', '127.0.0.1')
 MEMCACHED_PORT = 11211
 
-oauth_redirect_path = '/oauth'
-redirect_uri = 'http://127.0.0.1:8000/oauth'
-
-client_id = "098a2e6da880878e05da"
-client_secret = "854cc0d86e61a83bb1dd00c3b23a3cc5b832d45c"
+OAUTH_REDIRECT_PATH = '/oauth'
+REDIRECT_URI = 'http://127.0.0.1:8000/oauth'
+CLIENT_ID = "098a2e6da880878e05da"
+CLIENT_SECRET = "854cc0d86e61a83bb1dd00c3b23a3cc5b832d45c"
 
 REACT_PROMPT = '喜欢这篇文章吗? 记得给我留言或订阅哦'
 HERE = Path(__file__).parent.absolute()
 UPLOAD_FOLDER = HERE / 'static/upload'
-AUTHOR = 'xiaoming'
+OWNER = 'xiaoming'
 SITE_TITLE = 'My Blog'
 PER_PAGE = 10
 GOOGLE_ANALYTICS = ''
@@ -37,10 +36,7 @@ SHOW_PAGEVIEW = False
 PERMALINK_TYPE = 'slug'  # 可选 id、slug、title
 
 # [(Endpoint, Name, IconName, Color), ...]
-SITE_NAV_MENUS = [('blog.index', '首页'), ('blog.topics', '专题'),
-                  ('blog.archives', '归档'), ('blog.tags', '标签'),
-                  ('index.search', '搜索'), ('/page/aboutme', '关于我'),
-                  ('index.feed', 'RSS', 'rss', '#fc6423')]
+SITE_NAV_MENUS = []
 BEIAN_ID = ''
 JWT_SECRET = 'lyanna'
 EXPIRATION_DELTA = 60 * 60
@@ -60,16 +56,24 @@ REDIS_SENTINEL_SERVICE_PORT = 26379
 SHOW_AUTHOR = False
 
 try:
+    from local_settings import *  # noqa
+except ImportError:
+    ...
+
+try:
     with open(HERE / 'config.yaml') as f:
-        partials = AttrDict(yaml.safe_load(f)).partials
+        config = AttrDict(yaml.safe_load(f))
+    partials = config.partials
     USE_YAML = True
 except FileNotFoundError:
     USE_YAML = False
-    partials = {}
-try:
-    from local_settings import *  # noqa
-except ImportError:
-    pass
+    partials = []
+    config = {}
+
+if USE_YAML:
+    for subconfig in [config.common, config.oauth]:
+        globals().update({k.upper(): v for k, v in subconfig.items()})
+    globals().update({f'MAIL_{k.upper()}': v for k, v in config.mail.items()})
 
 redis_sentinel_host = os.getenv('REDIS_SENTINEL_SVC_HOST') or REDIS_SENTINEL_SERVICE_HOST  # noqa
 if redis_sentinel_host:

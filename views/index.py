@@ -9,7 +9,7 @@ from sanic_oauth.providers import GithubClient
 from werkzeug.contrib.atom import AtomFeed
 
 from ext import mako
-from config import AUTHOR, SITE_TITLE
+from config import OWNER, SITE_TITLE
 from models.mc import cache
 from models.blog import Post, MC_KEY_FEED, MC_KEY_SEARCH
 from models.user import create_github_user
@@ -20,8 +20,8 @@ bp = Blueprint('index', url_prefix='/')
 CODE_RE = re.compile('```([A-Za-z]+\n)?|#+')
 
 
-@bp.route(config.oauth_redirect_path)
-@bp.route(config.oauth_redirect_path + '/post/<post_id>')
+@bp.route(config.OAUTH_REDIRECT_PATH)
+@bp.route(config.OAUTH_REDIRECT_PATH + '/post/<post_id>')
 async def oauth(request, post_id=None):
     if post_id is None:
         url = '/'
@@ -33,13 +33,13 @@ async def oauth(request, post_id=None):
 
     client = GithubClient(
         request.app.async_session,
-        client_id=config.client_id,
-        client_secret=config.client_secret
+        client_id=config.CLIENT_ID,
+        client_secret=config.CLIENT_SECRET
     )
     if 'error' in request.args:
         return text(request.args.get('error'))
 
-    redirect_uri = config.redirect_uri
+    redirect_uri = config.REDIRECT_URI
     if post_id is not None:
         redirect_uri += f'/post/{post_id}'
 
@@ -55,8 +55,8 @@ async def oauth(request, post_id=None):
 
     client = GithubClient(
         request.app.async_session,
-        client_id=config.client_id,
-        client_secret=config.client_secret,
+        client_id=config.CLIENT_ID,
+        client_secret=config.CLIENT_SECRET,
         access_token=token
     )
 
@@ -64,7 +64,7 @@ async def oauth(request, post_id=None):
         user, info = await client.user_info()
     except Exception as exc:
         logger.exception(exc)
-        return redirect(config.oauth_redirect_path)
+        return redirect(config.OAUTH_REDIRECT_PATH)
 
     user = await create_github_user(user)
     request['session']['user'] = user.to_dict()
@@ -83,7 +83,7 @@ async def _feed(request):
 
         feed.add(
             post.title, body, content_type='html', summary=summary,
-            summary_type='html', author=AUTHOR, url=post.url,
+            summary_type='html', author=OWNER, url=post.url,
             id=post.id, updated=post.created_at, published=post.created_at
         )
     return feed.to_string()
