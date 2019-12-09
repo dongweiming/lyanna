@@ -1,5 +1,5 @@
-from tortoise import Tortoise
 from sanic_mako import SanicMako
+from tortoise import Tortoise
 
 from config import DB_URL, SENTRY_DSN
 

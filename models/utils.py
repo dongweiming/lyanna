@@ -1,7 +1,7 @@
-import re
 import math
-from urllib.parse import unquote
+import re
 from dataclasses import dataclass
+from urllib.parse import unquote
 
 from arq.connections import RedisSettings as _RedisSettings
 

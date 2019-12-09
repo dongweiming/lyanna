@@ -63,5 +63,5 @@ async def create_github_user(user_info):
         'username': user_info.username,
         'email': user_info.email or user_info.username,
     }
-    user = await (user.update(**kwargs) if user else GithubUser.create(**kwargs)) # noqa
+    user = await (user.update(**kwargs) if user else GithubUser.create(**kwargs))  # noqa
     return user

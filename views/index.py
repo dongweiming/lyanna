@@ -4,17 +4,16 @@ from urllib.parse import unquote
 
 from sanic import Blueprint, response
 from sanic.log import logger
-from sanic.response import redirect, text, HTTPResponse
+from sanic.response import HTTPResponse, redirect, text
 from sanic_oauth.providers import GithubClient
 from werkzeug.contrib.atom import AtomFeed
 
-from ext import mako
-from config import OWNER, SITE_TITLE
-from models.mc import cache
-from models.blog import Post, MC_KEY_FEED, MC_KEY_SEARCH
-from models.user import create_github_user
-
 import config
+from config import OWNER, SITE_TITLE
+from ext import mako
+from models.blog import MC_KEY_FEED, MC_KEY_SEARCH, Post
+from models.mc import cache
+from models.user import create_github_user
 
 bp = Blueprint('index', url_prefix='/')
 CODE_RE = re.compile('```([A-Za-z]+\n)?|#+')

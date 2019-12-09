@@ -2,10 +2,11 @@ import markupsafe
 from sanic.log import logger
 from sanic_wtf import SanicForm as _SanicForm
 from wtforms import (
-    PasswordField, StringField, SubmitField, BooleanField,
-    SelectField, SelectMultipleField, TextAreaField)
-from wtforms.widgets import HiddenInput
+    BooleanField, PasswordField, SelectField,
+    SelectMultipleField, StringField, SubmitField, TextAreaField,
+)
 from wtforms.validators import DataRequired
+from wtforms.widgets import HiddenInput
 
 
 class SwitchField(SelectField):

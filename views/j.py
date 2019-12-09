@@ -1,10 +1,9 @@
 import mistune
-
 from sanic import Blueprint
 from sanic.response import json
 from sanic_mako import render_template_def
 
-from models import Post, ReactItem, Comment
+from models import Comment, Post, ReactItem
 
 bp = Blueprint('j', url_prefix='/j')
 

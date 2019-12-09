@@ -1,5 +1,5 @@
-from json import dumps, JSONEncoder
-from datetime import datetime, date, timezone
+from datetime import date, datetime, timezone
+from json import JSONEncoder, dumps
 
 from sanic.response import HTTPResponse
 

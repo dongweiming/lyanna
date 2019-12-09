@@ -1,25 +1,25 @@
-import re
-import copy
 import base64
+import copy
 import mimetypes
-from pathlib import Path
+import re
 from collections import defaultdict
+from pathlib import Path
 
 from sanic import Blueprint, response
 from sanic.exceptions import abort
 from sanic_jwt import protected
 from sanic_jwt.decorators import instant_config
 from sanic_jwt.utils import call as jwt_call
-
-from ext import mako
 from tortoise.query_utils import Q
+
 from config import PER_PAGE
-from models import Post, User, Tag, PostTag, SpecialTopic
+from ext import mako
+from forms import PostForm, TopicForm, UserForm
+from models import Post, PostTag, SpecialTopic, Tag, User
 from models.user import generate_password
-from forms import UserForm, PostForm, TopicForm
 from views.utils import json
 
-FORM_REGEX = re.compile('posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')  # noqa
+FORM_REGEX = re.compile(r'posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')  # noqa
 
 bp = Blueprint('admin', url_prefix='/')
 bp.static('img', './static/img')
@@ -88,7 +88,8 @@ async def _post(request, post_id=None):
 
     if request.method in ('POST', 'PUT') and form.validate():
         title = form.title.data
-        assert str(form.author_id.data).isdigit()
+        if not str(form.author_id.data).isdigit():
+            return json({'ok': False})
         if post_id is None:
             post = await Post.filter(title=title).first()
         if not post:

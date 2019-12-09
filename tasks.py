@@ -1,18 +1,20 @@
 import asyncio
-from functools import wraps
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from functools import wraps
 
 import aiosmtplib
-from arq import cron, create_pool
+from arq import create_pool, cron
 from mako.lookup import TemplateLookup
 from tortoise.query_utils import Q
 
+from config import (
+    BLOG_URL, MAIL_PASSWORD, MAIL_PORT, MAIL_SERVER,
+    MAIL_USERNAME, REDIS_URL, SITE_TITLE,
+)
 from ext import init_db
-from models.blog import Post, RK_PAGEVIEW, RK_VISITED_POST_IDS
-from models.mention import Mention, EMAIL_SUBJECT
-from config import (MAIL_SERVER, MAIL_PORT, MAIL_USERNAME,
-                    MAIL_PASSWORD, SITE_TITLE, BLOG_URL, REDIS_URL)
+from models.blog import RK_PAGEVIEW, RK_VISITED_POST_IDS, Post
+from models.mention import EMAIL_SUBJECT, Mention
 from models.utils import RedisSettings
 
 CAN_SEND = all((MAIL_SERVER, MAIL_USERNAME, MAIL_PASSWORD))
