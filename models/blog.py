@@ -1,31 +1,31 @@
-import re
 import ast
-import types
-import random
 import inspect
+import random
+import re
+import types
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
 
-import pangu
 import mistune
-from tortoise import fields
+import pangu
 from aioredis.errors import RedisError
-from tortoise.query_utils import Q
-from tortoise.models import ModelMeta
-
 from pygments import highlight
-from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
+from pygments.lexers import get_lexer_by_name
+from tortoise import fields
+from tortoise.models import ModelMeta
+from tortoise.query_utils import Q
 
 from config import PERMALINK_TYPE
-from .mc import cache, clear_mc
+
 from .base import BaseModel, get_redis
-from .user import User
-from .consts import K_POST, ONE_HOUR, PERMALINK_TYPES
-from .utils import trunc_utf8
 from .comment import CommentMixin
+from .consts import K_POST, ONE_HOUR, PERMALINK_TYPES
+from .mc import cache, clear_mc
 from .react import ReactMixin
 from .toc import TocMixin
+from .user import User
+from .utils import trunc_utf8
 
 MC_KEY_TAGS_BY_POST_ID = 'post:%s:tags'
 MC_KEY_RELATED = 'post:related_posts:%s'
@@ -349,7 +349,8 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
     def url(self):
         if self.is_page:
             return f'/page/{self.slug}'
-        assert PERMALINK_TYPE in PERMALINK_TYPES
+        if PERMALINK_TYPE not in PERMALINK_TYPES:
+            raise TypeError('Wrong url type!')
         return f'/post/{getattr(self, PERMALINK_TYPE) or self.id}/'
 
     async def incr_pageview(self, increment=1):
@@ -481,7 +482,7 @@ class SpecialTopic(StatusMixin, BaseModel):
 
     @classmethod
     async def flush_by_pid(cls, post_id):
-        special_ids = SpecialItem.get_special_id_by_pid(post_id)
+        special_ids = await SpecialItem.get_special_id_by_pid(post_id)
         keys = [MC_KEY_SPECIAL_ITEMS % i for i in special_ids]
         keys.extend([MC_KEY_SPECIAL_POST_ITEMS % i for i in special_ids])
         keys.append(MC_KEY_SPECIAL_BY_PID % post_id)

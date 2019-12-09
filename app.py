@@ -1,28 +1,28 @@
-import sys
 import asyncio
+import sys
 import traceback
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import aiohttp
-import aioredis
 import aiomcache
+import aioredis
 from sanic import Sanic
+from sanic.exceptions import NotFound, ServerError
 from sanic.handlers import ErrorHandler as _ErrorHandler
 from sanic.request import Request as _Request
-from sanic.exceptions import NotFound, ServerError
 from sanic.response import HTTPResponse, text
-from sanic_mako import render_string
 from sanic_jwt import Initialize
-from sanic_session import Session, MemcacheSessionInterface
-from werkzeug.utils import find_modules, import_string, ImportStringError
+from sanic_mako import render_string
+from sanic_session import MemcacheSessionInterface, Session
+from werkzeug.utils import ImportStringError, find_modules, import_string
 
 import config
-from ext import mako, init_db, sentry
+from ext import init_db, mako, sentry
+from models import User, jwt_authenticate
+from models.blog import MC_KEY_SITEMAP, Post, Tag
 from models.mc import cache
-from models import jwt_authenticate, User
-from models.var import redis_var, memcache_var
-from models.blog import Post, Tag, MC_KEY_SITEMAP
+from models.var import memcache_var, redis_var
 
 
 async def retrieve_user(request, payload, *args, **kwargs):

@@ -1,13 +1,13 @@
-import inspect
 import asyncio
+import inspect
+
 import aioredis
 from sanic.exceptions import abort
-from asyncio.coroutines import CoroWrapper
-
 from tortoise import fields
-from tortoise.models import Model, ModelMeta as _ModelMeta
+from tortoise.models import Model, ModelMeta as _ModelMeta  # isort:skip
 
 import config
+
 from .mc import cache, clear_mc
 from .var import redis_var
 

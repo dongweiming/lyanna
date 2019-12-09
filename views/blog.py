@@ -1,20 +1,21 @@
 import random
-from itertools import groupby
 from collections import Counter
+from itertools import groupby
 
 from sanic import Blueprint
 from sanic.exceptions import abort
 from tortoise.query_utils import Q
 
-from ext import mako
 from config import PER_PAGE, AttrDict, partials
+from ext import mako
+from models import Post, PostTag, SpecialTopic, Tag
+from models.blog import (
+    MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
+    MC_KEY_TAGS, get_most_viewed_posts,
+)
+from models.comment import get_latest_comments
 from models.mc import cache
 from models.utils import Pagination
-from models.blog import (
-    MC_KEY_ARCHIVES, MC_KEY_ARCHIVE, MC_KEY_TAGS, MC_KEY_TAG,
-    get_most_viewed_posts)
-from models.comment import get_latest_comments
-from models import Post, Tag, PostTag, SpecialTopic
 
 bp = Blueprint('blog', url_prefix='/')
 

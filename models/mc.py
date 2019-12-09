@@ -1,14 +1,15 @@
-import re
 import asyncio
 import inspect
+import re
 from functools import wraps
-from pickle import loads, dumps
+from pickle import dumps, loads
 
 import aiomcache
 
 import config
-from .var import memcache_var
+
 from .utils import Empty
+from .var import memcache_var
 
 _memcache = None
 __formaters = {}
@@ -126,6 +127,8 @@ def cache(key_pattern, expire=0):
 
 async def clear_mc(*keys):
     memcache = await get_memcache()
-    assert memcache is not None
+    if memcache is None:
+        return False
     await asyncio.gather(*[memcache.delete(k.encode('utf-8')) for k in keys],
                          return_exceptions=True)
+    return True

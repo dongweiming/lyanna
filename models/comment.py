@@ -1,18 +1,19 @@
 import asyncio
 
-import mistune
 import markupsafe
+import mistune
+from arq import create_pool
 from tortoise import fields
 from tortoise.query_utils import Q
-from arq import create_pool
 
 from config import REDIS_URL, partials
+
 from .base import BaseModel
-from .mc import cache, clear_mc
-from .user import GithubUser
 from .consts import K_COMMENT, ONE_HOUR
-from .react import ReactMixin, ReactItem
+from .mc import cache, clear_mc
+from .react import ReactItem, ReactMixin
 from .signals import comment_reacted
+from .user import GithubUser
 from .utils import RedisSettings
 
 markdown = mistune.Markdown()

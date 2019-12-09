@@ -1,9 +1,9 @@
-import glob
 import argparse
+import glob
 
+import yaml
 from tortoise import run_async
 from tortoise.exceptions import IntegrityError
-import yaml
 
 from ext import init_db
 from models import Post
@@ -42,7 +42,7 @@ async def write_post(file):
                 continue
             meta_info += i + '\n'
 
-        meta_dict = yaml.load(meta_info, yaml.SafeLoader)
+        meta_dict = yaml.safe_load(meta_info)
         title = meta_dict['title']
         date = meta_dict.get('date') or meta_dict.get('created')
         tags = meta_dict.get('tags', [])
