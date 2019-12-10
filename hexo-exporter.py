@@ -1,5 +1,6 @@
 import argparse
 import glob
+from typing import List
 
 import yaml
 from tortoise import run_async
@@ -19,7 +20,7 @@ if not args.uid:
     print('the `uid` argument are required!')
     exit(1)
 
-files = []
+files: List[str] = []
 
 for dir in source_dirs:
     files.extend(sum([glob.glob(f'{dir}/*.{pattern}')
@@ -28,7 +29,7 @@ for dir in source_dirs:
 files = sorted(files, reverse=False)
 
 
-async def write_post(file):
+async def write_post(file: str) -> None:
     flag = False
     meta_info = ''
 
@@ -47,20 +48,21 @@ async def write_post(file):
         date = meta_dict.get('date') or meta_dict.get('created')
         tags = meta_dict.get('tags', [])
         if not (title and date):
-            print(f"[Fail] Parse meta failed in {file.name}")
+            print(f"[Fail] Parse meta failed in {f.name}")
             return
         content = ''.join(f.readlines())
 
         try:
-            await Post.create(title=title, content=content, tags=tags,
-                              author_id=args.uid, slug='', summary='',
-                              status=Post.STATUS_ONLINE, created_at=date)
-            print(f"[Success] Load post: {file.name}")
+            await Post.create(title=title, content=content,  # type: ignore
+                              tags=tags, author_id=args.uid, slug='',
+                              summary='', status=Post.STATUS_ONLINE,
+                              created_at=date)
+            print(f"[Success] Load post: {f.name}")
         except IntegrityError:
             ...
 
 
-async def main():
+async def main() -> None:
     await init_db()
     for f in files:
         await write_post(f)

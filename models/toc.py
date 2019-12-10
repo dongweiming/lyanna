@@ -2,6 +2,9 @@
 # Modified from https://github.com/lepture/mistune-contrib
 
 
+from typing import Iterator, List, Tuple
+
+
 class TocMixin:
 
     """TOC mixin for Renderer, mix this with Renderer::
@@ -18,8 +21,8 @@ class TocMixin:
         toc.render_toc(level=3)  # render TOC HTML
     """
 
-    def reset_toc(self):
-        self.toc_tree = []
+    def reset_toc(self) -> None:
+        self.toc_tree: List[Tuple] = []
         self.toc_count = 0
 
     def header(self, text, level, raw=None):
@@ -30,14 +33,14 @@ class TocMixin:
         self.toc_count += 1
         return rv
 
-    def render_toc(self, level=3):
+    def render_toc(self, level: int = 3) -> str:
         """Render TOC to HTML.
 
         :param level: render toc to the given level
         """
         return ''.join(self._iter_toc(level))
 
-    def _iter_toc(self, level):
+    def _iter_toc(self, level: int) -> Iterator[str]:
         first_level = 0
         last_level = 0
 

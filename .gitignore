@@ -74,3 +74,4 @@ srv/deploy.retry
 # K8s
 k8s/config.yaml
 config.yaml
+.mypy_cache
