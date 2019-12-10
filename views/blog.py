@@ -1,6 +1,7 @@
 import random
 from collections import Counter
 from itertools import groupby
+from typing import Dict, List, Tuple, Union
 
 from sanic import Blueprint
 from sanic.exceptions import abort
@@ -9,41 +10,42 @@ from tortoise.query_utils import Q
 from config import PER_PAGE, AttrDict, partials
 from ext import mako
 from models import Post, PostTag, SpecialTopic, Tag
-from models.blog import (
-    MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
-    MC_KEY_TAGS, get_most_viewed_posts,
-)
+from models.blog import (MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
+                         MC_KEY_TAGS, get_most_viewed_posts)
 from models.comment import get_latest_comments
 from models.mc import cache
 from models.utils import Pagination
+from views.request import Request
 
 bp = Blueprint('blog', url_prefix='/')
 
 
-def grouper(item):
+def grouper(item: Post) -> int:
     return item.created_at.year
 
 
 @bp.route('/')
-async def index(request):
+async def index(request: Request):
     return await _posts(request)
 
 
 @bp.route('/page/<ident>')
-async def page(request, ident=1):
+async def page(request: Request, ident: Union[str, int] = 1):
     if str(ident).isdigit():
         return await _posts(request, page=int(ident))
     return await _post(request, ident=ident)
 
 
 @mako.template('index.html')
-async def _posts(request, page=1):
+async def _posts(request: Request, page: int = 1):
     start = (page - 1) * PER_PAGE
     posts = await Post.get_all(with_page=False)
     total = len(posts)
     posts = posts[start: start + PER_PAGE]
     paginatior = Pagination(page, PER_PAGE, total, posts)
-    json = {'paginatior': paginatior}
+    json: Dict[
+        str, Union[List[Tuple[int, Post]], List[AttrDict],
+                   List[Tuple[Tag, int]], Pagination]] = {'paginatior': paginatior}
 
     for partial in partials:
         partial = AttrDict(partial)
@@ -82,12 +84,12 @@ async def _posts(request, page=1):
 
 
 @bp.route('/post/<ident>')
-async def post(request, ident):
+async def post(request: Request, ident: str):
     return await _post(request, ident=ident)
 
 
 @mako.template('post.html')
-async def _post(request, ident, is_preview=False):
+async def _post(request: Request, ident: str, is_preview: bool = False):
     post = await Post.get_or_404(ident)
     if not is_preview and post.status != Post.STATUS_ONLINE:
         abort(404)
@@ -95,7 +97,7 @@ async def _post(request, ident, is_preview=False):
     github_user = request['session'].get('user')
     stats = await post.stats
     reaction_type = None
-    liked_comment_ids = []
+    liked_comment_ids: List[int] = []
     if github_user:
         reaction_type = await post.get_reaction_type(github_user['gid'])
         liked_comment_ids = await post.comment_ids_liked_by(
@@ -117,7 +119,7 @@ async def preview(request, ident):
 @bp.route('/archives')
 @mako.template('archives.html')
 @cache(MC_KEY_ARCHIVES)
-async def archives(request):
+async def archives(request: Request) -> Dict[str, List[Tuple[int, List[Post]]]]:
     rv = {
         year: list(items) for year, items in groupby(
             await Post.filter(Q(status=Post.STATUS_ONLINE)).order_by('-id'),
@@ -143,12 +145,12 @@ async def archive(request, year):
 @bp.route('/tags')
 @mako.template('tags.html')
 @cache(MC_KEY_TAGS)
-async def tags(request):
+async def tags(request: Request) -> Dict[str, List[Tuple[Tag, int]]]:
     tags = await _tags()
     return {'tags': sorted(tags, key=lambda x: x[1], reverse=True)}
 
 
-async def _tags():
+async def _tags() -> List[Tuple[Tag, int]]:
     tag_ids = await PostTag.filter().values_list('tag_id', flat=True)
     counter = Counter(tag_ids)
     tags_ = await Tag.get_multi(counter.keys())
@@ -172,7 +174,7 @@ async def tag(request, tag_id):
 @bp.route('/topics')
 @bp.route('/topics/<ident>')
 @mako.template('topics.html')
-async def topics(request, ident=1):
+async def topics(request: Request, ident: int = 1) -> Dict[str, Pagination]:
     start = (ident - 1) * PER_PAGE
     topics = await SpecialTopic.get_all()
     total = len(topics)
@@ -183,7 +185,7 @@ async def topics(request, ident=1):
 
 @bp.route('/special/<ident>')
 @mako.template('topic.html')
-async def topic(request, ident):
+async def topic(request: Request, ident: str):
     topic = await SpecialTopic.cache(ident)
-    posts = await topic.get_post_items()
+    posts = await topic.get_post_items()  # type: ignore
     return {'topic': topic, 'posts': [await p.to_sync_dict() for p in posts]}

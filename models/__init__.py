@@ -17,7 +17,7 @@ async def jwt_authenticate(request, *args, **kwargs):
     if not ok:
         raise exceptions.AuthenticationFailed('User or Password is incorrect.')
 
-    if not user.active:
+    if not user.active:  # type: ignore
         raise exceptions.AuthenticationFailed(
             'The account has been deactivated!')
-    return {'user_id': user.id}
+    return {'user_id': user.id}  # type: ignore

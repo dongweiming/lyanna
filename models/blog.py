@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import inspect
 import random
@@ -5,6 +7,7 @@ import re
 import types
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
+from typing import Any, Callable, Dict, List, Tuple, Union  # noqa
 
 import mistune
 import pangu
@@ -15,8 +18,9 @@ from pygments.lexers import get_lexer_by_name
 from tortoise import fields
 from tortoise.models import ModelMeta
 from tortoise.query_utils import Q
+from tortoise.queryset import QuerySet
 
-from config import PERMALINK_TYPE
+from config import PERMALINK_TYPE, AttrDict
 
 from .base import BaseModel, get_redis
 from .comment import CommentMixin
@@ -81,8 +85,8 @@ class PanguMeta(type):
         return super().__new__(cls, name, bases, attrs)
 
     @classmethod
-    def deco(cls, func, index):
-        def wrapper(*args, **kwargs):
+    def deco(cls, func: Callable, index: int) -> Callable:
+        def wrapper(*args: Any, **kwargs: Any) -> str:
             _args = list(args)
             _args[index] = pangu.spacing_text(_args[index])
             result = func(*_args, **kwargs)
@@ -90,7 +94,7 @@ class PanguMeta(type):
         return wrapper
 
 
-class BlogHtmlFormatter(HtmlFormatter):
+class BlogHtmlFormatter(HtmlFormatter):  # type: ignore
 
     def __init__(self, **options):
         super().__init__(**options)
@@ -133,7 +137,8 @@ class BlogHtmlFormatter(HtmlFormatter):
         yield 0, '</pre>'
 
 
-def block_code(text, lang, inlinestyles=False, linenos=False):
+def block_code(text: str, lang: str, inlinestyles: bool = False,
+               linenos: bool = False) -> str:
     if not lang:
         text = text.strip()
         return '<pre><code>%s</code></pre>\n' % mistune.escape(text)
@@ -142,7 +147,7 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
         if lang in ('py', 'python'):
             lang = 'python3'
         lexer = get_lexer_by_name(lang, stripall=True)
-        formatter = BlogHtmlFormatter(
+        formatter = BlogHtmlFormatter(  # type: ignore
             noclasses=inlinestyles, linenos=linenos,
             cssclass='highlight %s' % lang, lang=lang
         )
@@ -167,7 +172,7 @@ def block_code(text, lang, inlinestyles=False, linenos=False):
         )
 
 
-class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):
+class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):  # type: ignore
     def header(self, text, level, raw=None):
         hid = text.replace(' ', '')
         return f'<h{level} id="{hid}">{text}</h{level}>\n'
@@ -181,7 +186,7 @@ class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):
         return f' {super().link(link, title, text) } '
 
 
-class TocRenderer(TocMixin, mistune.Renderer):
+class TocRenderer(TocMixin, mistune.Renderer):  # type:ignore
     ...
 
 
@@ -230,9 +235,9 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
             await PostTag.update_multi(self.id, tagnames)
         return True
 
-    @property
+    @property  # type: ignore
     @cache(MC_KEY_TAGS_BY_POST_ID % ('{self.id}'))
-    async def tags(self):
+    async def tags(self) -> List:
         pts = await PostTag.filter(post_id=self.id).order_by(
             'updated_at').all()
         if not pts:
@@ -242,44 +247,45 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
         return sorted(tags, key=lambda t: ids.index(t.id))
 
     @property
-    async def author(self):
+    async def author(self) -> User:
         rv = await User.cache(self.author_id)
         return rv
 
     @property
-    def preview_url(self):
+    def preview_url(self) -> str:
         return f'/{self.__class__.__name__.lower()}/{self.id}/preview'
 
-    async def set_content(self, content):
+    async def set_content(self, content: str) -> bool:
         return await self.set_props_by_key('content', content)
 
     async def save(self, *args, **kwargs):
         if (content := kwargs.pop('content', None)) is not None:
             await self.set_content(content)
-        return await super().save(*args, **kwargs)
+        return await super().save(*args, **kwargs)  # type: ignore
 
     @property
-    async def content(self):
+    async def content(self) -> str:
         if (rv := await self.get_props_by_key('content')):
             return rv.decode('utf-8')
+        return ''
 
     @property
-    async def html_content(self):
+    async def html_content(self) -> str:
         content = await self.content
         if not (content := await self.content):
             return ''
         return markdown(content)
 
     @property
-    async def excerpt(self):
+    async def excerpt(self) -> str:
         if self.summary:
             return self.summary
-        s = MLStripper()
+        s = MLStripper()  # type: ignore
         s.feed(await self.html_content)
         return trunc_utf8(BQ_REGEX.sub('', s.get_data()).replace('\n', ''), 100)  # noqa
 
     @cache(MC_KEY_RELATED % ('{self.id}'), ONE_HOUR)
-    async def get_related(self, limit=4):
+    async def get_related(self, limit: int = 4):
         tag_ids = [tag.id for tag in await self.tags]
         if not (tag_ids := [tag.id for tag in await self.tags]):
             return []
@@ -293,10 +299,10 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
 
         post_ids -= set(excluded_ids)
         try:
-            post_ids = random.sample(post_ids, limit)
+            _post_ids = random.sample(post_ids, limit)
         except ValueError:
-            ...
-        return await self.get_multi(post_ids)
+            _post_ids = []
+        return await self.get_multi(_post_ids)
 
     async def clear_mc(self):
         keys = [
@@ -314,27 +320,28 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
 
     @classmethod
     @cache(MC_KEY_POST_BY_SLUG % '{slug}')
-    async def get_by_slug(cls, slug):
+    async def get_by_slug(cls, slug: str) -> None:
         return await cls.filter(slug=slug).first()
 
     @classmethod
     @cache(MC_KEY_ALL_POSTS % '{with_page}')
-    async def get_all(cls, with_page=True):
+    async def get_all(cls, with_page: bool = True) -> List[Post]:
         if with_page:
-            return await Post.sync_filter(status=Post.STATUS_ONLINE,
-                                          orderings=['-id'], limit=None)
-        return await Post.sync_filter(status=Post.STATUS_ONLINE,
-                                      type__not=cls.TYPE_PAGE,
-                                      orderings=['-id'], limit=None)
+            return await Post.sync_filter(
+                status=Post.STATUS_ONLINE,
+                orderings=['-id'], limit=None)
+        return await Post.sync_filter(
+            status=Post.STATUS_ONLINE, type__not=cls.TYPE_PAGE,
+            orderings=['-id'], limit=None)
 
     @classmethod
-    async def cache(cls, ident):
+    async def cache(cls, ident: Union[str, int]) -> Post:
         if str(ident).isdigit():
             return await super().cache(ident)
         return await cls.get_by_slug(ident)
 
     @property
-    async def toc(self):
+    async def toc(self) -> str:
         if not (content := await self.content):
             return ''
         toc.reset_toc()
@@ -342,18 +349,18 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
         return toc.render_toc(level=4)
 
     @property
-    def is_page(self):
+    def is_page(self) -> bool:
         return self.type == self.TYPE_PAGE
 
     @property
-    def url(self):
+    def url(self) -> str:
         if self.is_page:
             return f'/page/{self.slug}'
         if PERMALINK_TYPE not in PERMALINK_TYPES:
             raise TypeError('Wrong url type!')
         return f'/post/{getattr(self, PERMALINK_TYPE) or self.id}/'
 
-    async def incr_pageview(self, increment=1):
+    async def incr_pageview(self, increment: int = 1) -> int:
         redis = await self.redis
         try:
             await redis.sadd(RK_ALL_POST_IDS, self.id)
@@ -364,7 +371,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
             return self._pageview
 
     @property
-    async def pageview(self):
+    async def pageview(self) -> int:
         try:
             return int(await (await self.redis).hget(
                 RK_PAGEVIEW.format(self.id), PAGEVIEW_FIELD) or 0)
@@ -379,14 +386,14 @@ class Tag(BaseModel):
         table = 'tags'
 
     @classmethod
-    def get_by_name(cls, name):
+    def get_by_name(cls, name: str) -> QuerySet:
         return cls.filter(name=name).first()
 
     @classmethod
-    def create(cls, **kwargs):
+    def create(cls, **kwargs) -> Tag:
         name = kwargs.pop('name')
         kwargs['name'] = name.lower()
-        return super().create(**kwargs)
+        return super().create(**kwargs)  # type: ignore
 
 
 class PostTag(BaseModel):
@@ -398,7 +405,7 @@ class PostTag(BaseModel):
         table = 'post_tags'
 
     @classmethod
-    async def update_multi(cls, post_id, tags):
+    async def update_multi(cls, post_id: int, tags: List[str]) -> None:
         origin_tags = set([t.name for t in (
             await Post.sync_get(id=post_id)).tags])
         need_add = set(tags) - origin_tags
@@ -432,7 +439,7 @@ class SpecialItem(BaseModel):
 
     @classmethod
     @cache(MC_KEY_SPECIAL_BY_PID % ('{post_id}'))
-    async def get_special_id_by_pid(cls, post_id):
+    async def get_special_id_by_pid(cls, post_id: int) -> List[Any]:
         return await SpecialItem.filter(post_id=post_id).values_list(
             'special_id', flat=True)
 
@@ -455,7 +462,7 @@ class SpecialTopic(StatusMixin, BaseModel):
         return sorted(posts, key=lambda p: post_ids.index(p.id))
 
     @cache(MC_KEY_SPECIAL_ITEMS % ('{self.id}'))
-    async def get_items(self):
+    async def get_items(self) -> List[SpecialItem]:
         return await SpecialItem.filter(special_id=self.id).order_by(
             'index').all()
 
@@ -481,7 +488,7 @@ class SpecialTopic(StatusMixin, BaseModel):
                        MC_KEY_SPECIAL_POST_ITEMS % self.id)
 
     @classmethod
-    async def flush_by_pid(cls, post_id):
+    async def flush_by_pid(cls, post_id: int) -> None:
         special_ids = await SpecialItem.get_special_id_by_pid(post_id)
         keys = [MC_KEY_SPECIAL_ITEMS % i for i in special_ids]
         keys.extend([MC_KEY_SPECIAL_POST_ITEMS % i for i in special_ids])
@@ -489,31 +496,31 @@ class SpecialTopic(StatusMixin, BaseModel):
         await clear_mc(*keys)
 
     @property
-    async def n_posts(self):
+    async def n_posts(self) -> int:
         return len(await self.get_post_items())
 
     @property
-    async def posts(self):
+    async def posts(self) -> List[Dict[str, Any]]:
         return [{'id': p.id, 'title': p.title}
                 for p in await self.get_post_items()]
 
     @property
-    def url(self):
+    def url(self) -> str:
         return f'/special/{self.slug or self.id}'
 
     @classmethod
     @cache(MC_KEY_SPECIAL_BY_SLUG % '{slug}')
-    async def get_by_slug(cls, slug):
+    async def get_by_slug(cls, slug: str) -> SpecialTopic:
         return await cls.filter(slug=slug).first()
 
     @classmethod
     @cache(MC_KEY_ALL_SPECIAL_TOPICS)
-    async def get_all(cls):
+    async def get_all(cls) -> List[AttrDict]:
         return await cls.sync_filter(status=cls.STATUS_ONLINE,
                                      orderings=['-id'], limit=None)
 
     @classmethod
-    async def cache(cls, ident):
+    async def cache(cls, ident: Union[str, int]) -> None:
         if str(ident).isdigit():
             return await super().cache(ident)
         return await cls.get_by_slug(ident)
@@ -528,7 +535,8 @@ class SpecialTopic(StatusMixin, BaseModel):
         await clear_mc(*keys)
 
 
-async def get_most_viewed_posts(count, offset=0):
+async def get_most_viewed_posts(
+        count: int, offset: int = 0) -> List[Tuple[int, Post]]:
     redis = await get_redis()
     key_pattern = RK_PAGEVIEW.replace('{}', '*')
     keys = (await redis.sort(RK_ALL_POST_IDS, by=f'{key_pattern}->pv',
