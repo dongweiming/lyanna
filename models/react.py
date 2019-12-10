@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from tortoise import fields
 
 from .base import BaseModel
@@ -34,7 +36,7 @@ class ReactItem(BaseModel):
         table = 'react_items'
 
     @classmethod
-    async def create(cls, **kwargs):
+    async def create(cls, **kwargs) -> ReactItem:
         obj = await super().create(**kwargs)
         react_name = next((name for name, type in cls.REACTION_MAP.items()
                            if type == obj.reaction_type), None)
@@ -52,8 +54,8 @@ class ReactItem(BaseModel):
                               target_kind=target_kind).first()
         return rv
 
-    async def delete(self, using_db=None):
-        rv = await super().delete(using_db=using_db)
+    async def delete(self, using_db=None) -> ReactItem:
+        rv = await super().delete(using_db=using_db)  # type: ignore
         stat = await ReactStats.get_by_target(self.target_id, self.target_kind)
         react_name = next((name for name, type in self.REACTION_MAP.items()
                            if type == self.reaction_type), None)
@@ -82,12 +84,11 @@ class ReactStats(BaseModel):
 
     @classmethod
     @cache(MC_KEY_USER_REACT_STAT % ('{target_id}', '{target_kind}'))
-    async def get_by_target(cls, target_id, target_kind):
+    async def get_by_target(cls, target_id: int, target_kind: int) -> ReactStats:
         rv = await cls.filter(target_id=target_id,
                               target_kind=target_kind).first()
         if not rv:
-            rv = await cls.create(target_id=target_id,
-                                  target_kind=target_kind)
+            rv = await cls.create(target_id=target_id, target_kind=target_kind)
         return rv
 
     async def clear_mc(self):
@@ -96,6 +97,9 @@ class ReactStats(BaseModel):
 
 
 class ReactMixin:
+    id: int
+    kind: int
+
     async def add_reaction(self, user_id, reaction_type):
         item = await ReactItem.get_reaction_item(user_id, self.id, self.kind)
         if item and reaction_type == item.reaction_type:
@@ -118,7 +122,7 @@ class ReactMixin:
         return True
 
     @property
-    async def stats(self):
+    async def stats(self) -> ReactStats:
         return await ReactStats.get_by_target(self.id, self.kind)
 
     async def get_reaction_type(self, user_id):

@@ -8,10 +8,8 @@ from arq import create_pool, cron
 from mako.lookup import TemplateLookup
 from tortoise.query_utils import Q
 
-from config import (
-    BLOG_URL, MAIL_PASSWORD, MAIL_PORT, MAIL_SERVER,
-    MAIL_USERNAME, REDIS_URL, SITE_TITLE,
-)
+from config import (BLOG_URL, MAIL_PASSWORD, MAIL_PORT, MAIL_SERVER,
+                    MAIL_USERNAME, REDIS_URL, SITE_TITLE)
 from ext import init_db
 from models.blog import RK_PAGEVIEW, RK_VISITED_POST_IDS, Post
 from models.mention import EMAIL_SUBJECT, Mention
@@ -29,7 +27,7 @@ def with_context(f):
     return _deco
 
 
-async def send_email(subject, html, send_to):
+async def send_email(subject: str, html: str, send_to: str) -> None:
     if not CAN_SEND:
         return
 

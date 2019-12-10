@@ -1,12 +1,17 @@
+from __future__ import annotations
+
 import math
 import re
 from dataclasses import dataclass
+from typing import Dict, Iterator, List, Union
 from urllib.parse import unquote
 
 from arq.connections import RedisSettings as _RedisSettings
 
+from config import AttrDict
 
-def trunc_utf8(string, num, etc='...'):
+
+def trunc_utf8(string: str, num: int, etc: str = '...') -> str:
     if num >= len(string):
         return string
 
@@ -76,14 +81,15 @@ empty = Empty()
 
 class Pagination:
 
-    def __init__(self, page, per_page, total, items):
+    def __init__(self, page: int, per_page: int, total: int,
+                 items: List[AttrDict]) -> None:
         self.page = page
         self.per_page = per_page
         self.total = total
         self.items = items
 
     @property
-    def pages(self):
+    def pages(self) -> int:
         if self.per_page == 0 or self.total is None:
             pages = 0
         else:
@@ -97,11 +103,11 @@ class Pagination:
         return self.page - 1
 
     @property
-    def has_prev(self):
+    def has_prev(self) -> bool:
         return self.page > 1
 
     @property
-    def has_next(self):
+    def has_next(self) -> bool:
         return self.page < self.pages
 
     @property
@@ -110,8 +116,10 @@ class Pagination:
             return None
         return self.page + 1
 
-    def iter_pages(self, left_edge=2, left_current=2,
-                   right_current=2, right_edge=2):
+    def iter_pages(self, left_edge: int = 2, left_current: int = 2,
+                   right_current: int = 2,
+                   right_edge: int = 2) -> Iterator[Union[Iterator, Iterator[int],
+                                                          None, int]]:
         last = 0
         for num in range(1, self.pages + 1):
             if (
@@ -125,7 +133,7 @@ class Pagination:
                 last = num
 
 
-def _parse_rfc1738_args(name):
+def _parse_rfc1738_args(name: str) -> Dict[str, str]:
     pattern = re.compile(
         r"""
             (?P<name>[\w\+]+)://
@@ -146,7 +154,7 @@ def _parse_rfc1738_args(name):
     )
 
     if (m := pattern.match(name)) is not None:
-        components = m.groupdict()
+        components = m.groupdict()  # type: ignore
         if components['database'] is not None:
             tokens = components['database'].split('?', 2)
             components['database'] = tokens[0]
@@ -165,9 +173,9 @@ def _parse_rfc1738_args(name):
 
 
 @dataclass
-class RedisSettings(_RedisSettings):
+class RedisSettings(_RedisSettings):  # type: ignore
     @classmethod
-    def from_url(cls, db_url):
+    def from_url(cls, db_url: str) -> RedisSettings:
         url = _parse_rfc1738_args(db_url)
         return cls(url['host'], url['port'],
                    url['database'] and int(url['database']) or 0,

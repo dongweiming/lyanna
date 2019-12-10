@@ -1,22 +1,28 @@
 import asyncio
 import inspect
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Set, Union, KeysView
 
 import aioredis
+from aioredis.commands import Redis
 from sanic.exceptions import abort
 from tortoise import fields
-from tortoise.models import Model, ModelMeta as _ModelMeta  # isort:skip
 
 import config
+from config import AttrDict
 
 from .mc import cache, clear_mc
 from .var import redis_var
+
+from tortoise.models import Model, ModelMeta as _ModelMeta  # isort:skip
+
 
 MC_KEY_ITEM_BY_ID = '%s:%s:v2'
 IGNORE_ATTRS = ['redis', 'stats']
 _redis = None
 
 
-async def get_redis():
+async def get_redis() -> Redis:
     global _redis
     if _redis is None:
         try:
@@ -34,22 +40,22 @@ class PropertyHolder(type):
 
     def __new__(cls, name, bases, attrs):
         new_cls = type.__new__(cls, name, bases, attrs)
-        new_cls.property_fields = []
+        new_cls.property_fields = []  # type: ignore
 
         for attr in list(attrs) + sum([list(vars(base))
                                        for base in bases], []):
             if attr.startswith('_') or attr in IGNORE_ATTRS:
                 continue
             if isinstance(getattr(new_cls, attr), property):
-                new_cls.property_fields.append(attr)
+                new_cls.property_fields.append(attr)  # type: ignore
         return new_cls
 
 
-class ModelMeta(_ModelMeta, PropertyHolder):
+class ModelMeta(_ModelMeta, PropertyHolder):  # type: ignore
     ...
 
 
-class BaseModel(Model, metaclass=ModelMeta):
+class BaseModel(Model, metaclass=ModelMeta):  # type: ignore
     id = fields.IntField(pk=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     _redis = None
@@ -58,13 +64,13 @@ class BaseModel(Model, metaclass=ModelMeta):
         abstract = True
 
     @property
-    def url(self):
+    def url(self) -> str:
         return f'/{self.__class__.__name__.lower()}/{self.id}/'
 
     def canonical_url(self):
         return f'{config.BLOG_URL}{self.url}'
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Union[datetime, int, str]]:
         return {f: getattr(self, f) for f in self._meta.fields}
 
     async def to_sync_dict(self):
@@ -76,10 +82,10 @@ class BaseModel(Model, metaclass=ModelMeta):
             else:
                 rv[field] = coro
         rv['url'] = self.url
-        return config.AttrDict(rv)
+        return AttrDict(rv)
 
     @classmethod
-    async def sync_get(cls, *args, **kwargs):
+    async def sync_get(cls, *args: Any, **kwargs: Any):
         rv = await super().get(*args, **kwargs)
         return await rv.to_sync_dict()
 
@@ -89,8 +95,9 @@ class BaseModel(Model, metaclass=ModelMeta):
         return await rv.to_sync_dict() if rv else None
 
     @classmethod
-    async def sync_filter(cls, orderings=None, offset=0, limit=20,
-                          *args, **kwargs):
+    async def sync_filter(cls, orderings: Union[List[str], str, None] = None,
+                          offset: int = 0, limit: Optional[Any] = 20,
+                          *args: Any, **kwargs: Any):
         items = []
         queryset = super().filter(*args, **kwargs)
         if orderings is not None:
@@ -104,29 +111,29 @@ class BaseModel(Model, metaclass=ModelMeta):
         return items
 
     @classmethod
-    async def sync_all(cls, ordering='-id'):
+    async def sync_all(cls, ordering: str = '-id'):
         items = []
         for item in await cls.filter().order_by(ordering).all():
             items.append(await item.to_sync_dict())
         return items
 
     @property
-    async def redis(self):
+    async def redis(self) -> Redis:
         return await get_redis()
 
-    def get_db_key(self, key):
+    def get_db_key(self, key: str) -> str:
         return f'{self.__class__.__name__}/{self.id}/props/{key}'
 
-    async def set_props_by_key(self, key, value):
+    async def set_props_by_key(self, key: str, value: str) -> bool:
         key = self.get_db_key(key)
         return await (await self.redis).set(key, value)  # noqa: W606
 
-    async def get_props_by_key(self, key):
+    async def get_props_by_key(self, key: str) -> bytes:
         key = self.get_db_key(key)
         return await (await self.redis).get(key) or b''  # noqa: W606
 
     @classmethod
-    async def get_or_404(cls, id, sync=False):
+    async def get_or_404(cls, id: Union[str, int], sync: bool = False):
         if not (obj := await cls.cache(id)):
             abort(404)
         if sync:
@@ -135,15 +142,15 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     @classmethod
     @cache(MC_KEY_ITEM_BY_ID % ('{cls.__name__}', '{id}'))
-    async def cache(cls, id):
+    async def cache(cls, id: Union[str, int]) -> Any:
         return await cls.filter(id=id).first()
 
     @classmethod
-    async def get_multi(cls, ids):
+    async def get_multi(cls, ids: Union[List[int], Set[int], KeysView[Any]]):
         return [await cls.cache(id) for id in ids]
 
     @classmethod
-    async def create(cls, **kwargs):
+    async def create(cls, **kwargs: Any):
         rv = await super().create(**kwargs)
         await cls.__flush__(rv)
         return rv
@@ -159,7 +166,7 @@ class BaseModel(Model, metaclass=ModelMeta):
         return rv
 
     @classmethod
-    async def __flush__(cls, target):
+    async def __flush__(cls, target) -> None:
         await asyncio.gather(
             clear_mc(MC_KEY_ITEM_BY_ID % (target.__class__.__name__, target.id)),  # noqa
             target.clear_mc(), return_exceptions=True
@@ -174,5 +181,5 @@ class BaseModel(Model, metaclass=ModelMeta):
             if k not in fields:
                 print(f'WARN: Field `{k}` may not be saved!')
             setattr(self, k, v)
-        await self.save()
+        await self.save()  # type: ignore
         return self

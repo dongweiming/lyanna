@@ -6,7 +6,7 @@ from config import DB_URL, SENTRY_DSN
 mako = SanicMako()
 
 
-async def init_db(create_db=False):
+async def init_db(create_db: bool = False) -> None:
     await Tortoise.init(
         db_url=DB_URL,
         modules={'models': ['models']},

@@ -1,12 +1,13 @@
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from json import JSONEncoder, dumps
 
 from sanic.response import HTTPResponse
+from typing import Any, Optional, Dict
 
 
 class APIJSONEncoder(JSONEncoder):
     def default(self, val):
-        if isinstance(val, (datetime, date)):
+        if isinstance(val, datetime):
             return int(val.replace(tzinfo=timezone.utc).timestamp())
         try:
             return JSONEncoder.default(self, val)
@@ -16,8 +17,8 @@ class APIJSONEncoder(JSONEncoder):
             raise e
 
 
-def json(body, status=200, headers=None, content_type="application/json",
-         **kwargs):
+def json(body: Dict[str, Any], status: int = 200, headers: Optional[Any] = None,
+         content_type: str = "application/json", **kwargs: Any) -> HTTPResponse:
     return HTTPResponse(
         dumps(body, separators=(",", ":"), cls=APIJSONEncoder, **kwargs),
         headers=headers,

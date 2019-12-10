@@ -1,12 +1,13 @@
 import os
 from pathlib import Path
+from typing import List, Tuple
 
 import yaml
 
 
 class AttrDict(dict):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super(AttrDict, self).__init__(*args, **kwargs)
         self.__dict__ = self
 
@@ -37,7 +38,7 @@ SHOW_PAGEVIEW = False
 PERMALINK_TYPE = 'slug'  # 可选 id、slug、title
 
 # [(Endpoint, Name, IconName, Color), ...]
-SITE_NAV_MENUS = []
+SITE_NAV_MENUS: List[Tuple] = []
 BEIAN_ID = ''
 JWT_SECRET = 'lyanna'
 EXPIRATION_DELTA = 60 * 60
@@ -64,17 +65,18 @@ except ImportError:
 try:
     with open(HERE / 'config.yaml') as f:
         config = AttrDict(yaml.safe_load(f))
-    partials = config.partials
+    partials = config.partials  # type: ignore
     USE_YAML = True
 except FileNotFoundError:
     USE_YAML = False
     partials = []
-    config = {}
+    config = {}  # type: ignore
 
 if USE_YAML:
-    for subconfig in [config.common, config.oauth]:
+    for subconfig in [config.common, config.oauth]:  # type: ignore
         globals().update({k.upper(): v for k, v in subconfig.items()})
-    globals().update({f'MAIL_{k.upper()}': v for k, v in config.mail.items()})
+    globals().update({f'MAIL_{k.upper()}': v for k, v
+                      in config.mail.items()})  # type: ignore
 
 redis_sentinel_host = os.getenv('REDIS_SENTINEL_SVC_HOST') or REDIS_SENTINEL_SERVICE_HOST  # noqa
 if redis_sentinel_host:

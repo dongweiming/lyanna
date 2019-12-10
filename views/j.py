@@ -1,3 +1,5 @@
+from typing import Callable, List
+
 import mistune
 from sanic import Blueprint
 from sanic.response import json
@@ -8,7 +10,7 @@ from models import Comment, Post, ReactItem
 bp = Blueprint('j', url_prefix='/j')
 
 
-def login_required(f):
+def login_required(f: Callable) -> Callable:
     async def wrapped(request, **kwargs):
         if not (user := request['session'].get('user')):
             return json({'r': 403, 'msg': 'Login required.'})
@@ -17,7 +19,7 @@ def login_required(f):
                 return json({'r': 1, 'msg': 'Post not exist'})
             args = (user, post)
         else:
-            args = (user,)
+            args = (user,)  # type: ignore
         return await f(request, *args, **kwargs)
     return wrapped
 
@@ -52,7 +54,7 @@ async def comments(request, post_id):
     start = (page - 1) * per_page
     comments = (await post.comments)[start: start + per_page]
 
-    liked_comment_ids = []
+    liked_comment_ids: List[int] = []
     if (user := request['session'].get('user')):
         liked_comment_ids = await post.comment_ids_liked_by(user['gid'])
 

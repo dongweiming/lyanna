@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from typing import Dict, List, Union
 from urllib.parse import unquote
 
 from sanic import Blueprint, response
@@ -14,6 +15,7 @@ from ext import mako
 from models.blog import MC_KEY_FEED, MC_KEY_SEARCH, Post
 from models.mc import cache
 from models.user import create_github_user
+from views.request import Request
 
 bp = Blueprint('index', url_prefix='/')
 CODE_RE = re.compile('```([A-Za-z]+\n)?|#+')
@@ -21,7 +23,7 @@ CODE_RE = re.compile('```([A-Za-z]+\n)?|#+')
 
 @bp.route(config.OAUTH_REDIRECT_PATH)
 @bp.route(config.OAUTH_REDIRECT_PATH + '/post/<post_id>')
-async def oauth(request, post_id=None):
+async def oauth(request: Request, post_id: Union[str, None] = None) -> HTTPResponse:
     if post_id is None:
         url = '/'
     else:
@@ -80,12 +82,12 @@ async def _feed(request):
         body = post.html_content
         summary = post.excerpt
 
-        feed.add(
+        feed.add(  # type: ignore
             post.title, body, content_type='html', summary=summary,
             summary_type='html', author=OWNER, url=post.url,
             id=post.id, updated=post.created_at, published=post.created_at
         )
-    return feed.to_string()
+    return feed.to_string()  # type: ignore
 
 
 @bp.route('atom.xml', methods=['GET', 'HEAD'])
@@ -96,13 +98,13 @@ async def feed(request):
 
 @bp.route('/search')
 @mako.template('search.html')
-async def search(request):
+async def search(request: Request) -> Dict[str, str]:
     q = request.args.get('q') or ''
     return {'q': q}
 
 
 @cache(MC_KEY_SEARCH)
-async def _search_json(request):
+async def _search_json(request: Request) -> List[Dict]:
     posts = await Post.get_all()
     return [{
         'url': post.url,
@@ -112,5 +114,5 @@ async def _search_json(request):
 
 
 @bp.route('/search.json')
-async def search_json(request):
+async def search_json(request: Request):
     return response.json(await _search_json(request))

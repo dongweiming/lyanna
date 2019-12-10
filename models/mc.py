@@ -3,8 +3,10 @@ import inspect
 import re
 from functools import wraps
 from pickle import dumps, loads
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import aiomcache
+from aiomcache.client import Client
 
 import config
 
@@ -12,12 +14,12 @@ from .utils import Empty
 from .var import memcache_var
 
 _memcache = None
-__formaters = {}
+__formaters: Dict[str, Callable] = {}
 percent_pattern = re.compile(r'%\w')
 brace_pattern = re.compile(r'\{[\w\d\.\[\]_]+\}')
 
 
-async def get_memcache():
+async def get_memcache() -> Client:
     global _memcache
     if _memcache is not None:
         return _memcache
@@ -25,8 +27,8 @@ async def get_memcache():
         memcache = memcache_var.get()
     except LookupError:
         # Hack for debug mode
-        memcache = None
-    if memcache is None:
+        memcache = ''
+    if memcache == '':
         loop = asyncio.get_event_loop()
         memcache = aiomcache.Client(config.MEMCACHED_HOST,
                                     config.MEMCACHED_PORT,
@@ -35,7 +37,7 @@ async def get_memcache():
     return memcache
 
 
-def formater(text):
+def formater(text: str) -> Callable:
     """
     >>> format('%s %s', 3, 2, 7, a=7, id=8)
     '3 2'
@@ -65,23 +67,24 @@ def formater(text):
         return text.format
 
 
-def format(text, *a, **kw):
+def format(text: str, *a, **kw) -> str:
     if (f := __formaters.get(text)) is None:
         f = formater(text)
         __formaters[text] = f
-    return f(*a, **kw)
+    return f(*a, **kw)  # type: ignore
 
 
 def gen_key(key_pattern, arg_names, defaults, *a, **kw):
     return gen_key_factory(key_pattern, arg_names, defaults)(*a, **kw)
 
 
-def gen_key_factory(key_pattern, arg_names, defaults):
+def gen_key_factory(key_pattern: str, arg_names: List[str],
+                    defaults: Optional[Tuple[Any, ...]]) -> Callable:
     args = dict(zip(arg_names[-len(defaults):], defaults)) if defaults else {}
     if callable(key_pattern):
         names = inspect.getargspec(key_pattern)[0]
 
-    def gen_key(*a, **kw):
+    def gen_key(*a: Any, **kw: Any) -> Tuple[str, Dict[str, Any]]:
         aa = args.copy()
         aa.update(zip(arg_names, a))
         aa.update(kw)
@@ -93,15 +96,15 @@ def gen_key_factory(key_pattern, arg_names, defaults):
     return gen_key
 
 
-def cache(key_pattern, expire=0):
-    def deco(f):
-        arg_names, varargs, varkw, defaults = inspect.getargspec(f)
+def cache(key_pattern: str, expire: int = 0) -> Callable:
+    def deco(f: Callable) -> Callable:
+        arg_names, varargs, varkw, defaults, _, _, _ = inspect.getfullargspec(f)  # noqa
         if varargs or varkw:
             raise Exception("do not support varargs")
         gen_key = gen_key_factory(key_pattern, arg_names, defaults)
 
         @wraps(f)
-        async def _(*a, **kw):
+        async def __(*a: Any, **kw: Any) -> Dict[str, List[Tuple]]:
             memcache = await get_memcache()
             key, args = gen_key(*a, **kw)
             if not key:
@@ -120,12 +123,12 @@ def cache(key_pattern, expire=0):
             except TypeError:
                 ...
             return r
-        _.original_function = f
-        return _
+        __.original_function = f  # type: ignore
+        return __
     return deco
 
 
-async def clear_mc(*keys):
+async def clear_mc(*keys) -> bool:
     memcache = await get_memcache()
     if memcache is None:
         return False

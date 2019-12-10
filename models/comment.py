@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import asyncio
+from typing import Dict, List
 
 import markupsafe
 import mistune
@@ -32,18 +35,19 @@ class Comment(ReactMixin, BaseModel):
     class Meta:
         table = 'comments'
 
-    async def set_content(self, content):
+    async def set_content(self, content: str) -> bool:
         return await self.set_props_by_key('content', content)
 
-    async def save(self, *args, **kwargs):
+    async def save(self, *args, **kwargs) -> Comment:
         if (content := kwargs.pop('content', None)) is not None:
             await self.set_content(content)
-        return await super().save(*args, **kwargs)
+        return await super().save(*args, **kwargs)  # type: ignore
 
     @property
-    async def content(self):
+    async def content(self) -> str:
         if (rv := await self.get_props_by_key('content')):
             return rv.decode('utf-8')
+        return ''
 
     @property
     async def html_content(self):
@@ -63,7 +67,7 @@ class Comment(ReactMixin, BaseModel):
         await clear_mc(*keys)
 
     @property
-    async def user(self):
+    async def user(self) -> GithubUser:
         return await GithubUser.get(gid=self.github_id)
 
     @property
@@ -72,9 +76,13 @@ class Comment(ReactMixin, BaseModel):
 
 
 class CommentMixin:
+    id: int
+    kind: int
+
     async def add_comment(self, user_id, content, ref_id=0):
-        obj = await Comment.create(github_id=user_id, post_id=self.id,
-                                   ref_id=ref_id)
+        obj = await Comment.create(
+            github_id=user_id, post_id=self.id,
+            ref_id=ref_id)
         redis = await create_pool(RedisSettings.from_url(REDIS_URL))
         await asyncio.gather(
             obj.set_content(content),
@@ -90,14 +98,14 @@ class CommentMixin:
             return True
         return False
 
-    @property
+    @property  # type: ignore
     @cache(MC_KEY_COMMENT_LIST % ('{self.id}'))
-    async def comments(self):
+    async def comments(self) -> List[Dict]:
         return await Comment.sync_filter(post_id=self.id, orderings=['-id'])
 
-    @property
+    @property  # type: ignore
     @cache(MC_KEY_N_COMMENTS % ('{self.id}'))
-    async def n_comments(self):
+    async def n_comments(self) -> int:
         return await Comment.filter(post_id=self.id).count()
 
     @cache(MC_KEY_COMMNET_IDS_LIKED_BY_USER % (

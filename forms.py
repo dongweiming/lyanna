@@ -1,21 +1,25 @@
+from __future__ import annotations
+
+from typing import Any, Generator, Tuple, Union
+
 import markupsafe
 from sanic.log import logger
 from sanic_wtf import SanicForm as _SanicForm
-from wtforms import (
-    BooleanField, PasswordField, SelectField,
-    SelectMultipleField, StringField, SubmitField, TextAreaField,
-)
+from wtforms import (BooleanField, PasswordField, SelectField,
+                     SelectMultipleField, StringField, SubmitField,
+                     TextAreaField)
 from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 
 
-class SwitchField(SelectField):
+class SwitchField(SelectField):  # type: ignore
     ...
 
 
-class SanicForm(_SanicForm):
+class SanicForm(_SanicForm):  # type: ignore
     def hidden_tag(self, *fields):
-        def hidden_fields(fields):
+        def hidden_fields(
+                fields: Union[Tuple[Any, ...], SanicForm]) -> Generator:
             for f in fields:
                 if isinstance(f, str):
                     f = getattr(self, f, None)
@@ -29,7 +33,7 @@ class SanicForm(_SanicForm):
             u'\n'.join(str(f) for f in hidden_fields(fields or self))
         )
 
-    def validate(self):
+    def validate(self) -> bool:
         extra_validators = {}
         for name in self._fields:
             if (inline := getattr(self.__class__, 'validate_%s' % name,
@@ -44,7 +48,7 @@ class SanicForm(_SanicForm):
             if extra_validators is not None and name in extra_validators:
                 extra = extra_validators[name]
             else:
-                extra = tuple()
+                extra = list()
             if not field.validate(self, extra):
                 success = False
                 logger.info(f'[Validate Fail] {field}')

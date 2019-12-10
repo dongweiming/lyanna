@@ -4,9 +4,11 @@ import mimetypes
 import re
 from collections import defaultdict
 from pathlib import Path
+from typing import Any, Dict, Optional, List, DefaultDict
 
 from sanic import Blueprint, response
 from sanic.exceptions import abort
+from sanic.response import HTTPResponse
 from sanic_jwt import protected
 from sanic_jwt.decorators import instant_config
 from sanic_jwt.utils import call as jwt_call
@@ -17,6 +19,7 @@ from ext import mako
 from forms import PostForm, TopicForm, UserForm
 from models import Post, PostTag, SpecialTopic, Tag, User
 from models.user import generate_password
+from views.request import Request
 from views.utils import json
 
 FORM_REGEX = re.compile(r'posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')  # noqa
@@ -27,7 +30,7 @@ bp.static('fonts', './static/fonts')
 
 
 @bp.middleware('request')
-async def inject_user(request):
+async def inject_user(request: Request) -> None:
     with instant_config(bp, request=request):
         payload = bp.auth.extract_payload(request, verify=False)
         user = await jwt_call(
@@ -39,13 +42,13 @@ async def inject_user(request):
 
 @bp.route('/admin')
 @mako.template('admin.html')
-async def admin(request):
+async def admin(request: Request) -> Dict:
     return {}
 
 
 @bp.route('/api/posts')
 @protected(bp)
-async def list_posts(request):
+async def list_posts(request: Request):
     limit = int(request.args.get('limit')) or PER_PAGE
     page = int(request.args.get('page')) or 1
     with_tag = int(request.args.get('with_tag') or 0)
@@ -53,10 +56,10 @@ async def list_posts(request):
     _posts = await Post.filter().order_by('-id').offset(offset).limit(limit)
     total = await Post.filter().count()
     posts = []
-    exclude_ids = []
+    exclude_ids: List[int] = []
     if (special_id := int(request.args.get('special_id') or 0)):
         if (topic := await SpecialTopic.cache(special_id)):
-            items = await topic.get_items()
+            items = await topic.get_items()  # type: ignore
             exclude_ids = [s.post_id for s in items]
         total -= len(exclude_ids)
     for post in _posts:
@@ -74,11 +77,11 @@ async def list_posts(request):
 
 @bp.route('/api/post/new', methods=['POST'])
 @protected(bp)
-async def new_post(request):
+async def new_post(request: Request):
     return await _post(request)
 
 
-async def _post(request, post_id=None):
+async def _post(request: Request, post_id: Optional[Any] = None):
     form = PostForm(request)
     form.status.data = int(form.status.data)
 
@@ -108,7 +111,7 @@ async def _post(request, post_id=None):
         ok = True
     else:
         ok = False
-    post = await post.to_sync_dict()
+    post = await post.to_sync_dict()  # type: ignore
     post['tags'] = [t.name for t in post['tags']]
     return json({'post': post if post else None, 'ok': ok})
 
@@ -138,7 +141,7 @@ async def post(request, post_id):
 
 @bp.route('/api/users')
 @protected(bp)
-async def list_users(request):
+async def list_users(request: Request) -> HTTPResponse:
     users = await User.sync_all()
     total = await User.filter().count()
     return response.json({'items': users, 'total': total})
@@ -146,7 +149,7 @@ async def list_users(request):
 
 @bp.route('/api/user/new', methods=['POST'])
 @protected(bp)
-async def new_user(request):
+async def new_user(request: Request):
     return await _user(request)
 
 
@@ -163,7 +166,7 @@ async def user(request, user_id):
     return response.json(user)
 
 
-async def _user(request, user_id=None):
+async def _user(request: Request, user_id: Optional[Any] = None):
     user = None
     form = UserForm(request)
 
@@ -191,7 +194,7 @@ async def _user(request, user_id=None):
     else:
         ok = False
 
-    return response.json({'user': await user.to_sync_dict(), 'ok': ok})
+    return response.json({'user': await user.to_sync_dict(), 'ok': ok})  # type: ignore
 
 
 @bp.route('/api/upload', methods=['POST', 'OPTIONS'])
@@ -227,7 +230,7 @@ async def status(request, target_kind, target_id):
 
 @bp.route('/api/user/search')
 @protected(bp)
-async def user_search(request):
+async def user_search(request: Request) -> HTTPResponse:
     name = request.args.get('name')
 
     users = await User.sync_all()
@@ -239,7 +242,7 @@ async def user_search(request):
 
 @bp.route('/api/tags')
 @protected(bp)
-async def list_tags(request):
+async def list_tags(request: Request) -> HTTPResponse:
     tags = await Tag.sync_all()
     return response.json({
         'items': [t.name for t in tags]
@@ -248,7 +251,7 @@ async def list_tags(request):
 
 @bp.route('/api/topics')
 @protected(bp)
-async def list_topics(request):
+async def list_topics(request: Request) -> HTTPResponse:
     topics = await SpecialTopic.sync_all()
     total = len(topics)
     return response.json({'items': topics, 'total': total})
@@ -256,7 +259,7 @@ async def list_topics(request):
 
 @bp.route('/api/topic/new', methods=['POST'])
 @protected(bp)
-async def new_topic(request):
+async def new_topic(request: Request):
     return await _topic(request)
 
 
@@ -271,7 +274,7 @@ async def topic(request, topic_id):
     return response.json(topic)
 
 
-async def _topic(request, topic_id=None):
+async def _topic(request: Request, topic_id: Optional[Any] = None):
     form = TopicForm(request)
     form.status.data = int(form.status.data)
 
@@ -280,14 +283,15 @@ async def _topic(request, topic_id=None):
         topic = await SpecialTopic.get_or_404(topic_id)
 
     if request.method in ('POST', 'PUT') and form.validate():
-        dct = defaultdict(dict)
+        dct: DefaultDict[str, Dict[str, int]] = defaultdict(dict)
         for k in copy.copy(request.form):
             if k.startswith('posts'):
                 match = FORM_REGEX.search(k)
                 if (match := FORM_REGEX.search(k)):
-                    key = match['key']
+                    key = match['key']  # type: ignore
                     val = request.form[k][0]
-                    dct[match['index']][key] = int(val) if key == 'id' else val
+                    dct[match['index']][key] = (  # type: ignore
+                        int(val) if key == 'id' else val)
                     del request.form[k]
 
         title = form.title.data
@@ -312,17 +316,17 @@ async def _topic(request, topic_id=None):
         ok = True
     else:
         ok = False
-    topic = await topic.to_sync_dict()
+    topic = await topic.to_sync_dict()  # type: ignore
     return json({'topic': topic if topic else None, 'ok': ok})
 
 
 @bp.route('/api/user/info')
 @protected(bp)
-async def user_info(request):
+async def user_info(request: Request) -> HTTPResponse:
     user = request.user
     avatar = user.avatar
     data = {
-        'name': request.user.name,
+        'name': user.name,
         'avatar': (
             request.app.url_for('static', filename=f'upload/{avatar}')
             if avatar else '')

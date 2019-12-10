@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Dict
 
 import click
 import cssmin
@@ -12,7 +13,7 @@ from models.base import get_redis
 from models.blog import PAGEVIEW_FIELD, RK_ALL_POST_IDS, RK_PAGEVIEW
 
 
-async def init():
+async def init() -> None:
     await init_db(create_db=False)
     await Tortoise._drop_databases()
     await init_db(create_db=True)
@@ -34,14 +35,14 @@ async def init():
         await migrate_for_v25()
 
 
-async def _migrate_for_v25():
+async def _migrate_for_v25() -> None:
     await init_db(create_db=False)
     client = Tortoise.get_connection('default')
     await client.execute_script(
         'alter table posts add column `pageview` int(11) DEFAULT "0"')
 
 
-async def _migrate_for_v27():
+async def _migrate_for_v27() -> None:
     redis = await get_redis()
     keys = await redis.keys('lyanna:pageview:*')
     ids = []
@@ -106,7 +107,7 @@ def migrate_for_v27():
     click.echo('Migrate Finished!')
 
 
-async def _adduser(**kwargs):
+async def _adduser(**kwargs) -> None:
     await init_db()
     try:
         user = await create_user(**kwargs)
@@ -135,7 +136,7 @@ def build_css():
         'post.min.css': ['main.min.css', 'post.css', 'react.css',
                          'gitment.css', 'dracula.css', 'social-sharer.css']
     }
-    css_map = {}
+    css_map: Dict[str, str] = {}
     css_dir = Path(HERE) / 'static/css/'
     for css, files in build_map.items():
         data = ''
