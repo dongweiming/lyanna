@@ -22,7 +22,7 @@ from .utils import RedisSettings
 markdown = mistune.Markdown()
 MC_KEY_COMMENT_LIST = 'comment:%s:comment_list'
 MC_KEY_N_COMMENTS = 'comment:%s:n_comments'
-MC_KEY_COMMNET_IDS_LIKED_BY_USER = 'react:comment_ids_liked_by:%s:%s'
+MC_KEY_COMMNET_IDS_REACTED_BY_USER = 'react:comment_ids_reacted_by:%s:%s'
 MC_KEY_LATEST_COMMENTS = 'comment:latest_comments:%s'
 
 
@@ -74,6 +74,10 @@ class Comment(ReactMixin, BaseModel):
     async def n_likes(self):
         return (await self.stats).love_count
 
+    @property
+    async def n_upvotes(self):
+        return (await self.stats).upvote_count
+
 
 class CommentMixin:
     id: int
@@ -108,15 +112,15 @@ class CommentMixin:
     async def n_comments(self) -> int:
         return await Comment.filter(post_id=self.id).count()
 
-    @cache(MC_KEY_COMMNET_IDS_LIKED_BY_USER % (
+    @cache(MC_KEY_COMMNET_IDS_REACTED_BY_USER % (
         '{user_id}', '{self.id}'), ONE_HOUR)
-    async def comment_ids_liked_by(self, user_id):
+    async def comments_reacted_by(self, user_id):
         if not (cids := [c.id for c in await self.comments]):
             return []
         queryset = await ReactItem.filter(
             Q(user_id=user_id), Q(target_id__in=cids),
             Q(target_kind=K_COMMENT))
-        return [item.target_id for item in queryset]
+        return [[item.target_id, item.reaction_type] for item in queryset]
 
 
 @comment_reacted.connect
@@ -124,7 +128,7 @@ async def update_comment_list_cache(_, user_id, comment_id):
     if (comment := await Comment.cache(comment_id)):
         asyncio.gather(
             clear_mc(MC_KEY_COMMENT_LIST % comment.post_id),
-            clear_mc(MC_KEY_COMMNET_IDS_LIKED_BY_USER % (
+            clear_mc(MC_KEY_COMMNET_IDS_REACTED_BY_USER % (
                 user_id, comment.post_id)),
             return_exceptions=True
         )

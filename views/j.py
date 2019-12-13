@@ -30,7 +30,7 @@ async def create_comment(request, user, post):
     if not (content := request.form.get('content')):
         return json({'r': 1, 'msg': 'Comment content required.'})
     comment = await post.add_comment(user['gid'], content)
-    liked_comment_ids = await post.comment_ids_liked_by(user['gid'])
+    reacted_comments = await post.comments_reacted_by(user['gid'])
     comment = await comment.to_sync_dict()
 
     return json({
@@ -38,7 +38,7 @@ async def create_comment(request, user, post):
         'html': await render_template_def(
             'utils.html', 'render_single_comment', request,
             {'comment': comment, 'github_user': user,
-             'liked_comment_ids': liked_comment_ids})
+             'reacted_comments': reacted_comments})
     })
 
 
@@ -54,16 +54,16 @@ async def comments(request, post_id):
     start = (page - 1) * per_page
     comments = (await post.comments)[start: start + per_page]
 
-    liked_comment_ids: List[int] = []
+    reacted_comments: List[List[int, int]] = []
     if (user := request['session'].get('user')):
-        liked_comment_ids = await post.comment_ids_liked_by(user['gid'])
+        reacted_comments = await post.comments_reacted_by(user['gid'])
 
     return json({
         'r': 0,
         'html': await render_template_def(
             'utils.html', 'render_comments', request,
             {'comments': comments, 'github_user': user,
-             'liked_comment_ids': liked_comment_ids})
+             'reacted_comments': reacted_comments})
     })
 
 
@@ -98,17 +98,27 @@ async def react(request, user, post):
                  })
 
 
-@bp.route('/comment/<comment_id>/like', methods=['POST', 'DELETE'])
-async def comment_like(request, comment_id):
+@bp.route('/comment/<comment_id>/react', methods=['POST', 'DELETE'])
+async def comment_react(request, comment_id):
     user = request['session'].get('user')
     if not user:
-        return json({'r': 403, 'msg': 'Login required.'})
+        return json({'r': 403, 'msg': 'Login required'})
     if not (comment := await Comment.cache(comment_id)):
-        return json({'r': 1, 'msg': 'Comment not exist'})
+        return json({'r': 404, 'msg': 'Comment not exist'})
+
+    reaction_type = int(request.form.get('reaction_type', ReactItem.K_LOVE))
+    if reaction_type not in (ReactItem.K_LOVE, ReactItem.K_UPVOTE):
+        return json({'r': 1, 'msg': 'Not supported reaction_type'})
 
     if request.method == 'POST':
-        rv = await comment.add_reaction(user['gid'], ReactItem.K_LOVE)
+        rv = await comment.add_reaction(user['gid'], reaction_type)
     elif request.method == 'DELETE':
-        rv = await comment.cancel_reaction(user['gid'])
+        rv = await comment.cancel_reaction(user['gid'], reaction_type)
 
-    return json({'r': int(not rv), 'n_likes': await comment.n_likes})
+    n_reacted = 0
+    if reaction_type == ReactItem.K_LOVE:
+        n_reacted = await comment.n_likes
+    elif reaction_type == ReactItem.K_UPVOTE:
+        n_reacted = await comment.n_upvotes
+
+    return json({'r': int(not rv), 'n_reacted': n_reacted})
