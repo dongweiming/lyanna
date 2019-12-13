@@ -97,18 +97,17 @@ async def _post(request: Request, ident: str, is_preview: bool = False):
     github_user = request['session'].get('user')
     stats = await post.stats
     reaction_type = None
-    liked_comment_ids: List[int] = []
+    reacted_comments: List[List[int, int]] = []
     if github_user:
         reaction_type = await post.get_reaction_type(github_user['gid'])
-        liked_comment_ids = await post.comment_ids_liked_by(
-            github_user['gid'])
+        reacted_comments = await post.comments_reacted_by(github_user['gid'])
 
     pageview = await post.incr_pageview()
     related_posts = await post.get_related()
     post = await post.to_sync_dict()
     return {'post': post, 'github_user': github_user, 'stats': stats,
             'reaction_type': reaction_type, 'related_posts': related_posts,
-            'liked_comment_ids': liked_comment_ids, 'pageview': pageview}
+            'reacted_comments': reacted_comments, 'pageview': pageview}
 
 
 @bp.route('/post/<ident>/preview')

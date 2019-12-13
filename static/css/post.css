@@ -102,4 +102,5 @@
     .tribute-container li.no-match {
       cursor: default; }
   .tribute-container .menu-highlighted {
-    font-weight: bold; }
+    font-weight: bold;
+}

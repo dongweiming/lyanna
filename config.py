@@ -48,6 +48,7 @@ MAIL_SERVER = 'smtp.qq.com'
 MAIL_PORT = 465
 MAIL_USERNAME = ''
 MAIL_PASSWORD = ''
+MAKO_STRICT_UNDEFINED = False
 
 BLOG_URL = 'https://example.com'
 
@@ -56,6 +57,7 @@ REDIS_SENTINEL_SERVICE_HOST = None
 REDIS_SENTINEL_SERVICE_PORT = 26379
 
 SHOW_AUTHOR = False
+COMMENT_REACTIONS = ['heart', 'upvote']
 
 try:
     from local_settings import *  # noqa
