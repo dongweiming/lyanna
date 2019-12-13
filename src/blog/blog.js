@@ -88,17 +88,26 @@ $pageItemBtn.click((e)=> {
     })
 });
 
-$commentContainer.on('click', '.gitment-comment-like-btn', (e)=> {
+$commentContainer.on('click', '.gitment-comment-react', (e)=> {
     let self = $(e.currentTarget);
-    let rqType = self.hasClass('liked') ? 'delete' : 'post'
+    let rqType = self.hasClass('reacted') ? 'delete' : 'post'
     $.ajax({
-        url: `/j/comment/${self.data('id')}/like`,
+        url: `/j/comment/${self.data('id')}/react`,
         type: rqType,
+        data: {'reaction_type': self.data('kind')},
         dataType: 'json',
         success: function (rs) {
             if (!rs.r) {
-                self.toggleClass('liked')
-                self.find('span').html(rs.n_likes)
+                self.toggleClass('reacted')
+                self.find('span').html(rs.n_reacted)
+                let $i = self.find('i'), $newCls;
+                let $cls = $i.attr('class').split(' ')[1]
+                if ($cls.indexOf('fill') >= 0) {
+                    $newCls = $cls.replace('fill', 'line')
+                } else {
+                    $newCls = $cls.replace('line', 'fill')
+                }
+                $i.removeClass($cls).addClass($newCls)
             }
         }
     })

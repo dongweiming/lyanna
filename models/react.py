@@ -47,12 +47,11 @@ class ReactItem(BaseModel):
         return obj
 
     @classmethod
-    @cache(MC_KEY_REACTION_ITEM_BY_USER_TARGET % ('{user_id}', '{target_id}',
-                                                  '{target_kind}'))
-    async def get_reaction_item(cls, user_id, target_id, target_kind):
-        rv = await cls.filter(user_id=user_id, target_id=target_id,
-                              target_kind=target_kind).first()
-        return rv
+    @cache(MC_KEY_REACTION_ITEM_BY_USER_TARGET % (
+        '{user_id}', '{target_id}', '{target_kind}'))
+    async def get_reaction_items(cls, user_id, target_id, target_kind):
+        return await cls.filter(user_id=user_id, target_id=target_id,
+                                target_kind=target_kind).all()
 
     async def delete(self, using_db=None) -> ReactItem:
         rv = await super().delete(using_db=using_db)  # type: ignore
@@ -60,7 +59,8 @@ class ReactItem(BaseModel):
         react_name = next((name for name, type in self.REACTION_MAP.items()
                            if type == self.reaction_type), None)
         field = f'{react_name}_count'
-        setattr(stat, field, getattr(stat, field) - 1)
+
+        setattr(stat, field, max(getattr(stat, field) - 1, 0))
         await stat.save()
         return rv
 
@@ -101,24 +101,25 @@ class ReactMixin:
     kind: int
 
     async def add_reaction(self, user_id, reaction_type):
-        item = await ReactItem.get_reaction_item(user_id, self.id, self.kind)
-        if item and reaction_type == item.reaction_type:
-            await item.save()
-            return True
-        if not item:
+        items = await ReactItem.get_reaction_items(user_id, self.id, self.kind)
+        if not items or not any(i for i in items if reaction_type == i.reaction_type):
             item = await ReactItem.create(
                 target_id=self.id, target_kind=self.kind,
                 user_id=user_id, reaction_type=reaction_type)
-        else:
-            item.reaction_type = reaction_type
-            await item.save()
+            return bool(item)
+        return True
 
-        return bool(item)
-
-    async def cancel_reaction(self, user_id):
-        item = await ReactItem.get_reaction_item(user_id, self.id, self.kind)
-        if item:
-            await item.delete()
+    async def cancel_reaction(self, user_id, reaction_type=None):
+        items = await ReactItem.get_reaction_items(user_id, self.id, self.kind)
+        if items:
+            if reaction_type is not None:
+                for item in items:
+                    await item.delete()
+            else:
+                if (item := next(
+                        (i for i in items if reaction_type == i.reaction_type), None)
+                ) is not None:
+                    await item.delete()
         return True
 
     @property
@@ -126,5 +127,5 @@ class ReactMixin:
         return await ReactStats.get_by_target(self.id, self.kind)
 
     async def get_reaction_type(self, user_id):
-        item = await ReactItem.get_reaction_item(user_id, self.id, self.kind)
-        return item.reaction_type if item else None
+        items = await ReactItem.get_reaction_items(user_id, self.id, self.kind)
+        return items[0].reaction_type if items else None
