@@ -87,7 +87,7 @@
 
 <%def name="render_single_comment(comment, github_user, reacted_comments)">
   <% user = comment.user %>
-  <li class="gitment-comment">
+    <li class="gitment-comment">
     <a class="gitment-comment-avatar" href="${ user.link }" target="_blank">
       <img class="gitment-comment-avatar-img" src="${ user.picture }">
     </a>
@@ -98,11 +98,11 @@
         </a>
         commented on
         <span title="${ comment.created_at }">${ comment.created_at.strftime('%a %B %d, %Y') }</span>
-        <a class="gitment-comment-reply" title="Reply">
+        <a class="gitment-comment-reply" title="Reply" data-id=${ comment.id }>
           <i class="iconfont icon-reply"></i>
         </a>
       </div>
-      <div class="gitment-comment-body gitment-markdown">${ comment.html_content | n }</div>
+      <div id="comment-content-${ comment.id }" class="gitment-comment-body gitment-markdown" data-username="${user.username}" data-content="${ comment.content }">${ comment.html_content | n }</div>
       <div class="gitment-comment-reactions">
         <% reaction_types = [item[1] for item in reacted_comments if item[0] == comment.id] %>
         % for react in COMMENT_REACTIONS:
