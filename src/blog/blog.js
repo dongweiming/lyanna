@@ -113,6 +113,22 @@ $commentContainer.on('click', '.gitment-comment-react', (e)=> {
     })
 })
 
+$commentContainer.on('click', '.gitment-comment-reply', (e)=> {
+    let refId = $(e.currentTarget).data('id');
+    let contentContainer = $(`#comment-content-${refId}`);
+    let replyCommentArray = contentContainer.data('content').split('\n');
+    replyCommentArray.unshift(`@${contentContainer.data('username')}`)
+    replyCommentArray = replyCommentArray.map(t => `> ${t}`)
+    replyCommentArray.push('')
+    replyCommentArray.push('')
+
+    let $comment = $writeTextarea.val();
+
+    if ($comment) replyCommentArray.unshift('')
+    $writeTextarea.val($comment + replyCommentArray.join('\n')).focus()
+    $writeTextarea.data('refId', refId)
+})
+
 $submitBtn.click((e)=> {
     let content = $writeTextarea.val();
     if (!content) {
@@ -124,7 +140,7 @@ $submitBtn.click((e)=> {
     $.ajax({
         url: `/j/post/${target_id}/comment`,
         type: 'post',
-        data: {'content': content},
+        data: {'content': content, 'ref_id': $writeTextarea.data('refId') || 0},
         dataType: 'json',
         success: function (rs) {
             if (!rs.r) {

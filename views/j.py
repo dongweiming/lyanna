@@ -29,7 +29,8 @@ def login_required(f: Callable) -> Callable:
 async def create_comment(request, user, post):
     if not (content := request.form.get('content')):
         return json({'r': 1, 'msg': 'Comment content required.'})
-    comment = await post.add_comment(user['gid'], content)
+    ref_id = int(request.form.get('ref_id', 0))
+    comment = await post.add_comment(user['gid'], content, ref_id)
     reacted_comments = await post.comments_reacted_by(user['gid'])
     comment = await comment.to_sync_dict()
 
