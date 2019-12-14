@@ -51,9 +51,9 @@ class Comment(ReactMixin, BaseModel):
 
     @property
     async def html_content(self):
-        if not (content := markupsafe.escape(await self.content)):
+        if not (content := str(markupsafe.escape(await self.content))):
             return ''
-        return markdown(content)
+        return markdown(content.replace('&gt;', '>'))
 
     async def clear_mc(self):
         keys = [key % self.post_id for key in (
