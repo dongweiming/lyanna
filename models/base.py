@@ -1,10 +1,8 @@
 import asyncio
 import inspect
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Union, KeysView
+from typing import Any, Dict, KeysView, List, Optional, Set, Union
 
-import aioredis
-from aioredis.commands import Redis
 from sanic.exceptions import abort
 from tortoise import fields
 
@@ -12,28 +10,12 @@ import config
 from config import AttrDict
 
 from .mc import cache, clear_mc
-from .var import redis_var
 
 from tortoise.models import Model, ModelMeta as _ModelMeta  # isort:skip
 
 
 MC_KEY_ITEM_BY_ID = '%s:%s:v2'
 IGNORE_ATTRS = ['redis', 'stats']
-_redis = None
-
-
-async def get_redis() -> Redis:
-    global _redis
-    if _redis is None:
-        try:
-            redis = redis_var.get()
-        except LookupError:
-            # Hack for debug mode
-            loop = asyncio.get_event_loop()
-            redis = await aioredis.create_redis_pool(
-                config.REDIS_URL, minsize=5, maxsize=20, loop=loop)
-        _redis = redis
-    return _redis
 
 
 class PropertyHolder(type):
@@ -116,21 +98,6 @@ class BaseModel(Model, metaclass=ModelMeta):  # type: ignore
         for item in await cls.filter().order_by(ordering).all():
             items.append(await item.to_sync_dict())
         return items
-
-    @property
-    async def redis(self) -> Redis:
-        return await get_redis()
-
-    def get_db_key(self, key: str) -> str:
-        return f'{self.__class__.__name__}/{self.id}/props/{key}'
-
-    async def set_props_by_key(self, key: str, value: str) -> bool:
-        key = self.get_db_key(key)
-        return await (await self.redis).set(key, value)  # noqa: W606
-
-    async def get_props_by_key(self, key: str) -> bytes:
-        key = self.get_db_key(key)
-        return await (await self.redis).get(key) or b''  # noqa: W606
 
     @classmethod
     async def get_or_404(cls, id: Union[str, int], sync: bool = False):

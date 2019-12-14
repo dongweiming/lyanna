@@ -2,13 +2,19 @@ from __future__ import annotations
 
 import math
 import re
+import asyncio
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Union
 from urllib.parse import unquote
 
+import aioredis
+from aioredis.commands import Redis
 from arq.connections import RedisSettings as _RedisSettings
 
-from config import AttrDict
+from config import AttrDict, REDIS_URL
+from .var import redis_var
+
+_redis = None
 
 
 def trunc_utf8(string: str, num: int, etc: str = '...') -> str:
@@ -180,3 +186,17 @@ class RedisSettings(_RedisSettings):  # type: ignore
         return cls(url['host'], url['port'],
                    url['database'] and int(url['database']) or 0,
                    url['password'], 1, 5, 1)
+
+
+async def get_redis() -> Redis:
+    global _redis
+    if _redis is None:
+        try:
+            redis = redis_var.get()
+        except LookupError:
+            # Hack for debug mode
+            loop = asyncio.get_event_loop()
+            redis = await aioredis.create_redis_pool(
+                REDIS_URL, minsize=5, maxsize=20, loop=loop)
+        _redis = redis
+    return _redis
