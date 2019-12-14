@@ -24,4 +24,6 @@ PyYAML==5.1.2
 aiosmtplib==1.1.0
 arq==0.18.3
 tortoise-orm==0.15.4
+lxml==4.4.2
+extraction==0.3
 -e git+https://github.com/dongweiming/aiomcache.git@dev2#egg=aiomcache

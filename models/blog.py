@@ -1,20 +1,12 @@
 from __future__ import annotations
 
-import ast
-import inspect
 import random
 import re
-import types
 from datetime import datetime, timedelta
 from html.parser import HTMLParser
 from typing import Any, Callable, Dict, List, Tuple, Union  # noqa
 
-import mistune
-import pangu
 from aioredis.errors import RedisError
-from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers import get_lexer_by_name
 from tortoise import fields
 from tortoise.models import ModelMeta
 from tortoise.query_utils import Q
@@ -22,14 +14,16 @@ from tortoise.queryset import QuerySet
 
 from config import PERMALINK_TYPE, AttrDict
 
-from .base import BaseModel, get_redis
+from .base import BaseModel
+from .mixin import get_redis
 from .comment import CommentMixin
 from .consts import K_POST, ONE_HOUR, PERMALINK_TYPES
+from .markdown import markdown, toc, toc_md
 from .mc import cache, clear_mc
 from .react import ReactMixin
-from .toc import TocMixin
 from .user import User
 from .utils import trunc_utf8
+from .mixin import ContentMixin
 
 MC_KEY_TAGS_BY_POST_ID = 'post:%s:tags'
 MC_KEY_RELATED = 'post:related_posts:%s'
@@ -70,132 +64,6 @@ class MLStripper(HTMLParser):
         return ''.join(self.fed)
 
 
-class PanguMeta(type):
-    def __new__(cls, name, bases, attrs):
-        for base in bases:
-            for name, fn in inspect.getmembers(base):
-                if (isinstance(fn, types.FunctionType) and
-                        name not in ('codespan', 'paragraph')):
-                    try:
-                        idx = inspect.getfullargspec(fn).args.index('text')
-                    except ValueError:
-                        continue
-                    setattr(base, name, cls.deco(fn, idx))
-
-        return super().__new__(cls, name, bases, attrs)
-
-    @classmethod
-    def deco(cls, func: Callable, index: int) -> Callable:
-        def wrapper(*args: Any, **kwargs: Any) -> str:
-            _args = list(args)
-            _args[index] = pangu.spacing_text(_args[index])
-            result = func(*_args, **kwargs)
-            return result
-        return wrapper
-
-
-class BlogHtmlFormatter(HtmlFormatter):  # type: ignore
-
-    def __init__(self, **options):
-        super().__init__(**options)
-        self.lang = options.get('lang', '')
-
-    def _wrap_div(self, inner):
-        style = []
-        if (self.noclasses and not self.nobackground and
-                self.style.background_color is not None):
-            style.append('background: %s' % (self.style.background_color,))
-        if self.cssstyles:
-            style.append(self.cssstyles)
-        style = '; '.join(style)
-
-        yield 0, ('<figure' + (self.cssclass and ' class="%s"' % self.cssclass) +  # noqa
-                  (style and (' style="%s"' % style)) +
-                  (self.lang and ' data-lang="%s"' % self.lang) +
-                  '><table><tbody><tr><td class="code">')
-        for tup in inner:
-            yield tup
-        yield 0, '</table></figure>\n'
-
-    def _wrap_pre(self, inner):
-        style = []
-        if self.prestyles:
-            style.append(self.prestyles)
-        if self.noclasses:
-            style.append('line-height: 125%')
-        style = '; '.join(style)
-
-        if self.filename:
-            yield 0, ('<span class="filename">' + self.filename + '</span>')
-
-        # the empty span here is to keep leading empty lines from being
-        # ignored by HTML parsers
-        yield 0, ('<pre' + (style and ' style="%s"' % style) + (
-            self.lang and f' class="hljs {self.lang}"') + '><span></span>')
-        for tup in inner:
-            yield tup
-        yield 0, '</pre>'
-
-
-def block_code(text: str, lang: str, inlinestyles: bool = False,
-               linenos: bool = False) -> str:
-    if not lang:
-        text = text.strip()
-        return '<pre><code>%s</code></pre>\n' % mistune.escape(text)
-
-    try:
-        if lang in ('py', 'python'):
-            lang = 'python3'
-        lexer = get_lexer_by_name(lang, stripall=True)
-        formatter = BlogHtmlFormatter(  # type: ignore
-            noclasses=inlinestyles, linenos=linenos,
-            cssclass='highlight %s' % lang, lang=lang
-        )
-        code = highlight(text, lexer, formatter)
-        return code
-    except Exception:
-        # Github Card
-        if lang == 'card':
-            try:
-                dct = ast.literal_eval(text)
-                if (user := dct.get('user')):
-                    repo = dct.get('repo')
-                    card_html = f'''<div class="github-card" data-user="{ user }" { f'data-repo="{ repo }"' if repo else "" }></div>'''  # noqa
-                    if dct.get('right'):
-                        card_html = f'<div class="card-right">{card_html}</div>'  # noqa
-                    return card_html
-            except (ValueError, SyntaxError):
-                ...
-
-        return '<pre class="%s"><code>%s</code></pre>\n' % (
-            lang, mistune.escape(text)
-        )
-
-
-class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):  # type: ignore
-    def header(self, text, level, raw=None):
-        hid = text.replace(' ', '')
-        return f'<h{level} id="{hid}">{text}</h{level}>\n'
-
-    def block_code(self, code, lang):
-        inlinestyles = self.options.get('inlinestyles')
-        linenos = self.options.get('linenos')
-        return block_code(code, lang, inlinestyles, linenos)
-
-    def link(self, link, title, text):
-        return f' {super().link(link, title, text) } '
-
-
-class TocRenderer(TocMixin, mistune.Renderer):  # type:ignore
-    ...
-
-
-renderer = BlogRenderer(linenos=False, inlinestyles=False)
-toc = TocRenderer()
-markdown = mistune.Markdown(escape=True, renderer=renderer)
-toc_md = mistune.Markdown(renderer=toc)
-
-
 class StatusMixin(metaclass=ModelMeta):
     STATUSES = (
         STATUS_UNPUBLISHED,
@@ -204,7 +72,7 @@ class StatusMixin(metaclass=ModelMeta):
     status = fields.SmallIntField(default=STATUS_UNPUBLISHED)
 
 
-class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
+class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
 
     TYPES = (TYPE_ARTICLE, TYPE_PAGE) = range(2)
 
@@ -212,7 +80,6 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
     author_id = fields.IntField()
     slug = fields.CharField(max_length=100)
     summary = fields.CharField(max_length=255)
-    can_comment = fields.BooleanField(default=True)
     type = fields.IntField(default=TYPE_ARTICLE)
     _pageview = fields.IntField(source_field='pageview', default=0)
     kind = K_POST
@@ -254,20 +121,6 @@ class Post(CommentMixin, ReactMixin, StatusMixin, BaseModel):
     @property
     def preview_url(self) -> str:
         return f'/{self.__class__.__name__.lower()}/{self.id}/preview'
-
-    async def set_content(self, content: str) -> bool:
-        return await self.set_props_by_key('content', content)
-
-    async def save(self, *args, **kwargs):
-        if (content := kwargs.pop('content', None)) is not None:
-            await self.set_content(content)
-        return await super().save(*args, **kwargs)  # type: ignore
-
-    @property
-    async def content(self) -> str:
-        if (rv := await self.get_props_by_key('content')):
-            return rv.decode('utf-8')
-        return ''
 
     @property
     async def html_content(self) -> str:
