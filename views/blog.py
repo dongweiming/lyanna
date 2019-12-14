@@ -97,7 +97,7 @@ async def _post(request: Request, ident: str, is_preview: bool = False):
     github_user = request['session'].get('user')
     stats = await post.stats
     reaction_type = None
-    reacted_comments: List[List[int, int]] = []
+    reacted_comments: List[List[int]] = []
     if github_user:
         reaction_type = await post.get_reaction_type(github_user['gid'])
         reacted_comments = await post.comments_reacted_by(github_user['gid'])

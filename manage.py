@@ -9,7 +9,7 @@ from tortoise.exceptions import IntegrityError
 from config import HERE
 from ext import init_db
 from models import create_user
-from models.base import get_redis
+from models.utils import get_redis
 from models.blog import PAGEVIEW_FIELD, RK_ALL_POST_IDS, RK_PAGEVIEW
 
 

@@ -116,9 +116,9 @@ class ReactMixin:
                 for item in items:
                     await item.delete()
             else:
-                if (item := next(
-                        (i for i in items if reaction_type == i.reaction_type), None)
-                ) is not None:
+                if (item := next((
+                        i for i in items if reaction_type == i.reaction_type),
+                                 None)) is not None:
                     await item.delete()
         return True
 

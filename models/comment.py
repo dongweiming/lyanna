@@ -3,8 +3,6 @@ from __future__ import annotations
 import asyncio
 from typing import Dict, List
 
-import markupsafe
-import mistune
 from arq import create_pool
 from tortoise import fields
 from tortoise.query_utils import Q
@@ -18,15 +16,15 @@ from .react import ReactItem, ReactMixin
 from .signals import comment_reacted
 from .user import GithubUser
 from .utils import RedisSettings
+from .mixin import ContentMixin
 
-markdown = mistune.Markdown()
 MC_KEY_COMMENT_LIST = 'comment:%s:comment_list'
 MC_KEY_N_COMMENTS = 'comment:%s:n_comments'
 MC_KEY_COMMNET_IDS_REACTED_BY_USER = 'react:comment_ids_reacted_by:%s:%s'
 MC_KEY_LATEST_COMMENTS = 'comment:latest_comments:%s'
 
 
-class Comment(ReactMixin, BaseModel):
+class Comment(ReactMixin, ContentMixin, BaseModel):
     github_id = fields.IntField()
     post_id = fields.IntField()
     ref_id = fields.IntField(default=0)
@@ -34,26 +32,6 @@ class Comment(ReactMixin, BaseModel):
 
     class Meta:
         table = 'comments'
-
-    async def set_content(self, content: str) -> bool:
-        return await self.set_props_by_key('content', content)
-
-    async def save(self, *args, **kwargs) -> Comment:
-        if (content := kwargs.pop('content', None)) is not None:
-            await self.set_content(content)
-        return await super().save(*args, **kwargs)  # type: ignore
-
-    @property
-    async def content(self) -> str:
-        if (rv := await self.get_props_by_key('content')):
-            return rv.decode('utf-8')
-        return ''
-
-    @property
-    async def html_content(self):
-        if not (content := str(markupsafe.escape(await self.content))):
-            return ''
-        return markdown(content.replace('&gt;', '>'))
 
     async def clear_mc(self):
         keys = [key % self.post_id for key in (
@@ -82,6 +60,7 @@ class Comment(ReactMixin, BaseModel):
 class CommentMixin:
     id: int
     kind: int
+    can_comment = fields.BooleanField(default=True)
 
     async def add_comment(self, user_id, content, ref_id=0):
         obj = await Comment.create(
