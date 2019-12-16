@@ -144,3 +144,10 @@ async def get_url_info(request):
         'url': extracted.url or url,
         'abstract': extracted.description
     })
+
+
+@bp.route('/activity', methods=['POST'])
+async def activity(request):
+    return json({
+        'r': 0
+    })
