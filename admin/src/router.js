@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import store from './store'
+import store from '#/store'
 import Layout from '@/views/layout/Layout'
-import { getToken } from '@/utils/auth'
+import { getToken } from '#/utils/auth'
 
 import Home from '@/views/home'
 import CreateUser from '@/views/user/create'

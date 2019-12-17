@@ -46,6 +46,7 @@
 <script>
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import { createActivity } from '#/api'
 
 export default @Component() class Main extends Vue {
   text = ''
@@ -53,7 +54,11 @@ export default @Component() class Main extends Vue {
   showIcon = true
 
   onSubmit() {
-    console.log(11)
+    createActivity(this.text).then(
+      this.text = ''
+    ).catch(err => {
+      console.log(err)
+    })
   }
 
 

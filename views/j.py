@@ -148,6 +148,9 @@ async def get_url_info(request):
 
 @bp.route('/activity', methods=['POST'])
 async def activity(request):
+    dct = request.json
+    if not (text := dct.get('text')):
+        return json({'r': 1, 'msg': 'Text required.'})
     return json({
         'r': 0
     })

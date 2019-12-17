@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { getPostList, updatePostStatus, deletePost } from '@/api'
+import { getPostList, updatePostStatus, deletePost } from '#/api'
 import Pagination from '@/components/Pagination'
 
 export default {
