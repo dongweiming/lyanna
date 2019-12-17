@@ -59,6 +59,8 @@ REDIS_SENTINEL_SERVICE_PORT = 26379
 SHOW_AUTHOR = False
 COMMENT_REACTIONS = ['heart', 'upvote']
 
+ACTIVITY_THEME = 'rainbow'
+
 try:
     from local_settings import *  # noqa
 except ImportError:
@@ -79,6 +81,8 @@ if USE_YAML:
         globals().update({k.upper(): v for k, v in subconfig.items()})
     globals().update({f'MAIL_{k.upper()}': v for k, v
                       in config.mail.items()})  # type: ignore
+    globals().update({f'ACTIVITY_{k.upper()}': v for k, v
+                      in config.activity.items()})  # type: ignore
 
 redis_sentinel_host = os.getenv('REDIS_SENTINEL_SVC_HOST') or REDIS_SENTINEL_SERVICE_HOST  # noqa
 if redis_sentinel_host:

@@ -1,7 +1,13 @@
 from __future__ import annotations
 
-import math
+import os
 import re
+import time
+import math
+import struct
+import random
+import binascii
+import threading
 import asyncio
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Union
@@ -200,3 +206,17 @@ async def get_redis() -> Redis:
                 REDIS_URL, minsize=5, maxsize=20, loop=loop)
         _redis = redis
     return _redis
+
+
+class ObjectId:
+    _inc = random.randint(0, 0xFFFFFF)
+    _inc_lock = threading.Lock()
+
+
+def generate_id() -> str:
+    oid = struct.pack(">i", int(time.time()))
+    oid += struct.pack(">H", os.getpid() % 0xFFFF)
+    with ObjectId._inc_lock:
+        oid += struct.pack(">i", ObjectId._inc)[2:4]
+        ObjectId._inc = (ObjectId._inc + 1) % 0xFFFFFF
+    return binascii.hexlify(oid).decode('utf-8')

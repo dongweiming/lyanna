@@ -7,7 +7,7 @@ from sanic import Blueprint
 from sanic.exceptions import abort
 from tortoise.query_utils import Q
 
-from config import PER_PAGE, AttrDict, partials
+from config import PER_PAGE, AttrDict, partials, ACTIVITY_THEME
 from ext import mako
 from models import Post, PostTag, SpecialTopic, Tag
 from models.blog import (MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
@@ -188,3 +188,9 @@ async def topic(request: Request, ident: str):
     topic = await SpecialTopic.cache(ident)
     posts = await topic.get_post_items()  # type: ignore
     return {'topic': topic, 'posts': [await p.to_sync_dict() for p in posts]}
+
+
+@bp.route('/activities')
+@mako.template('activities.html')
+async def activities(request: Request):
+    return {'theme': ACTIVITY_THEME}
