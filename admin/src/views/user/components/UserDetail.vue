@@ -64,7 +64,7 @@
 import MDinput from '@/components/MDinput'
 import Sticky from '@/components/Sticky'
 import ImageCropper from '@/components/ImageCropper'
-import { fetchUser, updateUser, createUser } from '@/api'
+import { fetchUser, updateUser, createUser } from '#/api'
 
 const defaultForm = {
   active: true,

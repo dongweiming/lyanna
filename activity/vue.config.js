@@ -1,6 +1,10 @@
 module.exports = {
     indexPath: 'index.html',
     productionSourceMap: false,  // 生产环境禁用
+    chainWebpack: (config)=>{
+        config.resolve.alias
+            .set('#', resolve('../common/src'))
+    },
     configureWebpack: {
         devtool: 'eval-source-map',
         output: {

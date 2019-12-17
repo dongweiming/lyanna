@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { scrollTo } from '@/utils/scrollTo'
+import { scrollTo } from '#/utils/scrollTo'
 
 export default {
   name: 'Pagination',

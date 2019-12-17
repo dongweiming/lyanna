@@ -53,7 +53,7 @@ import MDinput from '@/components/MDinput'
 import Dropdown from '@/components/Dropdown'
 import Sticky from '@/components/Sticky'
 import DndList from '@/components/DndList'
-import { fetchTopic, updateTopic, createTopic, getPostList } from '@/api'
+import { fetchTopic, updateTopic, createTopic, getPostList } from '#/api'
 
 const defaultForm = {
     status: '1',

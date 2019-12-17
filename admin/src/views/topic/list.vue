@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { getTopicList, updateTopicStatus } from '@/api'
+import { getTopicList, updateTopicStatus } from '#/api'
 
 export default {
   name: 'SpecialTopics',
