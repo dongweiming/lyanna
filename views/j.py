@@ -1,8 +1,6 @@
 from typing import Callable, List
 
-import aiohttp
 import mistune
-import extraction
 from sanic import Blueprint
 from sanic.response import json
 from sanic_mako import render_template_def
@@ -125,32 +123,3 @@ async def comment_react(request, comment_id):
         n_reacted = await comment.n_upvotes
 
     return json({'r': int(not rv), 'n_reacted': n_reacted})
-
-
-@bp.route('/get_url_info', methods=['POST'])
-async def get_url_info(request):
-    user = request['session'].get('user')
-    if not user:
-        return json({'r': 403, 'msg': 'Login required'})
-    if not (url := request.form.get('url')):
-        return json({'r': 403, 'msg': 'URL required'})
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            html = await resp.text()
-    extracted = extraction.Extractor().extract(html, source_url=url)
-    return json({
-        'title': extracted.title,
-        'url': extracted.url or url,
-        'abstract': extracted.description
-    })
-
-
-@bp.route('/activity', methods=['POST'])
-async def activity(request):
-    dct = request.json
-    if not (text := dct.get('text')):
-        return json({'r': 1, 'msg': 'Text required.'})
-    return json({
-        'r': 0
-    })
