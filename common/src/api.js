@@ -1,5 +1,5 @@
 import qs from 'qs'
-import request from '@/utils/request'
+import request from '#/utils/request'
 
 const loginByUsername = (username, password) => {
   const data = {
@@ -154,8 +154,19 @@ const fetchTopic = (id) => {
     })
 }
 
+const createActivity = (text) => {
+  const data = {
+    text
+  }
+  return request({
+    url: '/j/activity',
+    method: 'post',
+    data
+  })
+}
+
 export {loginByUsername, getUserInfo, getUserList, createPost,
         getPostList, createUser, updatePost, updatePostStatus, updateUser,
         deletePost, fetchUser, fetchPost, userSearch, fetchTags,
         getTopicList, updateTopicStatus, createTopic, updateTopic,
-        fetchTopic}
+        fetchTopic, createActivity}

@@ -19,6 +19,9 @@ module.exports = {
         }
     },
     chainWebpack: config => {
+        config.resolve.alias
+            .set('#', resolve('../common/src'))
+
         config.module
             .rule('svg')
             .exclude.add(resolve('src/icons'))
