@@ -1,7 +1,7 @@
 from sanic.request import Request as _Request
-from models import User
 
 import config
+from models import User
 
 
 class Request(_Request):  # type: ignore

@@ -7,7 +7,7 @@ from sanic import Blueprint
 from sanic.exceptions import abort
 from tortoise.query_utils import Q
 
-from config import PER_PAGE, AttrDict, partials, ACTIVITY_THEME
+from config import ACTIVITY_THEME, PER_PAGE, AttrDict, partials
 from ext import mako
 from models import Post, PostTag, SpecialTopic, Tag
 from models.blog import (MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,

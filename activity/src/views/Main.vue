@@ -1,5 +1,9 @@
 <template>
-  <upload-form/>
+  <div>
+    <upload-form/>
+    <div id="activities">
+    </div>
+  </div>
 </template>
 
 <script>
@@ -13,7 +17,7 @@ export default @Component({components: {UploadForm}}) class Main extends Vue {
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 ::selection {
-  background: #42b983;
+  background: #6699CC;
   color: #fff;
 }
 body {

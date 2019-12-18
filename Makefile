@@ -14,7 +14,7 @@ deps:
 
 lint: deps
 	flake8 $(checkfiles) || (echo "Please run 'make style' to try fix style issues" && false)
-	bandit -r $(checkfiles) -s B403,B301,B104,B105
+	bandit -r $(checkfiles) -s B403,B301,B104,B105,B311,B602,B404
 	mypy $(checkfiles)
 
 style: deps

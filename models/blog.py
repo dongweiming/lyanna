@@ -15,15 +15,14 @@ from tortoise.queryset import QuerySet
 from config import PERMALINK_TYPE, AttrDict
 
 from .base import BaseModel
-from .mixin import get_redis
 from .comment import CommentMixin
 from .consts import K_POST, ONE_HOUR, PERMALINK_TYPES
 from .markdown import markdown, toc, toc_md
 from .mc import cache, clear_mc
+from .mixin import ContentMixin, get_redis
 from .react import ReactMixin
 from .user import User
 from .utils import trunc_utf8
-from .mixin import ContentMixin
 
 MC_KEY_TAGS_BY_POST_ID = 'post:%s:tags'
 MC_KEY_RELATED = 'post:related_posts:%s'
