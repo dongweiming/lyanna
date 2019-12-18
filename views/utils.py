@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 from json import JSONEncoder, dumps
+from typing import Any, Dict, Optional
 
 from sanic.response import HTTPResponse
-from typing import Any, Optional, Dict
 
 
 class APIJSONEncoder(JSONEncoder):

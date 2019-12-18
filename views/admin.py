@@ -2,9 +2,10 @@ import base64
 import copy
 import mimetypes
 import re
+import subprocess
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, Optional, List, DefaultDict
+from typing import Any, DefaultDict, Dict, List, Optional, Union
 
 import aiohttp
 import extraction
@@ -16,14 +17,15 @@ from sanic_jwt.decorators import instant_config
 from sanic_jwt.utils import call as jwt_call
 from tortoise.query_utils import Q
 
-from config import PER_PAGE, UPLOAD_FOLDER
+from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG
 from ext import mako
 from forms import PostForm, TopicForm, UserForm
 from models import Post, PostTag, SpecialTopic, Tag, User
+from models.activity import create_status
 from models.user import generate_password
+from models.utils import generate_id
 from views.request import Request
 from views.utils import json
-from models.utils import generate_id
 
 FORM_REGEX = re.compile(r'posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')  # noqa
 
@@ -208,7 +210,9 @@ async def upload(request):
     except KeyError:
         file = request.files['file'][0]
         is_avatar = False
-    filename = f'{generate_id()}.{file.name.split(".")[-1]}'
+    suffix = file.name.split(".")[-1]
+    fid = generate_id()
+    filename = f'{fid}.{suffix}'
     uploaded_file = Path(UPLOAD_FOLDER) / filename
     with open(uploaded_file, 'wb') as f:
         f.write(file.body)
@@ -216,16 +220,22 @@ async def upload(request):
     mime, _ = mimetypes.guess_type(str(uploaded_file))
     encoded = b''.join(base64.encodestring(file.body).splitlines()).decode()
 
+    dct: Dict[str, Union[Dict, int, str]]
+
     if is_avatar:
         dct = {
             'files': {
-                'avatar': f'data:{mime};base64,{encoded}', 'avatar_path': path
+                'avatar': f'data:{mime};base64,{encoded}', 'avatar_path': filename
             }
         }
     else:
+        if USE_FFMPEG and suffix == 'mp4':
+            subprocess.call(
+                f'ffmpeg -loglevel error -y -i {uploaded_file} -ss 0 -t 10 -vf fps=15,scale=300:-1 {Path(UPLOAD_FOLDER) / fid}.gif', shell=True)  # noqa
+
         dct = {'r': 0, 'filename': filename}
 
-    return response.json(dct)
+    return json(dct)
 
 
 @bp.route('/api/<target_kind>/<target_id>/status', methods=['POST', 'DELETE'])
@@ -350,9 +360,8 @@ async def user_info(request: Request) -> HTTPResponse:
     return response.json(data)
 
 
-
 @bp.route('/api/get_url_info', methods=['POST'])
-#@protected(bp)
+# @protected(bp)
 async def get_url_info(request):
     if not (url := request.json.get('url')):
         return json({'r': 403, 'msg': 'URL required'})
@@ -362,12 +371,12 @@ async def get_url_info(request):
             async with session.get(url) as resp:
                 try:
                     html = await resp.text()
-                except:
+                except Exception:
                     html = resp._body.decode('utf-8')
-        except:
+        except Exception:
             html = ''
     if not html:
-        return json({'r':1, 'msg': '这个网址无法识别'})
+        return json({'r': 1, 'msg': '这个网址无法识别'})
     extracted = extraction.Extractor().extract(html, source_url=url)
     return json({
         'ok': 0,
@@ -379,12 +388,9 @@ async def get_url_info(request):
     })
 
 
-@bp.route('/api/activity', methods=['POST'])
-#@protected(bp)
-async def activity(request):
-    dct = request.json
-    if not (text := dct.get('text')):
-        return json({'r': 1, 'msg': 'Text required.'})
-    return json({
-        'r': 0
-    })
+@bp.route('/api/status', methods=['POST'])
+# @protected(bp)
+async def api_status(request):
+    user_id = 1
+    rv, msg = await create_status(user_id, request.json)
+    return json({'r': not bool(rv), 'msg': msg})

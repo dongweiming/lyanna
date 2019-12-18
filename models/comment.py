@@ -12,11 +12,11 @@ from config import REDIS_URL, partials
 from .base import BaseModel
 from .consts import K_COMMENT, ONE_HOUR
 from .mc import cache, clear_mc
+from .mixin import ContentMixin
 from .react import ReactItem, ReactMixin
 from .signals import comment_reacted
 from .user import GithubUser
 from .utils import RedisSettings
-from .mixin import ContentMixin
 
 MC_KEY_COMMENT_LIST = 'comment:%s:comment_list'
 MC_KEY_N_COMMENTS = 'comment:%s:n_comments'

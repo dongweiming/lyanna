@@ -1,3 +1,4 @@
+import distutils
 import os
 from pathlib import Path
 from typing import List, Tuple
@@ -59,6 +60,7 @@ REDIS_SENTINEL_SERVICE_PORT = 26379
 SHOW_AUTHOR = False
 COMMENT_REACTIONS = ['heart', 'upvote']
 
+USE_FFMPEG = bool(distutils.spawn.find_executable('ffmpeg'))  # type: ignore
 ACTIVITY_THEME = 'rainbow'
 
 try:
@@ -83,6 +85,9 @@ if USE_YAML:
                       in config.mail.items()})  # type: ignore
     globals().update({f'ACTIVITY_{k.upper()}': v for k, v
                       in config.activity.items()})  # type: ignore
+
+if not USE_FFMPEG:
+    print('Warning: Cover can be displayed after installing `ffmpeg`')
 
 redis_sentinel_host = os.getenv('REDIS_SENTINEL_SVC_HOST') or REDIS_SENTINEL_SERVICE_HOST  # noqa
 if redis_sentinel_host:
