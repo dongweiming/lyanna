@@ -1,6 +1,6 @@
 <template>
 <div>
-  <div id="activities">
+  <div id="form">
     <div class="create-activity" v-bind:class="{ active: OnFocus }">
       <form class="create-form" name="form" v-on:submit.prevent="onSubmit">
         <ul class="activity-tab">
@@ -51,7 +51,10 @@
             <ul class="file-list" v-else>
               <li v-for="file in files" :key="file.id" class="file-item">
                 <img :src="file.thumb" class="thumb" v-if="file.thumb">
-                <p v-else>{{ file.name }}</p>
+                <a v-else :title="file.name">
+                    <img :src="file.cover" class="thumb">
+                    <i class="iconfont icon-ziyuan player-btn"></i>
+                </a>
                 <a href="#" class="lnk-remove-photo" v-on:click="removeFile(file)">×</a>
               </li>
               <li class="file-item add-photo"><i>+</i>
@@ -105,7 +108,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import FileUpload from 'vue-upload-component'
-import { createActivity, getUrlInfo } from '#/api'
+import { createStatus, getUrlInfo } from '#/api'
 
 export default @Component({components: {FileUpload}}) class Main extends Vue {
   text = ''
@@ -140,7 +143,8 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
 
   async customAction(file, component) {
     let result = await component.uploadHtml5(file)
-    this.fids.set(file.id, JSON.parse(result.xhr.responseText)['filename'])
+    const filename = JSON.parse(result.xhr.responseText)['filename']
+    this.fids.set(file.id, filename)
     return result
   }
 
@@ -153,8 +157,16 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
   }
 
   onSubmit() {
-    let fids =[ ...this.fids.values() ];
-    createActivity(this.text, this.url, fids).then(response => {
+    const fids =[ ...this.fids.values() ];
+    const data = {
+      text: this.text,
+      url: this.url,
+      fids
+    }
+    if (this.url) {
+      data['url_info'] = this.urlInfo
+    }
+    createStatus(data).then(response => {
       if (response.data.r == 1) {
         this.$toasted.show(`发布失败: ${response.data.msg}`)
       } else {
@@ -221,7 +233,9 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
     if (newFile && oldFile) {
       let text = newFile.xhr.responseText
       if (text) {
-        this.fids.set(newFile.id, JSON.parse(text)['filename'])
+        const filename = JSON.parse(text)['filename']
+        newFile.cover = `/static/upload/${filename.replace('.mp4', '.gif')}`
+        this.fids.set(newFile.id, filename)
       }
     }
   }
@@ -256,7 +270,7 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
   background: #6699CC;
 }
 
-#activities {
+#form {
   width: 675px;
   float: left;
   margin-top: 80px;
@@ -618,5 +632,11 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
     position: absolute;
     top: 0;
     left: 0;
+}
+.player-btn {
+  position: absolute;
+  top: 12px;
+  left: 13px;
+  font-size: 24px;
 }
 </style>

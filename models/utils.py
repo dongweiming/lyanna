@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import os
-import re
-import time
-import math
-import struct
-import random
-import binascii
-import threading
 import asyncio
+import binascii
+import math
+import os
+import random
+import re
+import struct
+import threading
+import time
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Union
 from urllib.parse import unquote
@@ -17,7 +17,8 @@ import aioredis
 from aioredis.commands import Redis
 from arq.connections import RedisSettings as _RedisSettings
 
-from config import AttrDict, REDIS_URL
+from config import REDIS_URL, AttrDict
+
 from .var import redis_var
 
 _redis = None

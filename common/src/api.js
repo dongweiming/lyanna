@@ -154,12 +154,9 @@ const fetchTopic = (id) => {
     })
 }
 
-const createActivity = (text, url, fids) => {
-  const data = {
-    text, url, fids
-  }
+const createStatus = (data) => {
   return request({
-    url: '/api/activity',
+    url: '/api/status',
     method: 'post',
     data
   })
@@ -176,8 +173,16 @@ const getUrlInfo = (url) => {
   })
 }
 
+const getActivities = (params) => {
+    return request({
+        url: '/j/activities',
+        method: 'get',
+        params: params
+    })
+}
+
 export {loginByUsername, getUserInfo, getUserList, createPost,
         getPostList, createUser, updatePost, updatePostStatus, updateUser,
         deletePost, fetchUser, fetchPost, userSearch, fetchTags,
         getTopicList, updateTopicStatus, createTopic, updateTopic,
-        fetchTopic, createActivity, getUrlInfo}
+        fetchTopic, createStatus, getUrlInfo, getActivities}

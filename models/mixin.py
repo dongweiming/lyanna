@@ -1,7 +1,7 @@
 import markupsafe
 import mistune
-
 from aioredis.commands import Redis
+
 from .utils import get_redis
 
 markdown = mistune.Markdown()
@@ -17,7 +17,7 @@ class ContentMixin:
     def get_db_key(self, key: str) -> str:
         return f'{self.__class__.__name__}/{self.id}/props/{key}'
 
-    async def set_props_by_key(self, key: str, value: str) -> bool:
+    async def set_props_by_key(self, key: str, value: bytes) -> bool:
         key = self.get_db_key(key)
         return await (await self.redis).set(key, value)  # noqa: W606
 
@@ -25,7 +25,7 @@ class ContentMixin:
         key = self.get_db_key(key)
         return await (await self.redis).get(key) or b''  # noqa: W606
 
-    async def set_content(self, content: str) -> bool:
+    async def set_content(self, content: bytes) -> bool:
         return await self.set_props_by_key('content', content)
 
     async def save(self, *args, **kwargs):

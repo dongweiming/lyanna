@@ -9,8 +9,8 @@ from tortoise.exceptions import IntegrityError
 from config import HERE
 from ext import init_db
 from models import create_user
-from models.utils import get_redis
 from models.blog import PAGEVIEW_FIELD, RK_ALL_POST_IDS, RK_PAGEVIEW
+from models.utils import get_redis
 
 
 async def init() -> None:
@@ -84,6 +84,29 @@ async def _migrate_for_v27() -> None:
     await client.execute_script('alter table users add column `avatar` varchar(100) DEFAULT ""')  # noqa
 
 
+async def _migrate_for_v30() -> None:
+    await init_db(create_db=False)
+    client = Tortoise.get_connection('default')
+    await client.execute_script(
+        '''CREATE TABLE `activity` (
+        `can_comment` tinyint(1) NOT NULL,
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `created_at` datetime(6) NOT NULL,
+        `user_id` int(11) NOT NULL,
+        `target_id` int(11) NOT NULL,
+        `target_kind` int(11) NOT NULL,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
+
+    await client.execute_script(
+        '''CREATE TABLE `statuses` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `created_at` datetime(6) NOT NULL,
+        `user_id` int(11) NOT NULL,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
+
+
 @click.group()
 def cli():
     ...
@@ -104,6 +127,12 @@ def migrate_for_v25():
 @cli.command()
 def migrate_for_v27():
     run_async(_migrate_for_v27())
+    click.echo('Migrate Finished!')
+
+
+@cli.command()
+def migrate_for_v30():
+    run_async(_migrate_for_v30())
     click.echo('Migrate Finished!')
 
 

@@ -5,7 +5,7 @@ from sanic import Blueprint
 from sanic.response import json
 from sanic_mako import render_template_def
 
-from models import Comment, Post, ReactItem
+from models import Comment, Post, ReactItem, Activity
 
 bp = Blueprint('j', url_prefix='/j')
 
@@ -123,3 +123,10 @@ async def comment_react(request, comment_id):
         n_reacted = await comment.n_upvotes
 
     return json({'r': int(not rv), 'n_reacted': n_reacted})
+
+
+@bp.route('/activities', methods=['GET'])
+async def activities(request):
+    page = int(request.args.get('page', 1))
+    items = Activity.get_multi_by(page)
+    return json({'items': items})
