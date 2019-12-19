@@ -401,5 +401,6 @@ async def get_most_viewed_posts(
     posts = await Post.get_multi([k.decode() for k in keys])
     items = []
     for index, p in enumerate(posts):
-        items.append((counts[index], p))
+        if p:
+            items.append((counts[index], p))
     return items

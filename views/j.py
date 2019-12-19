@@ -128,5 +128,6 @@ async def comment_react(request, comment_id):
 @bp.route('/activities', methods=['GET'])
 async def activities(request):
     page = int(request.args.get('page', 1))
-    items = Activity.get_multi_by(page)
-    return json({'items': items})
+    total = await Activity.count()
+    items = await Activity.get_multi_by(page)
+    return json({'items': items, 'total': total})

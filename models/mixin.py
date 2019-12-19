@@ -1,10 +1,8 @@
 import markupsafe
-import mistune
 from aioredis.commands import Redis
 
 from .utils import get_redis
-
-markdown = mistune.Markdown()
+from .markdown import markdown
 
 
 class ContentMixin:
