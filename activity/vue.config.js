@@ -1,3 +1,5 @@
+const MomentLocalesPlugin = require('moment-locales-webpack-plugin');
+
 module.exports = {
     indexPath: 'index.html',
     productionSourceMap: false,  // 生产环境禁用
@@ -10,7 +12,12 @@ module.exports = {
         output: {
             filename: 'static/js/activity/[name].js',
             chunkFilename: 'static/js/activity/[name].js'
-        }
+        },
+        plugins: [
+            new MomentLocalesPlugin({
+                localesToKeep: ['zh-cn'],
+            }),
+        ]
     },
     css: {
         extract: {

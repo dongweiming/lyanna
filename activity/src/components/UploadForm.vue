@@ -262,12 +262,16 @@ ol, ul, dd, dl {
 input[type=text]:focus, input[type=password]:focus, textarea:focus {
   outline: 0;
 }
+::selection {
+  background: #63B5F5;
+  color: #fff;
+}
 .activity-tab a:link {
   text-decoration: none;
 }
 .activity-tab a:hover span {
   color: #fff;
-  background: #6699CC;
+  background: #63B5F5;
 }
 
 #form {
@@ -437,7 +441,7 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
   font-family: stheiti, tahoma, simsun, sans-serif;
 }
 .activity-btn {
-  background-color: #6699CC;
+  background-color: #63B5F5;
   color: #fff;
   padding: .3em .6em;
   font-size: 14px;
