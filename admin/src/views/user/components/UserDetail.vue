@@ -142,7 +142,7 @@ export default {
       this.imagecropperShow = false
       this.imagecropperKey = this.imagecropperKey + 1
       this.image = resData.files.avatar
-      this.userForm.avatar = resData.avatar_path
+      this.userForm.avatar = resData.files.avatar_path
     },
     submitForm() {
       this.$refs.userForm.validate(valid => {

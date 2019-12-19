@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import math
+import subprocess
+from pathlib import Path
 from dataclasses import asdict, dataclass, field
 from pickle import dumps, loads
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from tortoise import fields
 
-from config import USE_FFMPEG
+from config import USE_FFMPEG, UPLOAD_FOLDER
 
 from .base import BaseModel
 from .blog import Post
@@ -17,15 +19,19 @@ from .mc import cache, clear_mc
 from .mixin import ContentMixin
 from .react import ReactMixin
 from .user import User
+from .signals import post_created
 
 PER_PAGE = 10
-MC_KEY_GET_BY = 'core:activities:%s'
+DEFAULT_WIDTH = 260
+MC_KEY_ACTIVITIES = 'core:activities:%s'
+MC_KEY_ACTIVITY_COUNT = 'core:activity_count'
+MC_KEY_ACTIVITY_FULL_DICT = 'core:activity:full_dict:%s'
 MC_KEY_STATUS_ATTACHMENTS = 'core.status:attachments:%s'
-
+FFPROBE_TMPL = 'ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 {input}'  # noqa
 
 @dataclass
 class Attachment:
-    LAYOUTS = (LAYOUT_LINK, LAYOUT_PHOTO, LAYOUT_CODE, LAYOUT_VIDEO) = range(4)
+    LAYOUTS = (LAYOUT_LINK, LAYOUT_PHOTO, LAYOUT_VIDEO) = range(3)
     layout: int = LAYOUT_LINK
     url: Union[Optional[str], str] = ''
 
@@ -46,16 +52,10 @@ class Photo(Attachment):
 
 
 @dataclass
-class CodeSnippet(Attachment):
-    url: Optional[str] = ''
-    content: Optional[str] = ''
-    layout: int = Attachment.LAYOUT_CODE
-
-
-@dataclass
 class Video(Attachment):
     title: Optional[str] = ''
     cover_url: str = ''
+    size: Tuple[int, int] = (0, 0)
     layout: int = Attachment.LAYOUT_VIDEO
 
 
@@ -105,44 +105,112 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
     user_id = fields.IntField()
     target_id = fields.IntField()
     target_kind = fields.IntField()
+    _target = None
 
     @classmethod
-    # @cache(MC_KEY_GET_BY % '{page}')
+    # @cache(MC_KEY_ACTIVITIES % '{page}')
     async def get_multi_by(cls, page: int = 1) -> List[Dict]:
         items = []
-        queryset = cls.offset((page - 1) * PER_PAGE).limit(PER_PAGE).order_by('-id')
+        queryset = cls.filter().offset((page - 1) * PER_PAGE).limit(
+            PER_PAGE).order_by('-id')
         for item in await queryset:
             items.append(await item.to_full_dict())
         return items
 
     @property
     async def target(self):
-        kls = None
-        if self.target_kind == K_POST:
-            kls = Post
-        elif self.target_kind == K_STATUS:
-            kls = Status
-        if kls is None:
-            return
-        return await kls.cache(self.target_id)
+        if self._target is None:
+            kls = None
+            if self.target_kind == K_POST:
+                kls = Post
+            elif self.target_kind == K_STATUS:
+                kls = Status
+            if kls is None:
+                return
+            self._target = await kls.cache(self.target_id)
+        return self._target
 
+    @property
+    async def action(self):
+        action = None
+        if self.target_kind == K_STATUS:
+            target = await self.target
+            attachments = await target.attachments
+            if attachments:
+                layout = attachments[0]['layout']
+                if layout == Attachment.LAYOUT_LINK:
+                    action = '分享网页'
+                elif layout == Attachment.LAYOUT_PHOTO:
+                    action = f'上传了{len(attachments)}张照片'
+                elif layout == Attachment.LAYOUT_VIDEO:
+                    action = f'上传了{len(attachments)}个视频'
+            elif '```' in await target.content:
+                action = '分享了代码片段'
+        elif self.target_kind == K_POST:
+            action = '写了新文章'
+
+        if action is None:
+            action = '说'
+        return action
+
+    @property
+    async def attachments(self):
+        if self.target_kind == K_STATUS:
+            target = await self.target
+            attachments = await target.attachments
+        elif self.target_kind == K_POST:
+            target = await self.target
+            attachments = [
+                asdict(Link(url=target.url, title=target.title,
+                            abstract=target.summary))]
+        else:
+            attachments = []
+        return attachments
     @property
     async def user(self) -> User:
         return await User.cache(self.user_id)
 
+    @classmethod
+    @cache(MC_KEY_ACTIVITY_COUNT)
+    async def count(cls) -> int:
+        return await cls.filter().count()
+
+    #@cache(MC_KEY_ACTIVITY_FULL_DICT % '{self.id}')
     async def to_full_dict(self) -> Dict[str, Any]:
         target = await self.target
         if not target:
             return {}
+        user = (await self.user).to_dict()
+        target = await target.to_sync_dict()
+        if self.target_kind == K_STATUS:
+            target['url'] = ''
+        for k in ['user', 'user_id']:
+            try:
+                del target[k]
+            except KeyError:
+                ...
+        avatar = user['avatar']
+        if avatar:
+            avatar = f'/static/upload/{avatar}'
+        attachments = await self.attachments
+        layout = attachments[0]['layout'] if attachments else ''
         return {
-            'user': (await self.user).to_dict(),
-            'target': await target.to_sync_dict()
+            'user': {
+                'name': user['name'],
+                'avatar': avatar
+            },
+            'target': target,
+            'action': await self.action,
+            'created_at': self.created_at,
+            'attachments': attachments,
+            'layout': attachments[0]['layout'] if attachments else '',
         }
 
     async def clear_mc(self):
         total = await self.filter().count()
         page_count = math.ceil(total / PER_PAGE)
-        keys = [MC_KEY_GET_BY % p for p in range(1, page_count + 1)]
+        keys = [MC_KEY_ACTIVITIES % p for p in range(1, page_count + 1)]
+        keys.extend([MC_KEY_ACTIVITY_COUNT, MC_KEY_ACTIVITY_FULL_DICT % self.id])
         await clear_mc(*keys)
 
 
@@ -156,7 +224,16 @@ async def create_status(user_id: int, data: Dict):
         for fid in fids:
             attach = layout(url=f'/static/upload/{fid}')
             if USE_FFMPEG and is_video:
-                attach.cover_url = f'/static/upload/{fid.replace(".mp4", ".gif")}'
+                try:
+                    input = Path(UPLOAD_FOLDER) / fid
+                    output = subprocess.check_output(
+                        FFPROBE_TMPL.format(input=input), shell=True)
+                    lst = output.decode('utf-8').strip().split('x')
+                    size = (int(lst[0]), int(lst[1]))
+                except (subprocess.CalledProcessError, ValueError):
+                    size = (0, 0)
+                attach.size = size
+                attach.cover_url = f'/static/upload/{fid.replace(".mp4", ".png")}'
             attachments.append(attach)
     elif (url := data.get('url')):
         url_info = data.get('url_info', {})
@@ -170,3 +247,8 @@ async def create_status(user_id: int, data: Dict):
                                 user_id=user_id)
     dct = await act.to_full_dict()
     return bool(dct), act
+
+
+@post_created.connect
+async def create_activity_after_post_created(_, post_id, user_id):
+    await Activity.create(target_id=post_id, target_kind=K_POST, user_id=user_id)

@@ -173,11 +173,11 @@ const getUrlInfo = (url) => {
   })
 }
 
-const getActivities = (params) => {
+const getActivities = (page) => {
     return request({
         url: '/j/activities',
         method: 'get',
-        params: params
+        params: {page}
     })
 }
 

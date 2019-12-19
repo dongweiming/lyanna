@@ -21,6 +21,7 @@ from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG
 from ext import mako
 from forms import PostForm, TopicForm, UserForm
 from models import Post, PostTag, SpecialTopic, Tag, User
+from models.signals import post_created
 from models.activity import create_status
 from models.user import generate_password
 from models.utils import generate_id
@@ -101,7 +102,10 @@ async def _post(request: Request, post_id: Optional[Any] = None):
         if post_id is None:
             post = await Post.filter(title=title).first()
         if not post:
+            is_new = True
             post = Post()
+        else:
+            is_new = False
         tags = form.tags.data
         content = form.content.data
         is_page = form.is_page.data
@@ -113,6 +117,8 @@ async def _post(request: Request, post_id: Optional[Any] = None):
         await post.save()
         await post.update_tags(tags)
         await post.set_content(content)
+        if is_new:
+            post_created.send(post_id=post.id, user_id=post.author_id)
         ok = True
     else:
         ok = False
@@ -231,7 +237,7 @@ async def upload(request):
     else:
         if USE_FFMPEG and suffix == 'mp4':
             subprocess.call(
-                f'ffmpeg -loglevel error -y -i {uploaded_file} -ss 0 -t 10 -vf fps=15,scale=300:-1 {Path(UPLOAD_FOLDER) / fid}.gif', shell=True)  # noqa
+                f'ffmpeg -loglevel error -y -i {uploaded_file} -qscale:v 1 -qmin 1 -qmax 1 -frames:v 1 {Path(UPLOAD_FOLDER) / fid}.png', shell=True)  # noqa
 
         dct = {'r': 0, 'filename': filename}
 
