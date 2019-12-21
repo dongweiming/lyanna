@@ -194,6 +194,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
             avatar = f'/static/upload/{avatar}'
         attachments = await self.attachments
         return {
+            'id': self.id,
             'user': {
                 'name': user['name'],
                 'avatar': avatar
@@ -215,7 +216,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
         await clear_mc(*keys)
 
 
-async def create_status(user_id: int, data: Dict):
+async def create_status(user_id: int, data: Dict) -> Tuple[bool, str]:
     if not (text := data.get('text')):
         return False, 'Text required.'
     fids = data.get('fids', [])
@@ -246,8 +247,7 @@ async def create_status(user_id: int, data: Dict):
     await status.set_attachments(attachments)
     act = await Activity.create(target_id=status.id, target_kind=K_STATUS,
                                 user_id=user_id)
-    dct = await act.to_full_dict()
-    return bool(dct), act
+    return act, ''
 
 
 @post_created.connect

@@ -135,3 +135,29 @@ async def clear_mc(*keys) -> bool:
     await asyncio.gather(*[memcache.delete(k.encode('utf-8')) for k in keys],
                          return_exceptions=True)
     return True
+
+
+class mc:
+    @staticmethod
+    async def get_multi(*keys) -> List[Any]:
+        memcache = await get_memcache()
+        if memcache is None:
+            return []
+        values = await memcache.multi_get(*[k.encode('utf-8') for k in keys])
+
+        rs = []
+        for value in values:
+            try:
+                r = loads(value)
+            except TypeError:
+                r = None
+            rs.append(r)
+        return rs
+
+    @staticmethod
+    async def set_multi(keys, values, expire: int = 0) -> bool:
+        memcache = await get_memcache()
+        for k, v in zip(keys, values):
+            await memcache.set(k.encode('utf-8'),
+                               dumps(v), expire)
+        return True
