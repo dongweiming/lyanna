@@ -5,7 +5,9 @@ from sanic import Blueprint
 from sanic.response import json
 from sanic_mako import render_template_def
 
+from config import DEBUG
 from models import Comment, Post, ReactItem, Activity
+from models.consts import K_POST, K_ACTIVITY
 
 bp = Blueprint('j', url_prefix='/j')
 
@@ -13,7 +15,9 @@ bp = Blueprint('j', url_prefix='/j')
 def login_required(f: Callable) -> Callable:
     async def wrapped(request, **kwargs):
         if not (user := request['session'].get('user')):
-            return json({'r': 403, 'msg': 'Login required.'})
+            if not DEBUG:
+                return json({'r': 403, 'msg': 'Login required.'})
+            user = {'gid': 841395}  # My Github id
         if (target_id := kwargs.pop('target_id', None)) is not None:
             target_kind = kwargs.pop('target_kind', 'post')
             if target_kind == 'post':
@@ -25,7 +29,7 @@ def login_required(f: Callable) -> Callable:
             else:
                 return json({'r': 403, 'msg': 'Not support'})
             if not (target := await kls.cache(target_id)):
-                return json({'r': 1, 'msg': f'{kls.__name__} not exist'})
+                return json({'r': 1, 'msg': f'{kls.__class__.__name__} not exist'})
             args = (user, target)
         else:
             args = (user,)  # type: ignore
@@ -40,21 +44,24 @@ async def create_comment(request, user, target):
         return json({'r': 1, 'msg': 'Content required.'})
     ref_id = int(request.form.get('ref_id', 0))
     comment = await target.add_comment(user['gid'], content, ref_id)
-    reacted_comments = await target.comments_reacted_by(user['gid'])
-    comment = await target.to_sync_dict()
+    comment = await comment.to_sync_dict()
 
-    return json({
-        'r': 0 if comment else 1,
-        'html': await render_template_def(
-            'utils.html', 'render_single_comment', request,
-            {'comment': comment, 'github_user': user,
-             'reacted_comments': reacted_comments})
-    })
+    rv = {'r': 0 if comment else 1}
+    if target.kind == K_POST:
+        reacted_comments = await target.comments_reacted_by(user['gid'])
+        rv.update({
+            'html': await render_template_def(
+                'utils.html', 'render_single_comment', request,
+                {'comment': comment, 'github_user': user,
+                 'reacted_comments': reacted_comments})
+        })
+    else:
+        rv.update({'comment': comment})
+    return json(rv)
 
 
 @bp.route('/post/<post_id>/comments')
 async def comments(request, post_id):
-    post = await Post.cache(post_id)
     if not (post := await Post.cache(post_id)):
         return json({'r': 1, 'msg': 'Post not exist'})
 
@@ -108,7 +115,7 @@ async def react(request, user, post):
                  })
 
 
-@bp.route('/target_kind/<target_id>/react', methods=['POST', 'DELETE'])
+@bp.route('/<target_kind>/<target_id>/react', methods=['POST', 'DELETE'])
 @login_required
 async def target_react(request, user, target):
     reaction_type = int(request.form.get('reaction_type', ReactItem.K_LOVE))
@@ -134,4 +141,27 @@ async def activities(request):
     page = int(request.args.get('page', 1))
     total = await Activity.count()
     items = await Activity.get_multi_by(page)
-    return json({'items': items, 'total': total})
+    if not (user := request['session'].get('user')):
+        user_id = 841395 if DEBUG else None
+    else:
+        user_id = user['gid']
+    if user_id is None:
+        reactions = []
+    else:
+        reactions = await Activity.get_reactions_by_targets(
+            [item['id'] for item in items], user_id)
+    activities = []
+    for item in items:
+        id = item['id']
+        item['liked'] = id in reactions and ReactItem.K_LOVE in [
+            r.reaction_type for r in reactions[id]]
+        activities.append(item)
+    return json({'items': activities, 'total': total})
+
+
+@bp.route('/activity/<activity_id>/comments')
+async def activity_comments(request, activity_id):
+    if not (activity := await Activity.cache(activity_id)):
+        return json({'r': 1, 'msg': 'Activity not exist'})
+
+    return json({'r': 0, 'items': await activity.comments})

@@ -181,8 +181,40 @@ const getActivities = (page) => {
     })
 }
 
+const reactActivity = (id, method, reaction_type=2) => {
+    const data = {
+        reaction_type
+    }
+    return request({
+        url: `/j/activity/${id}/react`,
+        headers: {'content-type': 'application/x-www-form-urlencoded'},
+        method: method,
+        data: qs.stringify(data)
+    })
+}
+
+const commentActivity = (id, content, ref_id=0) => {
+    const data = {
+        content, ref_id
+    }
+    return request({
+        url: `/j/activity/${id}/comment`,
+        headers: {'content-type': 'application/x-www-form-urlencoded'},
+        method: 'post',
+        data: qs.stringify(data)
+    })
+}
+
+const getActivityCommentList = (id) => {
+    return request({
+        url: `/j/activity/${id}/comments`,
+        method: 'get'
+    })
+}
+
 export {loginByUsername, getUserInfo, getUserList, createPost,
         getPostList, createUser, updatePost, updatePostStatus, updateUser,
         deletePost, fetchUser, fetchPost, userSearch, fetchTags,
         getTopicList, updateTopicStatus, createTopic, updateTopic,
-        fetchTopic, createStatus, getUrlInfo, getActivities}
+        fetchTopic, createStatus, getUrlInfo, getActivities, reactActivity,
+        commentActivity, getActivityCommentList}

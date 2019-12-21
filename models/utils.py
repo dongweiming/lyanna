@@ -89,6 +89,12 @@ class Empty:
     def __delattr__(self, name):
         return self
 
+    def __getstate__(self):
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+
 
 empty = Empty()
 

@@ -1,12 +1,15 @@
 from __future__ import annotations
+from collections import defaultdict
+from typing import List, Dict
 
 from tortoise import fields
+from tortoise.query_utils import Q
 
 from .base import BaseModel
 from .consts import K_COMMENT
-from .mc import cache, clear_mc
+from .mc import cache, clear_mc, mc
 from .signals import comment_reacted
-from .utils import cached_property
+from .utils import cached_property, empty
 
 MC_KEY_USER_REACT_STAT = 'react:stats:%s:%s'
 MC_KEY_REACTION_ITEM_BY_USER_TARGET = 'react:reaction_item:%s:%s:%s'
@@ -138,3 +141,28 @@ class ReactMixin:
     @property
     async def n_upvotes(self):
         return (await self.stats).upvote_count
+
+    @classmethod
+    async def get_reactions_by_targets(cls, target_ids: List[int], user_id: int) -> Dict:
+        target_kind = cls.kind
+        keys = [MC_KEY_REACTION_ITEM_BY_USER_TARGET % (
+            user_id, target_id, target_kind) for target_id in target_ids]
+        values = await mc.get_multi(*keys)
+        cached = {id: v for id, v in zip(target_ids, values) if v is not None}
+        missed_ids = [id for id in target_ids if id not in cached]
+        if not missed_ids:
+            return {k: v for k, v in cached.items() if v}
+        reactions = await ReactItem.filter(user_id=user_id, target_id__in=missed_ids,
+                                           target_kind=target_kind).all()
+        missed_cached = defaultdict(list)
+        for r in reactions:
+            missed_cached[r.target_id].append(r)
+        cached.update(missed_cached)
+        for id in missed_ids:
+            if id not in missed_cached:
+                missed_cached[id] = empty
+        missed_keys = [MC_KEY_REACTION_ITEM_BY_USER_TARGET % (
+            user_id, target_id, target_kind) for target_id in missed_cached]
+        if missed_keys:
+            await mc.set_multi(missed_keys, missed_cached.values())
+        return cached

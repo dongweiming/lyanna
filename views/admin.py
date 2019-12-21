@@ -398,5 +398,5 @@ async def get_url_info(request):
 # @protected(bp)
 async def api_status(request):
     user_id = 1
-    rv, msg = await create_status(user_id, request.json)
-    return json({'r': not bool(rv), 'msg': msg})
+    obj, msg = await create_status(user_id, request.json)
+    return json({'r': not bool(obj), 'msg': msg, 'activity': await obj.to_full_dict()})

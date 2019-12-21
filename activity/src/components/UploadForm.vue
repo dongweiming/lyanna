@@ -1,5 +1,6 @@
 <template>
-  <div id="form" v-bind:class="{ active: OnFocus }">
+  <div id="form">
+    <div class="create-activity" v-bind:class="{ active: OnFocus }">
     <form class="create-form" name="form" v-on:submit.prevent="onSubmit">
       <ul class="activity-tab">
         <li class="status" @click="activate(1)" :class="{ active : activeLi == 1 }"><a href="javascript:void(0);"><i class="iconfont icon-dongtai icon-right"></i><span>发动态</span></a></li>
@@ -96,6 +97,7 @@
         <span class="ico">视频</span>
       </a>
     </div>
+    </div>
   </div>
 </template>
 
@@ -170,6 +172,7 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
         this.fids = new Map()
         this.files = []
         this.$toasted.show('已发布')
+        this.$emit('insertNewActivity', response.data.activity);
       }
     }).catch(() => {
       this.$toasted.show('发布失败')

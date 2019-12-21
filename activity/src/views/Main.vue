@@ -1,6 +1,6 @@
 <template>
   <div>
-    <upload-form/>
+    <upload-form v-on:insertNewActivity="insertNewActivity"/>
     <div id="activities" v-if="activities.length">
       <div v-for="activity in activities" :key="activity.id" class="activity-item">
         <div class="mod">
@@ -46,16 +46,34 @@
             <div class="actions">
               <span class="time" :title="moment(activity.created_at).format('YYYY-MM-D HH:mm:ss')"><a :href="activity.target.url || 'javascript:void(0);'">
                 {{ moment(activity.created_at).fromNow()}}</a></span>
-              <a href="javascript:void(0);" class="btn reply">{{ activity.n_comments || '' }}回应</a>
-              <a href="javascript:void(0);" class="btn heart">{{ activity.n_likes || '' }}赞</a>
+              <a href="javascript:void(0);" class="btn reply" @click="toggleShowComments(activity)">{{ activity.showComments ? ' 隐藏' : activity.n_comments || ''}}评论</a>
+              <a href="javascript:void(0);" class="btn heart" :class="{ 'liked' : activity.liked }" @click="react(activity)">{{ activity.liked ? '已' : '' }}赞{{ activity.n_likes == 0 ? '' : `(${activity.n_likes})` }}</a>
             </div>
-            <div class="comments" v-if="activity.showComment">
-              <div class="comments-items"></div>
+            <div class="comments" v-if="activity.showComments">
+              <div class="comments-items">
+                <div v-for="(comment, index) in activity.comments" :key="index" class="comment-item"
+                     @mouseover="comment.showReply = true" @mouseleave="comment.showReply = false">
+                  <span class="comment-item-content">{{ comment.content }}</span>
+                  <i class="comment-item-spliter">-</i>
+                  <a class="comment-item-author" :href="comment.user.link">{{ comment.user.username }}</a>
+                  <div class="comment-item-action" v-if="comment.showReply">
+                    <a class="reply" @click="reply(activity, comment)">回复</a>
+                  </div>
+                </div>
+              </div>
+              <form class="comment-reply" v-on:submit.prevent="commentTo(activity)">
+                <div class="comment-text">
+                  <span class="reply-target">{{ replyTo }}</span>
+                  <input type="text" v-model="commentContent" class="reply-input" maxlength="280" autocomplete="off">
+                </div>
+                <button class="comment-btn" type="submit">发表回应</button>
+              </form>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <paginator :total="total" :page="page"/>
     <div id="aside"></div>
   </div>
 </template>
@@ -65,25 +83,37 @@ import Vue from 'vue'
 import Moment from 'moment'
 import Component from 'vue-class-component'
 import UploadForm from '../components/UploadForm'
-import { getActivities } from '#/api'
+import Paginator from '../components/Paginator'
+import { getActivities, reactActivity, commentActivity, getActivityCommentList } from '#/api'
 
 Moment.locale('zh-cn');
 
-export default @Component({components: {UploadForm}}) class Main extends Vue {
+export default @Component({components: {UploadForm, Paginator}}) class Main extends Vue {
   page = 1
+  total = 10
   listLoading = false
   activities = []
+  refId = 0
+  replyTo = ''
+  commentContent = ''
 
   getActivityList() {
     this.listLoading = true
+    this.page = this.$route.query.p || this.page
     getActivities(this.page).then(response => {
         this.activities = response.data.items.map(i => {
-          i.big = false
+          i.showReply = false
+          i.showComments = false
+          i.commentFetched = false
+          i.comments = []
           return i
         })
         this.total = response.data.total
         this.listLoading = false
       })
+  }
+  insertNewActivity(activity) {
+    this.activities.unshift(activity)
   }
   moment(value) {
     return Moment(value * 1000)
@@ -96,6 +126,56 @@ export default @Component({components: {UploadForm}}) class Main extends Vue {
       return
     }
     activity.big = !activity.big
+  }
+  fetchCommentList(activity) {
+    getActivityCommentList(activity.id).then(response => {
+      activity.comments = response.data.items.map(i => {
+          i.showReply = false
+          return i
+        })
+      activity.commentFetched = true
+    })
+  }
+  toggleShowComments(activity) {
+    activity.showComments = !activity.showComments
+    if (activity.showComments && activity.commentFetched) {
+      return
+    }
+    if (activity.showComments) {
+      this.fetchCommentList(activity)
+    }
+  }
+
+  react(activity) {
+    reactActivity(activity.id, activity.liked ? 'delete': 'post').then(response => {
+      if (response.data.r != 0) {
+        this.$toasted.show(`点赞失败: ${response.data.msg}`)
+      } else {
+        activity.n_likes = response.data.n_reacted
+        activity.liked = !activity.liked
+      }
+    })
+  }
+  commentTo(activity) {
+    if (!this.commentContent) {
+      return
+    }
+    commentActivity(activity.id, `${this.replyTo} ${this.commentContent}`, this.refId).then(response => {
+      if (response.data.r != 0) {
+        this.$toasted.show(`评论失败: ${response.data.msg}`)
+      } else {
+        this.$toasted.show('评论成功')
+        this.replyTo = ''
+        this.commentContent = ''
+        let comment = response.data.comment
+        comment.showReply = false
+        activity.comments.unshift(comment)
+      }
+    })
+  }
+  reply(activity, comment) {
+    this.refId = comment.id
+    this.replyTo = `回应 @${comment.user.username}`
   }
 }
 </script>
@@ -202,6 +282,9 @@ blockquote {
     color: #7094b7;
     margin-left: .5em;
   }
+  .liked {
+    color: #999;
+  }
 }
 .lnk {
   overflow: hidden;
@@ -307,6 +390,70 @@ blockquote {
   height: 344px;
   .plyr__controls {
     display: flex;
+  }
+}
+.comment-reply {
+  display: flex;
+  margin-top: 5px;
+  .comment-text {
+    flex: 1;
+    width: 520px;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-size: 13px;
+    vertical-align: middle;
+    border: 1px solid #c9c9c9;
+    display: flex;
+    .reply-target {
+      display: inline-block;
+      line-height: 20px;
+    }
+    .reply-input {
+      flex: 1;
+      line-height: 20px;
+      padding: 0px 0px 0px 5px;
+      border: none;
+      outline: 0;
+    }
+  }
+  .comment-btn {
+    font-size: 12px;
+    margin-left: 10px;
+    height: 26px;
+    line-height: 24px;
+    padding: 0 3px;
+    border-radius: 2px;
+    border: 1px solid #c0c0c0;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #fcfcfc), color-stop(1, #e9e9e9));
+    outline: none;
+  }
+}
+.comments {
+  margin-top: 7px;
+}
+.comment-item {
+  position: relative;
+  margin: 3px 10px 3px 0px;
+  padding-right: 60px;
+  line-height: 1.62em;
+  overflow: hidden;
+  word-wrap: break-word;
+  .comment-item-content {
+    color: #666;
+  }
+  .comment-item-spliter {
+    color: #666;
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+  .comment-item-action {
+    position: absolute;
+    right: 0;
+    top: 0;
+    a {
+      color: #bbb;
+      margin-left: 5px;
+    }
   }
 }
 </style>
