@@ -20,6 +20,7 @@ from .mixin import ContentMixin
 from .react import ReactMixin
 from .user import User
 from .signals import post_created
+from .utils import cached_property
 
 PER_PAGE = 10
 DEFAULT_WIDTH = 260
@@ -28,6 +29,7 @@ MC_KEY_ACTIVITY_COUNT = 'core:activity_count'
 MC_KEY_ACTIVITY_FULL_DICT = 'core:activity:full_dict:%s'
 MC_KEY_STATUS_ATTACHMENTS = 'core.status:attachments:%s'
 FFPROBE_TMPL = 'ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 {input}'  # noqa
+
 
 @dataclass
 class Attachment:
@@ -105,7 +107,6 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
     user_id = fields.IntField()
     target_id = fields.IntField()
     target_kind = fields.IntField()
-    _target = None
 
     @classmethod
     # @cache(MC_KEY_ACTIVITIES % '{page}')
@@ -117,18 +118,16 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
             items.append(await item.to_full_dict())
         return items
 
-    @property
+    @cached_property
     async def target(self):
-        if self._target is None:
-            kls = None
-            if self.target_kind == K_POST:
-                kls = Post
-            elif self.target_kind == K_STATUS:
-                kls = Status
-            if kls is None:
-                return
-            self._target = await kls.cache(self.target_id)
-        return self._target
+        kls = None
+        if self.target_kind == K_POST:
+            kls = Post
+        elif self.target_kind == K_STATUS:
+            kls = Status
+        if kls is None:
+            return
+        return await kls.cache(self.target_id)
 
     @property
     async def action(self):
@@ -166,6 +165,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
         else:
             attachments = []
         return attachments
+
     @property
     async def user(self) -> User:
         return await User.cache(self.user_id)
@@ -175,7 +175,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
     async def count(cls) -> int:
         return await cls.filter().count()
 
-    #@cache(MC_KEY_ACTIVITY_FULL_DICT % '{self.id}')
+    # @cache(MC_KEY_ACTIVITY_FULL_DICT % '{self.id}')
     async def to_full_dict(self) -> Dict[str, Any]:
         target = await self.target
         if not target:
@@ -193,7 +193,6 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
         if avatar:
             avatar = f'/static/upload/{avatar}'
         attachments = await self.attachments
-        layout = attachments[0]['layout'] if attachments else ''
         return {
             'user': {
                 'name': user['name'],
@@ -203,6 +202,8 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
             'action': await self.action,
             'created_at': self.created_at,
             'attachments': attachments,
+            'n_likes': await self.n_likes,
+            'n_comments': await self.n_comments,
             'layout': attachments[0]['layout'] if attachments else '',
         }
 
