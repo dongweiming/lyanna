@@ -9,6 +9,7 @@ import re
 import struct
 import threading
 import time
+from functools import wraps
 from dataclasses import dataclass
 from typing import Dict, Iterator, List, Union
 from urllib.parse import unquote
@@ -221,3 +222,29 @@ def generate_id() -> str:
         oid += struct.pack(">i", ObjectId._inc)[2:4]
         ObjectId._inc = (ObjectId._inc + 1) % 0xFFFFFF
     return binascii.hexlify(oid).decode('utf-8')
+
+
+# Modify from https://github.com/pydanny/cached-property/blob/master/cached_property.py
+class cached_property:
+    def __init__(self, func):
+        self.__doc__ = getattr(func, '__doc__')
+        self.func = func
+
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
+
+        if asyncio and asyncio.iscoroutinefunction(self.func):
+            return self._wrap_in_coroutine(obj)  # type: ignore
+
+        value = obj.__dict__[self.func.__name__] = self.func(obj)
+        return value
+
+    def _wrap_in_coroutine(self, obj):
+        @wraps(obj)
+        async def wrapper():
+            future = asyncio.ensure_future(self.func(obj))
+            obj.__dict__[self.func.__name__] = future
+            return await future
+
+        return wrapper()
