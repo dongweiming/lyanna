@@ -46,8 +46,8 @@
             <div class="actions">
               <span class="time" :title="moment(activity.created_at).format('YYYY-MM-D HH:mm:ss')"><a :href="activity.target.url || 'javascript:void(0);'">
                 {{ moment(activity.created_at).fromNow()}}</a></span>
-              <a href="javascript:void(0);" class="btn reply">1回应</a>
-              <a href="javascript:void(0);" class="btn heart">2赞</a>
+              <a href="javascript:void(0);" class="btn reply">{{ activity.n_comments || '' }}回应</a>
+              <a href="javascript:void(0);" class="btn heart">{{ activity.n_likes || '' }}赞</a>
             </div>
             <div class="comments" v-if="activity.showComment">
               <div class="comments-items"></div>
@@ -56,6 +56,7 @@
         </div>
       </div>
     </div>
+    <div id="aside"></div>
   </div>
 </template>
 
@@ -140,6 +141,12 @@ blockquote {
     border-bottom-right-radius: 2px;
     border-top-right-radius: 2px;
 }
+#aside {
+  width: 300px;
+  float: right;
+  margin-top: 80px;
+}
+
 .hljs {
   background: none !important;
 }
@@ -158,7 +165,6 @@ blockquote {
   text-align: left;
   font-size: 14px;
   width: 675px;
-  padding-top: 30px;
 }
 .activity-item {
   padding: 20px 0;

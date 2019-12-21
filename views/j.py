@@ -14,25 +14,34 @@ def login_required(f: Callable) -> Callable:
     async def wrapped(request, **kwargs):
         if not (user := request['session'].get('user')):
             return json({'r': 403, 'msg': 'Login required.'})
-        if (post_id := kwargs.pop('post_id', None)) is not None:
-            if not (post := await Post.cache(post_id)):
-                return json({'r': 1, 'msg': 'Post not exist'})
-            args = (user, post)
+        if (target_id := kwargs.pop('target_id', None)) is not None:
+            target_kind = kwargs.pop('target_kind', 'post')
+            if target_kind == 'post':
+                kls = Post
+            elif target_kind == 'activity':
+                kls = Activity
+            elif target_kind == 'comment':
+                kls = Comment
+            else:
+                return json({'r': 403, 'msg': 'Not support'})
+            if not (target := await kls.cache(target_id)):
+                return json({'r': 1, 'msg': f'{kls.__name__} not exist'})
+            args = (user, target)
         else:
             args = (user,)  # type: ignore
         return await f(request, *args, **kwargs)
     return wrapped
 
 
-@bp.route('/post/<post_id>/comment', methods=['POST'])
+@bp.route('/<target_kind>/<target_id>/comment', methods=['POST'])
 @login_required
-async def create_comment(request, user, post):
+async def create_comment(request, user, target):
     if not (content := request.form.get('content')):
-        return json({'r': 1, 'msg': 'Comment content required.'})
+        return json({'r': 1, 'msg': 'Content required.'})
     ref_id = int(request.form.get('ref_id', 0))
-    comment = await post.add_comment(user['gid'], content, ref_id)
-    reacted_comments = await post.comments_reacted_by(user['gid'])
-    comment = await comment.to_sync_dict()
+    comment = await target.add_comment(user['gid'], content, ref_id)
+    reacted_comments = await target.comments_reacted_by(user['gid'])
+    comment = await target.to_sync_dict()
 
     return json({
         'r': 0 if comment else 1,
@@ -76,7 +85,7 @@ async def render_markdown(request, user):
     return json({'r': 0, 'text':  mistune.markdown(text)})
 
 
-@bp.route('/post/<post_id>/react', methods=['POST', 'DELETE'])
+@bp.route('/post/<target_id>/react', methods=['POST', 'DELETE'])
 @login_required
 async def react(request, user, post):
     if request.method == 'POST':
@@ -99,28 +108,23 @@ async def react(request, user, post):
                  })
 
 
-@bp.route('/comment/<comment_id>/react', methods=['POST', 'DELETE'])
-async def comment_react(request, comment_id):
-    user = request['session'].get('user')
-    if not user:
-        return json({'r': 403, 'msg': 'Login required'})
-    if not (comment := await Comment.cache(comment_id)):
-        return json({'r': 404, 'msg': 'Comment not exist'})
-
+@bp.route('/target_kind/<target_id>/react', methods=['POST', 'DELETE'])
+@login_required
+async def target_react(request, user, target):
     reaction_type = int(request.form.get('reaction_type', ReactItem.K_LOVE))
     if reaction_type not in (ReactItem.K_LOVE, ReactItem.K_UPVOTE):
         return json({'r': 1, 'msg': 'Not supported reaction_type'})
 
     if request.method == 'POST':
-        rv = await comment.add_reaction(user['gid'], reaction_type)
+        rv = await target.add_reaction(user['gid'], reaction_type)
     elif request.method == 'DELETE':
-        rv = await comment.cancel_reaction(user['gid'], reaction_type)
+        rv = await target.cancel_reaction(user['gid'], reaction_type)
 
     n_reacted = 0
     if reaction_type == ReactItem.K_LOVE:
-        n_reacted = await comment.n_likes
+        n_reacted = await target.n_likes
     elif reaction_type == ReactItem.K_UPVOTE:
-        n_reacted = await comment.n_upvotes
+        n_reacted = await target.n_upvotes
 
     return json({'r': int(not rv), 'n_reacted': n_reacted})
 

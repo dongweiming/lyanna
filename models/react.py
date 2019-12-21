@@ -6,6 +6,7 @@ from .base import BaseModel
 from .consts import K_COMMENT
 from .mc import cache, clear_mc
 from .signals import comment_reacted
+from .utils import cached_property
 
 MC_KEY_USER_REACT_STAT = 'react:stats:%s:%s'
 MC_KEY_REACTION_ITEM_BY_USER_TARGET = 'react:reaction_item:%s:%s:%s'
@@ -122,10 +123,18 @@ class ReactMixin:
                     await item.delete()
         return True
 
-    @property
+    @cached_property
     async def stats(self) -> ReactStats:
         return await ReactStats.get_by_target(self.id, self.kind)
 
     async def get_reaction_type(self, user_id):
         items = await ReactItem.get_reaction_items(user_id, self.id, self.kind)
         return items[0].reaction_type if items else None
+
+    @property
+    async def n_likes(self):
+        return (await self.stats).love_count
+
+    @property
+    async def n_upvotes(self):
+        return (await self.stats).upvote_count

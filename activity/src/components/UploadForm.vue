@@ -1,107 +1,102 @@
 <template>
-<div>
-  <div id="form">
-    <div class="create-activity" v-bind:class="{ active: OnFocus }">
-      <form class="create-form" name="form" v-on:submit.prevent="onSubmit">
-        <ul class="activity-tab">
-          <li class="status" @click="activate(1)" :class="{ active : activeLi == 1 }"><a href="javascript:void(0);"><i class="iconfont icon-dongtai icon-right"></i><span>发动态</span></a></li>
-          <li class="pic" @click="activate(2)" :class="{ active : activeLi == 2 }"><a href="javascript:void(0);"><i class="iconfont icon-photo icon-right"></i><span>发照片</span></a></li>
-          <li class="video" @click="activate(3)" :class="{ active : activeLi == 3 }"><a href="javascript:void(0);"><i class="iconfont icon-video icon-right"></i><span>发视频</span></a></li>
-          <li class="link" @click="activate(4)" :class="{ active : activeLi == 4 }"><a href="javascript:void(0);"><i class="iconfont icon-link icon-right"></i><span>推荐网页</span></a></li>
-        </ul>
-        <div class="field link-act" v-if="activeLi == 4">
-           <div class="hd" v-if="urlInfo">
-             <p>{{ this.urlInfo.title }}</p>
-           </div>
-          <div class="bd">
-            <div v-if="urlError" class="error"><span>{{ this.urlError }}</span><a href="javascript:void(0);" v-on:click="urlError = ''">重新输入</a></div>
-            <input v-if="!urlError && !urlLoading && !urlInfo" type="text" value="http://" class="link-text" name="url" v-model="url">
-            <input v-if="!urlError && !urlLoading && !urlInfo" type="button" value="输入网址" class="input-link" v-on:click="getLinkInfo" :disabled="!url">
-            <p v-if="urlLoading">正在获取网址信息...</p>
-            <p v-if="urlInfo">{{ this.urlInfo.abstract }}</p>
-          </div>
-          <a href="javascript:void(0);" class="link-cancel" v-if="urlInfo" v-on:click="urlInfo = null">×</a>
+  <div id="form" v-bind:class="{ active: OnFocus }">
+    <form class="create-form" name="form" v-on:submit.prevent="onSubmit">
+      <ul class="activity-tab">
+        <li class="status" @click="activate(1)" :class="{ active : activeLi == 1 }"><a href="javascript:void(0);"><i class="iconfont icon-dongtai icon-right"></i><span>发动态</span></a></li>
+        <li class="pic" @click="activate(2)" :class="{ active : activeLi == 2 }"><a href="javascript:void(0);"><i class="iconfont icon-photo icon-right"></i><span>发照片</span></a></li>
+        <li class="video" @click="activate(3)" :class="{ active : activeLi == 3 }"><a href="javascript:void(0);"><i class="iconfont icon-video icon-right"></i><span>发视频</span></a></li>
+        <li class="link" @click="activate(4)" :class="{ active : activeLi == 4 }"><a href="javascript:void(0);"><i class="iconfont icon-link icon-right"></i><span>推荐网页</span></a></li>
+      </ul>
+      <div class="field link-act" v-if="activeLi == 4">
+         <div class="hd" v-if="urlInfo">
+           <p>{{ this.urlInfo.title }}</p>
+         </div>
+        <div class="bd">
+          <div v-if="urlError" class="error"><span>{{ this.urlError }}</span><a href="javascript:void(0);" v-on:click="urlError = ''">重新输入</a></div>
+          <input v-if="!urlError && !urlLoading && !urlInfo" type="text" value="http://" class="link-text" name="url" v-model="url">
+          <input v-if="!urlError && !urlLoading && !urlInfo" type="button" value="输入网址" class="input-link" v-on:click="getLinkInfo" :disabled="!url">
+          <p v-if="urlLoading">正在获取网址信息...</p>
+          <p v-if="urlInfo">{{ this.urlInfo.abstract }}</p>
         </div>
-        <div class="activity-content">
-          <label id="label" for="text" v-if="!OnFocus && !text">分享我的动态...</label>
-          <textarea id="text" name="text" v-bind:style="{ height: textAreaHeight + 'px' }" v-model="text" rows="1"
-                    @focus="OnFocus = true"></textarea>
-        </div>
-        <div class="upload-form" v-if="[2, 3].includes(activeLi)">
-          <file-upload v-if="!files.length"
-            class="upload"
-            :custom-action="customAction"
-             post-action="/api/upload"
-            :multiple="true"
-            :size="1024 * 1024 * 10"
-            :drop="true"
-            :drop-directory="true"
-            v-model="files"
-            @input-file="inputFile"
-            @input-filter="inputFilter"
-          ref="upload">
-          </file-upload>
-          <div class="bd">
-            <div class="upload-section" v-if="!files.length">
-              <p class="drag-tip"><i class="iconfont icon-Drag-Drop icon-right"></i>拖文件到框里上传</p>
-              <a href="javascript: void 0;" class="upload-btn">
-                <i class="iconfont icon-big" v-bind:class="{ 'icon-photoadd' : activeLi == 2, 'icon-video_add' : activeLi == 3  }"></i>
-                <span class="upload-info">上传{{ activeLi == 2 ? '照片' : '视频' }}</span></a>
-            </div>
-            <ul class="file-list" v-else>
-              <li v-for="file in files" :key="file.id" class="file-item">
-                <img :src="file.thumb" class="thumb" v-if="file.thumb">
-                <a v-else :title="file.name">
-                    <img :src="file.cover" class="thumb">
-                    <i class="iconfont icon-ziyuan player-btn"></i>
-                </a>
-                <a href="#" class="lnk-remove-photo" v-on:click="removeFile(file)">×</a>
-              </li>
-              <li class="file-item add-photo"><i>+</i>
-                <file-upload v-if="files.length"
-                  class="file-upload"
-                  post-action="/api/upload"
-                  :multiple="true"
-                  :size="1024 * 1024 * 10"
-                  :drop="true"
-                  :drop-directory="true"
-                  v-model="files"
-                  @input-file="inputFile"
-                  @input-filter="inputFilter"
-                  ref="upload">
-                </file-upload>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="btn" v-if="OnFocus || activeLi != 1">
-          <button type="submit" class="pure-button activity-btn">发布</button>
-        </div>
-      </form>
-      <div class="pure-button-group btn-group">
-          <file-upload v-if="!files.length"
-            class="file-upload-btn"
-            post-action="/api/upload"
-            :multiple="true"
-            :size="1024 * 1024 * 10"
-            :drop="true"
-            :drop-directory="true"
-            v-model="files"
-            @input-file="inputFile"
-            @input-filter="inputFilter"
-            ref="upload">
-          </file-upload>
-        <a v-if="showIcon" href="javascript:void(0);" class="iconfont icon-photo1" title="上传照片">
-          <span class="ico">照片</span>
-        </a>
-        <a v-if="showIcon" href="javascript:void(0);" class="iconfont icon-video1" title="上传视频">
-          <span class="ico">视频</span>
-        </a>
+        <a href="javascript:void(0);" class="link-cancel" v-if="urlInfo" v-on:click="urlInfo = null">×</a>
       </div>
+      <div class="activity-content">
+        <label id="label" for="text" v-if="!OnFocus && !text">分享我的动态...</label>
+        <textarea id="text" name="text" v-bind:style="{ height: textAreaHeight + 'px' }" v-model="text" rows="1"
+                  @focus="OnFocus = true"></textarea>
+      </div>
+      <div class="upload-form" v-if="[2, 3].includes(activeLi)">
+        <file-upload v-if="!files.length"
+          class="upload"
+          :custom-action="customAction"
+           post-action="/api/upload"
+          :multiple="true"
+          :size="1024 * 1024 * 10"
+          :drop="true"
+          :drop-directory="true"
+          v-model="files"
+          @input-file="inputFile"
+          @input-filter="inputFilter"
+        ref="upload">
+        </file-upload>
+        <div class="bd">
+          <div class="upload-section" v-if="!files.length">
+            <p class="drag-tip"><i class="iconfont icon-Drag-Drop icon-right"></i>拖文件到框里上传</p>
+            <a href="javascript: void 0;" class="upload-btn">
+              <i class="iconfont icon-big" v-bind:class="{ 'icon-photoadd' : activeLi == 2, 'icon-video_add' : activeLi == 3  }"></i>
+              <span class="upload-info">上传{{ activeLi == 2 ? '照片' : '视频' }}</span></a>
+          </div>
+          <ul class="file-list" v-else>
+            <li v-for="file in files" :key="file.id" class="file-item">
+              <img :src="file.thumb" class="thumb" v-if="file.thumb">
+              <a v-else :title="file.name">
+                  <img :src="file.cover" class="thumb">
+                  <i class="iconfont icon-ziyuan player-btn"></i>
+              </a>
+              <a href="#" class="lnk-remove-photo" v-on:click="removeFile(file)">×</a>
+            </li>
+            <li class="file-item add-photo"><i>+</i>
+              <file-upload v-if="files.length"
+                class="file-upload"
+                post-action="/api/upload"
+                :multiple="true"
+                :size="1024 * 1024 * 10"
+                :drop="true"
+                :drop-directory="true"
+                v-model="files"
+                @input-file="inputFile"
+                @input-filter="inputFilter"
+                ref="upload">
+              </file-upload>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="btn" v-if="OnFocus || activeLi != 1">
+        <button type="submit" class="pure-button activity-btn">发布</button>
+      </div>
+    </form>
+    <div class="pure-button-group btn-group" v-if="activeLi == 1">
+        <file-upload v-if="!files.length"
+          class="file-upload-btn"
+          post-action="/api/upload"
+          :multiple="true"
+          :size="1024 * 1024 * 10"
+          :drop="true"
+          :drop-directory="true"
+          v-model="files"
+          @input-file="inputFile"
+          @input-filter="inputFilter"
+          ref="upload">
+        </file-upload>
+      <a v-if="showIcon" href="javascript:void(0);" class="iconfont icon-photo1" title="上传照片">
+        <span class="ico">照片</span>
+      </a>
+      <a v-if="showIcon" href="javascript:void(0);" class="iconfont icon-video1" title="上传视频">
+        <span class="ico">视频</span>
+      </a>
     </div>
   </div>
-  <div id="aside"></div>
-</div>
 </template>
 
 <script>
@@ -278,21 +273,13 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
   width: 675px;
   float: left;
   margin-top: 80px;
-}
-
-#aside {
-  width: 300px;
-  float: right;
-  margin-top: 80px;
-}
-
-.create-activity {
   position: relative;
   padding: 0;
   margin: -5px 0 2em;
   *zoom: 1;
   z-index: 1;
 }
+
 .active .activity-content {
   border-color: #ccc;
   textarea {
@@ -303,10 +290,11 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
 }
 .active .btn-group {
   letter-spacing: 0;
-  position: relative;
+  position: inherit;
   text-align: left;
   margin-left: 7px;
   margin-top: -70px;
+  padding-bottom: 40px;
 }
 
 .activity-tab {

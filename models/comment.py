@@ -48,14 +48,6 @@ class Comment(ReactMixin, ContentMixin, BaseModel):
     async def user(self) -> GithubUser:
         return await GithubUser.get(gid=self.github_id)
 
-    @property
-    async def n_likes(self):
-        return (await self.stats).love_count
-
-    @property
-    async def n_upvotes(self):
-        return (await self.stats).upvote_count
-
 
 class CommentMixin:
     id: int
