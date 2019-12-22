@@ -59,6 +59,15 @@ def register_blueprints(root: str, app: Sanic) -> None:
             app.register_blueprint(mod.bp)
 
 
+class LyannaSanic(Sanic):  # type: ignore
+    def url_for(self, view_name: str, **kwargs):
+        url = super().url_for(view_name, **kwargs)
+        cdn = config.CDN_DOMAIN
+        if cdn and not config.DEBUG:
+            url = f'{cdn}{url}'
+        return url
+
+
 class ErrorHandler(_ErrorHandler):  # type: ignore
     def default(self, request: Request, exception) -> HTTPResponse:
         exc = '\n'.join(traceback.format_tb(sys.exc_info()[-1]))
@@ -68,7 +77,7 @@ class ErrorHandler(_ErrorHandler):  # type: ignore
         return super().default(request, exception)
 
 
-app = Sanic(__name__, request_class=Request)
+app = LyannaSanic(__name__, request_class=Request)
 app.error_handler = ErrorHandler()
 app.config.from_object(config)
 mako.init_app(app, context_processors=())

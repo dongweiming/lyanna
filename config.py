@@ -62,6 +62,7 @@ COMMENT_REACTIONS = ['heart', 'upvote']
 
 USE_FFMPEG = bool(distutils.spawn.find_executable('ffmpeg'))  # type: ignore
 ACTIVITY_THEME = 'rainbow'
+CDN_DOMAIN = ''
 
 try:
     from local_settings import *  # noqa
