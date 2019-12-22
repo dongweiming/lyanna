@@ -1,8 +1,8 @@
 import markupsafe
 from aioredis.commands import Redis
 
-from .utils import get_redis
 from .markdown import markdown
+from .utils import get_redis
 
 
 class ContentMixin:

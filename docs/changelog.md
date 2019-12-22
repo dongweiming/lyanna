@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0 (2019-12-22)
+
+1. Use Python 3.8 syntax
+2. Activity feature. like douban user's status
+3. Configuration file uses YAML format
+4. Use isort/bandit/autopep8
+5. Use mypy
+6. Support reply comment
+
 ## 2.7.1 (2019-11-27)
 
 1. Update recent comments in realtime

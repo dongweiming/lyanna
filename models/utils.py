@@ -9,8 +9,8 @@ import re
 import struct
 import threading
 import time
-from functools import wraps
 from dataclasses import dataclass
+from functools import wraps
 from typing import Dict, Iterator, List, Union
 from urllib.parse import unquote
 

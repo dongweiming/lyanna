@@ -55,3 +55,44 @@
 ```
 python manage.py build-css
 ```
+
+## 「动态」页面(/activities)
+
+使用 Vue-CLI+Vue-Router+Vuex+Webpack+ES6+Sass ，需要安装依赖：
+
+```bash
+❯ cd activity  # 在 activity 子目录下
+❯ yarn install
+```
+
+接着启动开发环境:
+
+```bash
+❯ yarn serve
+```
+
+修改src目录下代码即可看到效果
+
+生产环境需要构建：
+
+```
+❯ yarn build
+❯ cp -rp dist/static/* ../static/   # 把新生成的文件拷贝到static目录下
+```
+
+## 其他说明
+
+管理后台和动态使用了一些通用组件和功能，放在了common目录下:
+
+```bash
+❯ tree common -L 2
+common
+└── src
+    ├── api.js # API统一在这里
+    ├── store  # Vuex
+    └── utils  # 功能函数
+
+3 directories, 1 file
+```
+
+为了优化网页打开速度，Vue等库使用Webpack的externals参数项(在vue.config.js中)直接在模板中引入外部CDN(cdn.jsdelivr.net)的内容

@@ -10,8 +10,10 @@ from tortoise.query_utils import Q
 from config import ACTIVITY_THEME, PER_PAGE, AttrDict, partials
 from ext import mako
 from models import Post, PostTag, SpecialTopic, Tag
-from models.blog import (MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
-                         MC_KEY_TAGS, get_most_viewed_posts)
+from models.blog import (
+    MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
+    MC_KEY_TAGS, get_most_viewed_posts,
+)
 from models.comment import get_latest_comments
 from models.mc import cache
 from models.utils import Pagination

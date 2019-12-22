@@ -21,8 +21,8 @@ from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG
 from ext import mako
 from forms import PostForm, TopicForm, UserForm
 from models import Post, PostTag, SpecialTopic, Tag, User
-from models.signals import post_created
 from models.activity import create_status
+from models.signals import post_created
 from models.user import generate_password
 from models.utils import generate_id
 from views.request import Request

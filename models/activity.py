@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import math
 import subprocess
-from pathlib import Path
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from pickle import dumps, loads
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from tortoise import fields
 
-from config import USE_FFMPEG, UPLOAD_FOLDER
+from config import UPLOAD_FOLDER, USE_FFMPEG
 
 from .base import BaseModel
 from .blog import Post
@@ -18,8 +18,8 @@ from .consts import K_ACTIVITY, K_POST, K_STATUS
 from .mc import cache, clear_mc
 from .mixin import ContentMixin
 from .react import ReactMixin
-from .user import User
 from .signals import post_created
+from .user import User
 from .utils import cached_property
 
 PER_PAGE = 10
