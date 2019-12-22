@@ -1,6 +1,9 @@
 # lyanna
 
 [![Build Status](https://travis-ci.org/dongweiming/lyanna.svg?branch=master)](https://travis-ci.org/dongweiming/lyanna)
+![Tag](https://img.shields.io/github/v/tag/dongweiming/lyanna)
+![Python Version](https://img.shields.io/badge/python-3.8-blue)
+[![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 My Blog Using Sanic
 
