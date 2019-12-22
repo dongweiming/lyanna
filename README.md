@@ -6,6 +6,10 @@ My Blog Using Sanic
 
 [查看文档 📖](https://dongweiming.github.io/lyanna/)
 
+## 版本提示
+
+3.0版本开始已经使用了最新的Python3.8语法，所以如果你不方便升级CPython请使用2.X版本
+
 ## Overview
 
 这是一个使用asyncio生态开发的个人技术博客。具体如下：
@@ -16,6 +20,7 @@ My Blog Using Sanic
 * 缓存: aiomcache
 * KV数据库: aioredis
 * 任务队列: arq
+* 代码质量: mypy/flake8/isort/bandit
 
 其他aio扩展: Sanic-Auth、Sanic-wtf、sanic-session、aiotask-context、asyncblink、sanic-sentry、sanic-jwt、aiosmtplib
 
@@ -23,13 +28,15 @@ My Blog Using Sanic
   <img width="600" src="./docs/widget.png" >
 </p>
 
-管理后台使用 ElementUI + Vue-CLI + Vue-Router + Vuex
+管理后台使用: ElementUI + Vue-CLI + Vue-Router + Vuex
 
 <p align="center">
   <img width="600" src="./screenshot/admin.png" >
 </p>
 
 Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
+
+[动态](https://www.dongwm.com/activities) 使用: Vue-CLI + Vue-Router + Vuex
 
 ## Features
 
@@ -51,11 +58,14 @@ Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 * 支持评论提及邮件
 * 支持 Github Cards. 具体用法请看 [这里](#github-cards)
 * 文章内容(除代码部分之外)自动「盘古之白」
-* 支持文章专题
+* 支持「文章专题」
+* 支持「动态」
+* 可对评论回应
 * 支持用Docker Compose本地开发
 * 支持kubernetes上运行
 * Widget系统，内置aboutme、blogroll、most\_viewed、latest\_comments、tagcloud、html等widget
-* 导航栏项可以设置icon(如RSS)
+* 导航栏项可以设置icon和颜色(如RSS)
+* 支持配置CDN域名服务静态文件
 
 ## Github Cards
 

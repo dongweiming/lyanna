@@ -1,6 +1,6 @@
 # 配置项
 
-全部配置项都在 config.py 中可以找到
+全部配置项都在 config.py 中可以找到。但是从3.0版本开始不再使用`local_settings.py`存放配置，统一使用`config.yaml`，具体可以看`config.yaml.tmpl`样板文件中的设置项
 
 ## DB_URL
 
@@ -179,3 +179,19 @@ Redis Sentinel集群架构，本项指定主机端口号。另外也支持从环
 - 默认值: `False`
 
 文章页可以显示发布文章的用户信息(名字、头像)，目前还不提供链接到用户详情页
+
+## USE_FFMPEG
+
+动态可以上传视频，如果服务器上安装了ffmpeg可以在上传后自动截取封面并且获得视频大小，这样让用户访问体验更好。本项会自动根据是否安装ffmpeg决定，为了在启动时给博主提示，改变此项无意义
+
+## CDN_DOMAIN
+
+- 默认值: `''`
+
+为了更好地访问效果，博客内的静态文件(Javascript/css/img/fonts等)地址可以使用CDN的域名，默认不开启
+
+## ACTIVITY_THEME
+
+- 默认值: `rainbow`
+
+指定动态页面渲染代码块用的highlight.js主题的名字，默认引入`https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/rainbow.min.css`

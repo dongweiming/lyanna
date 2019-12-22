@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 from collections import defaultdict
-from typing import List, Dict, DefaultDict, Any
+from typing import Any, DefaultDict, Dict, List
 
 from tortoise import fields
 

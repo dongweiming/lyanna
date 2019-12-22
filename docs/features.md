@@ -1,6 +1,6 @@
 # 功能
 
-支持如下功能
+支持如下功能:
 
 * 可以通过后台对文章、标签等做增删改查
 * 后台支持Markdown编辑/预览
@@ -16,12 +16,15 @@
 * 支持定制导航栏
 * 支持RSS/Sitemap
 * 相关文章推荐(根据相似标签)
-* 响应式网站设计
+* 响应式设计
 * 支持评论提及邮件
-* 支持 Github Cards
+* 支持 Github Cards. 具体用法请看 [这里](#github-cards)
 * 文章内容(除代码部分之外)自动「盘古之白」
-* 支持文章专题
+* 支持「文章专题」
+* 支持「动态」
+* 可对评论回应
 * 支持用Docker Compose本地开发
 * 支持kubernetes上运行
 * Widget系统，内置aboutme、blogroll、most\_viewed、latest\_comments、tagcloud、html等widget
-* 导航栏项可以设置icon(如RSS)
+* 导航栏项可以设置icon和颜色(如RSS)
+* 支持配置CDN域名服务静态文件
