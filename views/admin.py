@@ -367,7 +367,7 @@ async def user_info(request: Request) -> HTTPResponse:
 
 
 @bp.route('/api/get_url_info', methods=['POST'])
-# @protected(bp)
+@protected(bp)
 async def get_url_info(request):
     if not (url := request.json.get('url')):
         return json({'r': 403, 'msg': 'URL required'})
@@ -395,8 +395,9 @@ async def get_url_info(request):
 
 
 @bp.route('/api/status', methods=['POST'])
-# @protected(bp)
+@protected(bp)
 async def api_status(request):
     user_id = 1
     obj, msg = await create_status(user_id, request.json)
-    return json({'r': not bool(obj), 'msg': msg, 'activity': await obj.to_full_dict()})
+    activity = None if not obj else await obj.to_full_dict()  # type: ignore
+    return json({'r': not bool(obj), 'msg': msg, 'activity': activity})
