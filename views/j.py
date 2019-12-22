@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Dict, Any
 
 import mistune
 from sanic import Blueprint
@@ -7,7 +7,7 @@ from sanic_mako import render_template_def
 
 from config import DEBUG
 from models import Comment, Post, ReactItem, Activity
-from models.consts import K_POST, K_ACTIVITY
+from models.consts import K_POST
 
 bp = Blueprint('j', url_prefix='/j')
 
@@ -145,9 +145,8 @@ async def activities(request):
         user_id = 841395 if DEBUG else None
     else:
         user_id = user['gid']
-    if user_id is None:
-        reactions = []
-    else:
+    reactions: Dict[int, Any] = {}
+    if user_id is not None:
         reactions = await Activity.get_reactions_by_targets(
             [item['id'] for item in items], user_id)
     activities = []

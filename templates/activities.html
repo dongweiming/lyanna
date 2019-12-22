@@ -1,0 +1,20 @@
+<%inherit file="/base.html" />
+<%def name="title()">动态</%def>
+
+<%def name="doc_head()">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/${ theme }.min.css">
+<link href="/static/css/activity/app.css" rel="stylesheet">
+</%def>
+
+<%def name="pagination()"></%def>
+
+<%def name="content()">
+  <div id="app"></div>
+</%def>
+
+<%def name="bottom_script()">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.18.1/min/moment-with-locales.min.js"></script>
+  <script src="/static/js/activity/chunk-vendors.js"></script>
+  <script src="/static/js/activity/app.js"></script>
+</%def>

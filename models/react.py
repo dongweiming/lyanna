@@ -1,9 +1,8 @@
 from __future__ import annotations
 from collections import defaultdict
-from typing import List, Dict
+from typing import List, Dict, DefaultDict, Any
 
 from tortoise import fields
-from tortoise.query_utils import Q
 
 from .base import BaseModel
 from .consts import K_COMMENT
@@ -143,7 +142,8 @@ class ReactMixin:
         return (await self.stats).upvote_count
 
     @classmethod
-    async def get_reactions_by_targets(cls, target_ids: List[int], user_id: int) -> Dict:
+    async def get_reactions_by_targets(
+            cls, target_ids: List[int], user_id: int) -> Dict:
         target_kind = cls.kind
         keys = [MC_KEY_REACTION_ITEM_BY_USER_TARGET % (
             user_id, target_id, target_kind) for target_id in target_ids]
@@ -154,7 +154,7 @@ class ReactMixin:
             return {k: v for k, v in cached.items() if v}
         reactions = await ReactItem.filter(user_id=user_id, target_id__in=missed_ids,
                                            target_kind=target_kind).all()
-        missed_cached = defaultdict(list)
+        missed_cached: DefaultDict[int, Any] = defaultdict(list)
         for r in reactions:
             missed_cached[r.target_id].append(r)
         cached.update(missed_cached)

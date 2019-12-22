@@ -85,8 +85,8 @@ class Status(ContentMixin, BaseModel):
         await self.set_props_by_key('attachments', dumps(lst))
         return True
 
-    @property
-    # @cache(MC_KEY_STATUS_ATTACHMENTS % '{self.id}')
+    @property  # type: ignore
+    @cache(MC_KEY_STATUS_ATTACHMENTS % '{self.id}')
     async def attachments(self) -> List[Attachment]:
         if not (rv := await self.get_props_by_key('attachments')):
             return []
@@ -109,7 +109,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
     target_kind = fields.IntField()
 
     @classmethod
-    # @cache(MC_KEY_ACTIVITIES % '{page}')
+    @cache(MC_KEY_ACTIVITIES % '{page}')
     async def get_multi_by(cls, page: int = 1) -> List[Dict]:
         items = []
         queryset = cls.filter().offset((page - 1) * PER_PAGE).limit(
@@ -175,7 +175,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
     async def count(cls) -> int:
         return await cls.filter().count()
 
-    # @cache(MC_KEY_ACTIVITY_FULL_DICT % '{self.id}')
+    @cache(MC_KEY_ACTIVITY_FULL_DICT % '{self.id}')
     async def to_full_dict(self) -> Dict[str, Any]:
         target = await self.target
         if not target:
