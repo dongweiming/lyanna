@@ -275,9 +275,9 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
 #form {
   width: 675px;
   float: left;
-  margin-top: 80px;
   position: relative;
   padding: 0;
+  padding-top: 40px;
   margin: -5px 0 2em;
   *zoom: 1;
   z-index: 1;
@@ -414,7 +414,7 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
 
 .btn-group {
   position: absolute;
-  top: 50%;
+  top: 72%;
   right: 0;
   white-space: nowrap;
   z-index: 1;

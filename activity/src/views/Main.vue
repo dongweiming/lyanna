@@ -1,6 +1,6 @@
 <template>
   <div>
-    <upload-form v-on:insertNewActivity="insertNewActivity"/>
+    <upload-form v-on:insertNewActivity="insertNewActivity" v-if="token"/>
     <div id="activities" v-if="activities.length">
       <div v-for="activity in activities" :key="activity.id" class="activity-item">
         <div class="mod">
@@ -26,7 +26,8 @@
                 <p>{{ attachment.abstract }}</p>
               </div>
             </div>
-            <div class="pics" :class="{ 'pics-big' : activity.big }" @click="toggleActivitySize(activity)" v-else-if="activity.attachments.length && activity.layout == 1">
+            <div class="pics" :class="{ 'pics-big' : activity.big }" @click="toggleActivitySize(activity)"
+                 v-else-if="activity.attachments.length && activity.layout == 1">
               <div v-for="(attachment, index) in activity.attachments" :key="index" class="pic">
                 <img :src="attachment.url">
               </div>
@@ -82,6 +83,7 @@
 import Vue from 'vue'
 import Moment from 'moment'
 import Component from 'vue-class-component'
+import { getToken } from '#/utils/auth'
 import UploadForm from '../components/UploadForm'
 import Paginator from '../components/Paginator'
 import { getActivities, reactActivity, commentActivity, getActivityCommentList } from '#/api'
@@ -102,6 +104,7 @@ export default @Component({components: {UploadForm, Paginator}}) class Main exte
     this.page = this.$route.query.p || this.page
     getActivities(this.page).then(response => {
         this.activities = response.data.items.map(i => {
+          i.big = false
           i.showReply = false
           i.showComments = false
           i.commentFetched = false
@@ -111,6 +114,9 @@ export default @Component({components: {UploadForm, Paginator}}) class Main exte
         this.total = response.data.total
         this.listLoading = false
       })
+  }
+  get token() {
+    return getToken()
   }
   insertNewActivity(activity) {
     this.activities.unshift(activity)
@@ -245,6 +251,7 @@ blockquote {
   text-align: left;
   font-size: 14px;
   width: 675px;
+  margin-top: 30px;
 }
 .activity-item {
   padding: 20px 0;
@@ -369,7 +376,7 @@ blockquote {
 .video /deep/ .plyr--video {
   height: 172px;
   cursor: pointer;
-  .plyr__controls {
+  .plyr__controls, .plyr__control--overlaid {
     display: none;
   }
 }
