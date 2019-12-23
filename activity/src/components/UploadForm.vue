@@ -32,7 +32,7 @@
           :custom-action="customAction"
            post-action="/api/upload"
           :multiple="true"
-          :size="1024 * 1024 * 10"
+          :size="1024 * 1024 * 30"
           :drop="true"
           :drop-directory="true"
           v-model="files"
@@ -51,7 +51,7 @@
             <li v-for="file in files" :key="file.id" class="file-item">
               <img :src="file.thumb" class="thumb" v-if="file.thumb">
               <a v-else :title="file.name">
-                  <img :src="file.cover" class="thumb">
+                  <img :src="getCover(file)" class="thumb">
                   <i class="iconfont icon-ziyuan player-btn"></i>
               </a>
               <a href="#" class="lnk-remove-photo" v-on:click="removeFile(file)">×</a>
@@ -59,9 +59,10 @@
             <li class="file-item add-photo"><i>+</i>
               <file-upload v-if="files.length"
                 class="file-upload"
+                :custom-action="customAction"
                 post-action="/api/upload"
                 :multiple="true"
-                :size="1024 * 1024 * 10"
+                :size="1024 * 1024 * 30"
                 :drop="true"
                 :drop-directory="true"
                 v-model="files"
@@ -80,9 +81,10 @@
     <div class="pure-button-group btn-group" v-if="activeLi == 1">
         <file-upload v-if="!files.length"
           class="file-upload-btn"
+          :custom-action="customAction"
           post-action="/api/upload"
           :multiple="true"
-          :size="1024 * 1024 * 10"
+          :size="1024 * 1024 * 30"
           :drop="true"
           :drop-directory="true"
           v-model="files"
@@ -118,6 +120,7 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
   fids = new Map()
   OnFocus = false
   name = 'file'
+  changeTracker = 1  // Hack
 
   getLinkInfo() {
     if (!this.url.startsWith('http')) {
@@ -138,18 +141,23 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
     })
   }
 
+
   async customAction(file, component) {
     let result = await component.uploadHtml5(file)
     const filename = JSON.parse(result.xhr.responseText)['filename']
     this.fids.set(file.id, filename)
+    this.changeTracker++
     return result
+  }
+  reset() {
+    this.files = []
+    this.fids = new Map()
   }
 
   activate(num) {
     this.activeLi = num;
     if (!(this.activeLi == 1 && num != 1)) {
-      this.files = []
-      this.fids = new Map()
+      this.reset()
     }
   }
 
@@ -169,14 +177,16 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
       } else {
         this.text = ''
         this.url = ''
-        this.fids = new Map()
-        this.files = []
         this.$toasted.show('已发布')
         this.$emit('insertNewActivity', response.data.activity);
+        this.reset()
       }
     }).catch(() => {
       this.$toasted.show('发布失败')
     })
+  }
+  getCover(file) {
+    return this.changeTracker && '/static/upload/' + (this.fids.get(file.id) || '').replace('.mp4', '.png')
   }
 
   removeFile(file) {
@@ -232,8 +242,8 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
       let text = newFile.xhr.responseText
       if (text) {
         const filename = JSON.parse(text)['filename']
-        newFile.cover = `/static/upload/${filename.replace('.mp4', '.gif')}`
         this.fids.set(newFile.id, filename)
+        this.changeTracker++
       }
     }
   }
@@ -293,7 +303,7 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
 }
 .active .btn-group {
   letter-spacing: 0;
-  position: inherit;
+  position: relative;
   text-align: left;
   margin-left: 7px;
   margin-top: -70px;
@@ -410,6 +420,7 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
   border: 1px solid #ccc;
   border-top: none;
   position: relative;
+  z-index: 101
 }
 
 .btn-group {
@@ -623,15 +634,21 @@ input[type=text]:focus, input[type=password]:focus, textarea:focus {
 }
 .file-upload-btn {
     height: 30px;
-    width: 44px;
+    width: 92px;
     position: absolute;
     top: 0;
     left: 0;
 }
 .player-btn {
   position: absolute;
+  color: #fff;
   top: 12px;
   left: 13px;
   font-size: 24px;
+}
+@media (max-width: 768px) {
+  #form {
+    display: none;
+  }
 }
 </style>

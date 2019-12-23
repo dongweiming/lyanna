@@ -99,17 +99,21 @@ export default @Component({components: {UploadForm, Paginator}}) class Main exte
   replyTo = ''
   commentContent = ''
 
+  patchActivity(activity) {
+    activity.big = false
+    activity.showReply = false
+    activity.showComments = false
+    activity.commentFetched = false
+    activity.comments = []
+    return activity
+  }
+
   getActivityList() {
     this.listLoading = true
     this.page = this.$route.query.p || this.page
     getActivities(this.page).then(response => {
         this.activities = response.data.items.map(i => {
-          i.big = false
-          i.showReply = false
-          i.showComments = false
-          i.commentFetched = false
-          i.comments = []
-          return i
+          return this.patchActivity(i)
         })
         this.total = response.data.total
         this.listLoading = false
@@ -119,7 +123,7 @@ export default @Component({components: {UploadForm, Paginator}}) class Main exte
     return getToken()
   }
   insertNewActivity(activity) {
-    this.activities.unshift(activity)
+    this.activities.unshift(this.patchActivity(activity))
   }
   moment(value) {
     return Moment(value * 1000)
@@ -156,6 +160,10 @@ export default @Component({components: {UploadForm, Paginator}}) class Main exte
     reactActivity(activity.id, activity.liked ? 'delete': 'post').then(response => {
       if (response.data.r != 0) {
         this.$toasted.show(`点赞失败: ${response.data.msg}`)
+        if (response.data.r == 403) {
+          this.$toasted.show(`登录中...`)
+          window.location =  '/oauth/activities'
+        }
       } else {
         activity.n_likes = response.data.n_reacted
         activity.liked = !activity.liked
@@ -169,6 +177,10 @@ export default @Component({components: {UploadForm, Paginator}}) class Main exte
     commentActivity(activity.id, `${this.replyTo} ${this.commentContent}`, this.refId).then(response => {
       if (response.data.r != 0) {
         this.$toasted.show(`评论失败: ${response.data.msg}`)
+        if (response.data.r == 403) {
+          this.$toasted.show(`登录中...`)
+          window.location =  '/oauth/activities'
+        }
       } else {
         this.$toasted.show('评论成功')
         this.replyTo = ''
@@ -187,6 +199,7 @@ export default @Component({components: {UploadForm, Paginator}}) class Main exte
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
+@import "../../../static/css/dracula.css";
 ::selection {
   background: #63B5F5;
   color: #fff;
@@ -320,6 +333,15 @@ blockquote {
 .html /deep/ .highlight {
   margin: 0;
   display: grid !important;
+  background: #3C4556;
+  padding: 0 10px;
+  border-radius: 2px;
+  margin: 20px 0;
+  overflow: auto;
+  position: relative;
+}
+.html /deep/ .hljs {
+  background: #3C4556;
 }
 .pics {
   font-size: 0;
@@ -460,6 +482,42 @@ blockquote {
     a {
       color: #bbb;
       margin-left: 5px;
+    }
+  }
+}
+@media (max-width: 768px) {
+  #aside {
+    display: none
+  }
+  #activities, .paginator {
+    margin: 0 auto;
+    margin-top: 30px;
+  }
+  .paginator {
+    margin: 30px;
+  }
+}
+@media screen and (max-width: 414px) {
+  #activities {
+    padding: 0 16px;
+    width: 100%;
+  }
+  .pics {
+    width: min-content;
+  }
+  .paginator {
+    margin: 10px 0;
+    width: 100%;
+  }
+  .bd {
+    padding-left: 48px;
+  }
+  .avatar {
+    margin-right: 10px;
+    img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
     }
   }
 }

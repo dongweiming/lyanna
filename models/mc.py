@@ -6,7 +6,7 @@ from pickle import dumps, loads
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import aiomcache
-from aiomcache.client import Client
+from aiomcache.client import Client, ClientException
 
 import config
 
@@ -110,8 +110,10 @@ def cache(key_pattern: str, expire: int = 0) -> Callable:
             if not key:
                 return f(*a, **kw)
             force = kw.pop('force', False)
-            r = await memcache.get(key.encode('utf-8')) if not force else None
-
+            try:
+                r = await memcache.get(key.encode('utf-8')) if not force else None
+            except ClientException:
+                r = None
             if r is None:
                 r = await f(*a, **kw)
                 if r is not None and not isinstance(r, Empty):

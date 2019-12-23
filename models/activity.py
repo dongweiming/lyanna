@@ -184,7 +184,10 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
         target = await target.to_sync_dict()
         if self.target_kind == K_STATUS:
             target['url'] = ''
-        for k in ['user', 'user_id']:
+        elif self.target_kind == K_POST:
+            target['content'] = ''
+            target['html_content'] = ''
+        for k in ['user', 'user_id', 'tags']:
             try:
                 del target[k]
             except KeyError:
