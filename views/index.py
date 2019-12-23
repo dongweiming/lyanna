@@ -23,11 +23,9 @@ CODE_RE = re.compile('```([A-Za-z]+\n)?|#+')
 
 @bp.route(config.OAUTH_REDIRECT_PATH)
 @bp.route(config.OAUTH_REDIRECT_PATH + '/post/<post_id>')
+@bp.route(config.OAUTH_REDIRECT_PATH + '/activities')
 async def oauth(request: Request, post_id: Union[str, None] = None) -> HTTPResponse:
-    if post_id is None:
-        url = '/'
-    else:
-        url = request.app.url_for('blog.post', ident=post_id)
+    url = request.url.replace(config.OAUTH_REDIRECT_PATH, '') or '/'
 
     if (user := request['session'].get('user')):
         return redirect(url)
@@ -43,6 +41,8 @@ async def oauth(request: Request, post_id: Union[str, None] = None) -> HTTPRespo
     redirect_uri = config.REDIRECT_URI
     if post_id is not None:
         redirect_uri += f'/post/{post_id}'
+    elif '/activities' in url:
+        redirect_uri += '/activities'
 
     if 'code' not in request.args:
         return redirect(unquote(unquote(client.get_authorize_url(

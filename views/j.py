@@ -15,8 +15,7 @@ bp = Blueprint('j', url_prefix='/j')
 def login_required(f: Callable) -> Callable:
     async def wrapped(request, **kwargs):
         if not (user := request['session'].get('user')):
-            if not DEBUG:
-                return json({'r': 403, 'msg': 'Login required.'})
+            return json({'r': 403, 'msg': 'Login required.'})
             user = {'gid': 841395}  # My Github id
         if (target_id := kwargs.pop('target_id', None)) is not None:
             target_kind = kwargs.pop('target_kind', 'post')

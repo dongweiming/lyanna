@@ -7,7 +7,7 @@ from sanic import Blueprint
 from sanic.exceptions import abort
 from tortoise.query_utils import Q
 
-from config import ACTIVITY_THEME, PER_PAGE, AttrDict, partials
+from config import PER_PAGE, AttrDict, partials
 from ext import mako
 from models import Post, PostTag, SpecialTopic, Tag
 from models.blog import (
@@ -195,4 +195,4 @@ async def topic(request: Request, ident: str):
 @bp.route('/activities')
 @mako.template('activities.html')
 async def activities(request: Request):
-    return {'theme': ACTIVITY_THEME}
+    return {}

@@ -61,7 +61,6 @@ SHOW_AUTHOR = False
 COMMENT_REACTIONS = ['heart', 'upvote']
 
 USE_FFMPEG = bool(distutils.spawn.find_executable('ffmpeg'))  # type: ignore
-ACTIVITY_THEME = 'rainbow'
 CDN_DOMAIN = ''
 
 try:
@@ -84,8 +83,6 @@ if USE_YAML:
         globals().update({k.upper(): v for k, v in subconfig.items()})
     globals().update({f'MAIL_{k.upper()}': v for k, v
                       in config.mail.items()})  # type: ignore
-    globals().update({f'ACTIVITY_{k.upper()}': v for k, v
-                      in config.activity.items()})  # type: ignore
 
 if not USE_FFMPEG:
     print('Warning: Cover can be displayed after installing `ffmpeg`')

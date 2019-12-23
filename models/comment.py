@@ -46,7 +46,7 @@ class Comment(ReactMixin, ContentMixin, BaseModel):
 
     @property
     async def user(self) -> GithubUser:
-        return await GithubUser.get(gid=self.github_id)
+        return await GithubUser.filter(gid=self.github_id).first()
 
 
 class CommentMixin:

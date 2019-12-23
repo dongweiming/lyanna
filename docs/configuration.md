@@ -189,9 +189,3 @@ Redis Sentinel集群架构，本项指定主机端口号。另外也支持从环
 - 默认值: `''`
 
 为了更好地访问效果，博客内的静态文件(Javascript/css/img/fonts等)地址可以使用CDN的域名，默认不开启
-
-## ACTIVITY_THEME
-
-- 默认值: `rainbow`
-
-指定动态页面渲染代码块用的highlight.js主题的名字，默认引入`https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/rainbow.min.css`
