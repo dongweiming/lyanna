@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1 (2019-12-24)
+
+1. @cache support `serialize` & `parser` opts
+2. Fix some issues
+3. Add activity responsive style
+
 ## 3.0 (2019-12-22)
 
 1. Use Python 3.8 syntax
