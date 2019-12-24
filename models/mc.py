@@ -180,19 +180,19 @@ class mc:
         memcache = await get_memcache()
         key = key.encode('utf-8')
         try:
-            rs = await memcache.incr(key, increment)
-        except ClientException as e:
+            return await memcache.incr(key, increment)
+        except ClientException:
             increment_ = str(default).encode('utf-8')
             await memcache.set(key, increment_)
             return increment_
 
     @staticmethod
-    async def decr(key: str, increment: int = 1) -> bytes:
+    async def decr(key: str, increment: int = 1) -> Union[bytes, bool]:
         memcache = await get_memcache()
         key = key.encode('utf-8')
         try:
             return await memcache.decr(key, increment)
-        except ClientException as e:
+        except ClientException:
             return False
 
     @staticmethod

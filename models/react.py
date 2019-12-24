@@ -79,7 +79,7 @@ class ReactItem(BaseModel):
                                  comment_id=self.target_id)
 
     async def incr(self):
-        default = None
+        default = 0
         if self.reaction_type in (self.K_UPVOTE, self.K_LOVE):
             default = await self.filter(target_id=self.target_id,
                                         target_kind=self.target_kind,

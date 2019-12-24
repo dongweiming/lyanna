@@ -111,6 +111,7 @@ async def _migrate_for_v30() -> None:
     await client.execute_script(
         'alter table comments add column `target_kind` smallint(6) DEFAULT 1001')
 
+
 @click.group()
 def cli():
     ...
