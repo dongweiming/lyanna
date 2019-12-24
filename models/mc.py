@@ -3,7 +3,7 @@ import inspect
 import re
 from functools import wraps
 from pickle import dumps, loads
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import aiomcache
 from aiomcache.client import Client, ClientException
@@ -96,7 +96,8 @@ def gen_key_factory(key_pattern: str, arg_names: List[str],
     return gen_key
 
 
-def cache(key_pattern: str, expire: int = 0) -> Callable:
+def cache(key_pattern: str, expire: int = 0, serialize: bool = True,
+          parser: Union[Any] = None) -> Callable:
     def deco(f: Callable) -> Callable:
         arg_names, varargs, varkw, defaults, _, _, _ = inspect.getfullargspec(f)  # noqa
         if varargs or varkw:
@@ -117,13 +118,23 @@ def cache(key_pattern: str, expire: int = 0) -> Callable:
             if r is None:
                 r = await f(*a, **kw)
                 if r is not None and not isinstance(r, Empty):
-                    r = dumps(r)
+                    if serialize:
+                        r = dumps(r)
+                    else:
+                        r = str(r).encode('utf-8')
                     await memcache.set(key.encode('utf-8'),
                                        r, expire)
-            try:
-                r = loads(r)
-            except TypeError:
-                ...
+            if serialize:
+                try:
+                    r = loads(r)
+                except TypeError:
+                    ...
+            if parser is not None:
+                try:
+                    r = parser(r)
+                except ValueError:
+                    if parser == int:
+                        r = 0
             return r
         __.original_function = f  # type: ignore
         return __
@@ -163,3 +174,35 @@ class mc:
             await memcache.set(k.encode('utf-8'),
                                dumps(v), expire)
         return True
+
+    @staticmethod
+    async def incr(key: str, increment: int = 1, default: int = 0) -> bytes:
+        memcache = await get_memcache()
+        key = key.encode('utf-8')
+        try:
+            rs = await memcache.incr(key, increment)
+        except ClientException as e:
+            increment_ = str(default).encode('utf-8')
+            await memcache.set(key, increment_)
+            return increment_
+
+    @staticmethod
+    async def decr(key: str, increment: int = 1) -> bytes:
+        memcache = await get_memcache()
+        key = key.encode('utf-8')
+        try:
+            return await memcache.decr(key, increment)
+        except ClientException as e:
+            return False
+
+    @staticmethod
+    async def get(key: str):
+        memcache = await get_memcache()
+        key = key.encode('utf-8')
+        return await memcache.get(key)
+
+    @staticmethod
+    async def set(key: str, value):
+        memcache = await get_memcache()
+        key = key.encode('utf-8')
+        return await memcache.set(key, value)

@@ -13,6 +13,8 @@ from .utils import cached_property, empty
 
 MC_KEY_USER_REACT_STAT = 'react:stats:%s:%s'
 MC_KEY_REACTION_ITEM_BY_USER_TARGET = 'react:reaction_item:%s:%s:%s'
+MC_KEY_TARGET_N_LIKES = 'react:stats:n_likes:%s:%s'
+MC_KEY_TARGET_N_UPVOTES = 'react:stats:n_upvotes:%s:%s'
 
 
 class ReactItem(BaseModel):
@@ -76,6 +78,27 @@ class ReactItem(BaseModel):
             comment_reacted.send(user_id=self.user_id,
                                  comment_id=self.target_id)
 
+    async def incr(self):
+        default = None
+        if self.reaction_type in (self.K_UPVOTE, self.K_LOVE):
+            default = await self.filter(target_id=self.target_id,
+                                        target_kind=self.target_kind,
+                                        reaction_type=self.reaction_type).count()
+        if self.reaction_type == self.K_UPVOTE:
+            return await mc.incr(MC_KEY_TARGET_N_UPVOTES % (
+                self.target_id, self.target_kind), default=default)
+        elif self.reaction_type == self.K_LOVE:
+            return await mc.incr(MC_KEY_TARGET_N_LIKES % (
+                self.target_id, self.target_kind), default=default)
+
+    async def decr(self):
+        if self.reaction_type == self.K_UPVOTE:
+            return await mc.decr(MC_KEY_TARGET_N_UPVOTES % (
+                self.target_id, self.target_kind))
+        elif self.reaction_type == self.K_LOVE:
+            return await mc.decr(MC_KEY_TARGET_N_LIKES % (
+                self.target_id, self.target_kind))
+
 
 class ReactStats(BaseModel):
     target_id = fields.IntField()
@@ -134,11 +157,15 @@ class ReactMixin:
         items = await ReactItem.get_reaction_items(user_id, self.id, self.kind)
         return items[0].reaction_type if items else None
 
-    @property
+    @property  # type: ignore
+    @cache(MC_KEY_TARGET_N_LIKES % ('{self.id}', '{self.kind}'), serialize=False,
+           parser=int)
     async def n_likes(self):
         return (await self.stats).love_count
 
-    @property
+    @property  # type: ignore
+    @cache(MC_KEY_TARGET_N_UPVOTES % ('{self.id}', '{self.kind}'), serialize=False,
+           parser=int)
     async def n_upvotes(self):
         return (await self.stats).upvote_count
 

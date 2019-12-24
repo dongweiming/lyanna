@@ -61,7 +61,7 @@ async def _posts(request: Request, page: int = 1):
             latest_comments = []
             for c in comments:
                 user = await c.user
-                post = await Post.cache(c.post_id)
+                post = await Post.cache(c.target_id)
                 user = AttrDict({
                     'name': user.username,
                     'link': user.link,
