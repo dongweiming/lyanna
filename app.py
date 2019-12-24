@@ -23,6 +23,7 @@ from ext import init_db, mako, sentry
 from models import User, jwt_authenticate
 from models.blog import MC_KEY_SITEMAP, Post, Tag
 from models.mc import cache
+from models.consts import STATIC_FILE_TYPES
 from models.var import memcache_var, redis_var
 from views.request import Request
 
@@ -63,7 +64,7 @@ class LyannaSanic(Sanic):  # type: ignore
     def url_for(self, view_name: str, **kwargs):
         url = super().url_for(view_name, **kwargs)
         cdn = config.CDN_DOMAIN
-        if cdn and not config.DEBUG:
+        if cdn and not config.DEBUG and url.split('.')[-1] in STATIC_FILE_TYPES:
             url = f'{cdn}{url}'
         return url
 

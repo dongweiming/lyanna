@@ -110,12 +110,21 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
 
     @classmethod
     @cache(MC_KEY_ACTIVITIES % '{page}')
-    async def get_multi_by(cls, page: int = 1) -> List[Dict]:
+    async def _get_multi_by(cls, page: int = 1) -> List[Dict]:
         items = []
         queryset = cls.filter().offset((page - 1) * PER_PAGE).limit(
             PER_PAGE).order_by('-id')
         for item in await queryset:
-            items.append(await item.to_full_dict())
+            items.append(await item._to_full_dict())
+        return items
+
+    @classmethod
+    async def get_multi_by(cls, page: int = 1) -> List[Dict]:
+        items = []
+        for item in await cls._get_multi_by(page):
+            self = await cls.cache(item['id'])
+            item.update(await self.dynamic_dict())
+            items.append(item)
         return items
 
     @cached_property
@@ -176,7 +185,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
         return await cls.filter().count()
 
     @cache(MC_KEY_ACTIVITY_FULL_DICT % '{self.id}')
-    async def to_full_dict(self) -> Dict[str, Any]:
+    async def _to_full_dict(self) -> Dict[str, Any]:
         target = await self.target
         if not target:
             return {}
@@ -206,10 +215,19 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
             'action': await self.action,
             'created_at': self.created_at,
             'attachments': attachments,
-            'n_likes': await self.n_likes,
-            'n_comments': await self.n_comments,
             'layout': attachments[0]['layout'] if attachments else '',
         }
+
+    async def dynamic_dict(self) -> Dict[str, int]:
+        return {
+            'n_likes': await self.n_likes,
+            'n_comments': await self.n_comments
+        }
+
+    async def to_full_dict(self) -> Dict[str, Any]:
+        dct = await self._to_full_dict()
+        dct.update(await self.dynamic_dict())
+        return dct
 
     async def clear_mc(self):
         total = await self.filter().count()

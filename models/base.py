@@ -120,11 +120,13 @@ class BaseModel(Model, metaclass=ModelMeta):  # type: ignore
     async def create(cls, **kwargs: Any):
         rv = await super().create(**kwargs)
         await cls.__flush__(rv)
+        await rv.incr()
         return rv
 
     async def delete(self, using_db=None):
         rv = await super().delete(using_db=using_db)
         await self.__flush__(self)
+        await self.decr()  # type: ignore
         return rv
 
     async def save(self, *args, **kwargs):
@@ -150,3 +152,9 @@ class BaseModel(Model, metaclass=ModelMeta):  # type: ignore
             setattr(self, k, v)
         await self.save()  # type: ignore
         return self
+
+    async def incr(self):
+        ...
+
+    async def decr(self):
+        ...

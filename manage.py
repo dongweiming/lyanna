@@ -106,6 +106,10 @@ async def _migrate_for_v30() -> None:
         PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
+    await client.execute_script(
+        'ALTER TABLE comments CHANGE `post_id` `target_id` int(11) NOT NULL')
+    await client.execute_script(
+        'alter table comments add column `target_kind` smallint(6) DEFAULT 1001')
 
 @click.group()
 def cli():

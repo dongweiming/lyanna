@@ -42,7 +42,7 @@ async def create_comment(request, user, target):
     if not (content := request.form.get('content')):
         return json({'r': 1, 'msg': 'Content required.'})
     ref_id = int(request.form.get('ref_id', 0))
-    comment = await target.add_comment(user['gid'], content, ref_id)
+    comment = await target.add_comment(user['gid'], content, ref_id, target.kind)
     comment = await comment.to_sync_dict()
 
     rv = {'r': 0 if comment else 1}
