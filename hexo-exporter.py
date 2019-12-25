@@ -56,7 +56,7 @@ async def write_post(file: str) -> None:
             await Post.create(title=title, content=content,  # type: ignore
                               tags=tags, author_id=args.uid, slug='',
                               summary='', status=Post.STATUS_ONLINE,
-                              created_at=date)
+                              created_at=str(date))
             print(f"[Success] Load post: {f.name}")
         except IntegrityError:
             ...

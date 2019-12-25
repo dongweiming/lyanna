@@ -26,7 +26,7 @@ async def init() -> None:
     await client.execute_script(
         'alter table post_tags add index `idx_post_tag` (`post_id`, `tag_id`)')
     await client.execute_script(
-        'alter table comments add index `idx_post_id` (`post_id`)')
+        'alter table comments add index `idx_target_kind` (`target_id`, `target_kind`)')
     await client.execute_script(
         'alter table react_items add index `idx_id_kind_user` (`target_id`, `target_kind`, `user_id`)')  # noqa
 
