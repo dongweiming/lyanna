@@ -215,6 +215,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
             'action': await self.action,
             'created_at': self.created_at,
             'attachments': attachments,
+            'can_comment': self.can_comment,
             'layout': attachments[0]['layout'] if attachments else '',
         }
 

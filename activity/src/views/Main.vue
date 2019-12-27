@@ -47,7 +47,7 @@
             <div class="actions">
               <span class="time" :title="moment(activity.created_at).format('YYYY-MM-D HH:mm:ss')"><a :href="activity.target.url || 'javascript:void(0);'">
                 {{ moment(activity.created_at).fromNow()}}</a></span>
-              <a href="javascript:void(0);" class="btn reply" @click="toggleShowComments(activity)">{{ activity.showComments ? ' 隐藏' : activity.n_comments || ''}}评论</a>
+              <a v-if="activity.can_comment" href="javascript:void(0);" class="btn reply" @click="toggleShowComments(activity)">{{ activity.showComments ? ' 隐藏' : activity.n_comments || ''}}评论</a>
               <a href="javascript:void(0);" class="btn heart" :class="{ 'liked' : activity.liked }" @click="react(activity)">{{ activity.liked ? '已' : '' }}赞{{ activity.n_likes == 0 ? '' : `(${activity.n_likes})` }}</a>
             </div>
             <div class="comments" v-if="activity.showComments">
