@@ -152,6 +152,8 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
   reset() {
     this.files = []
     this.fids = new Map()
+    this.url = ''
+    this.urlInfo = null
   }
 
   activate(num) {
