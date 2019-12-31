@@ -1,5 +1,5 @@
-import distutils
 import os
+import distutils.spawn
 from pathlib import Path
 from typing import List, Tuple
 
@@ -60,7 +60,7 @@ REDIS_SENTINEL_SERVICE_PORT = 26379
 SHOW_AUTHOR = False
 COMMENT_REACTIONS = ['heart', 'upvote']
 
-USE_FFMPEG = bool(distutils.spawn.find_executable('ffmpeg'))  # type: ignore
+USE_FFMPEG = bool(distutils.spawn.find_executable('ffmpeg'))
 CDN_DOMAIN = ''
 
 try:

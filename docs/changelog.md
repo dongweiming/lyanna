@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1 (2019-12-31)
+
+1. Fix some issues
+2. Add task log
+3. Fix aio-libs/aiomysql#454
+
 ## 3.0.1 (2019-12-24)
 
 1. @cache support `serialize` & `parser` opts

@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from tortoise import fields
 
-from config import UPLOAD_FOLDER, USE_FFMPEG
+from config import UPLOAD_FOLDER, USE_FFMPEG, CDN_DOMAIN, DEBUG
 
 from .base import BaseModel
 from .blog import Post
@@ -203,7 +203,8 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
                 ...
         avatar = user['avatar']
         if avatar:
-            avatar = f'/static/upload/{avatar}'
+            domain = CDN_DOMAIN if CDN_DOMAIN and not DEBUG else ''
+            avatar = f'{domain}/static/upload/{avatar}'
         attachments = await self.attachments
         return {
             'id': self.id,
