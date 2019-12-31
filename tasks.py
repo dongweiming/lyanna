@@ -13,7 +13,7 @@ from config import (
     MAIL_USERNAME, REDIS_URL, SITE_TITLE,
 )
 from ext import init_db
-from models.blog import RK_PAGEVIEW, RK_VISITED_POST_IDS, Post
+from models.blog import RK_PAGEVIEW, RK_VISITED_POST_IDS, Post, PAGEVIEW_FIELD
 from models.mention import EMAIL_SUBJECT, Mention
 from models.utils import RedisSettings
 
@@ -66,6 +66,7 @@ async def mention_users(ctx, post_id, content, author_id):
         html = template.render(username=user.username,
                                site_url=BLOG_URL, post=post,
                                site_name=SITE_TITLE)
+        print(f'Send Mail(subject={subject}, html={html}) To {email}')
         await send_email(subject, html.decode(), email)
 
 
@@ -78,9 +79,10 @@ async def flush_to_db(ctx):
 
         post = await Post.get(Q(id=post_id))
         if post:
-            post._pageview = int(await redis.get(
-                RK_PAGEVIEW.format(post_id)) or 0)
+            post._pageview = int(await redis.hget(
+                RK_PAGEVIEW.format(post_id), PAGEVIEW_FIELD) or 0)
             await post.save()
+            print(f'Flush Post(id={post_id}) pageview')
 
 
 class WorkerSettings:
