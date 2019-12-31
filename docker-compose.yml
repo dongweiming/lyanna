@@ -26,7 +26,7 @@ services:
   web:
     networks:
       - app-network
-    build: .
+    image: dongweiming/lyanna:latest
     ports:
       - '8000:8000'
     volumes:
