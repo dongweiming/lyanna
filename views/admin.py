@@ -397,7 +397,7 @@ async def get_url_info(request):
 @bp.route('/api/status', methods=['POST'])
 @protected(bp)
 async def api_status(request):
-    user_id = 1
+    user_id = request.user.id
     obj, msg = await create_status(user_id, request.json)
     activity = None if not obj else await obj.to_full_dict()  # type: ignore
     return json({'r': not bool(obj), 'msg': msg, 'activity': activity})
