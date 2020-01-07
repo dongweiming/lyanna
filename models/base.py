@@ -33,11 +33,11 @@ class PropertyHolder(type):
         return new_cls
 
 
-class ModelMeta(_ModelMeta, PropertyHolder):  # type: ignore
+class ModelMeta(_ModelMeta, PropertyHolder):
     ...
 
 
-class BaseModel(Model, metaclass=ModelMeta):  # type: ignore
+class BaseModel(Model, metaclass=ModelMeta):
     id = fields.IntField(pk=True)
     created_at = fields.DatetimeField(auto_now_add=True)
     _redis = None

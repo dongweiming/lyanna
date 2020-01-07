@@ -40,7 +40,7 @@ services:
       REDIS_URL: 'redis://redis:6379'
       MEMCACHED_HOST: 'memcached'
       DB_URL: 'mysql://root:@db:3306/test?charset=utf8'
-      PYTHONPATH: $PYTHONPATH:/usr/local/src/aiomcache:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src
+      PYTHONPATH: $PYTHONPATH:/usr/local/src/aiomcache:/usr/local/src/aiomysql:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src
     command: sh -c './setup.sh && python app.py'
 volumes:
   my-datavolume:

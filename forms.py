@@ -13,11 +13,11 @@ from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 
 
-class SwitchField(SelectField):  # type: ignore
+class SwitchField(SelectField):
     ...
 
 
-class SanicForm(_SanicForm):  # type: ignore
+class SanicForm(_SanicForm):
     def hidden_tag(self, *fields):
         def hidden_fields(
                 fields: Union[Tuple[Any, ...], SanicForm]) -> Generator:
