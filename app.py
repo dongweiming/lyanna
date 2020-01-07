@@ -60,7 +60,7 @@ def register_blueprints(root: str, app: Sanic) -> None:
             app.register_blueprint(mod.bp)
 
 
-class LyannaSanic(Sanic):  # type: ignore
+class LyannaSanic(Sanic):
     def url_for(self, view_name: str, **kwargs):
         url = super().url_for(view_name, **kwargs)
         cdn = config.CDN_DOMAIN
@@ -69,7 +69,7 @@ class LyannaSanic(Sanic):  # type: ignore
         return url
 
 
-class ErrorHandler(_ErrorHandler):  # type: ignore
+class ErrorHandler(_ErrorHandler):
     def default(self, request: Request, exception) -> HTTPResponse:
         exc = '\n'.join(traceback.format_tb(sys.exc_info()[-1]))
         if 'Connection refused' in str(exception) and 'memcache' in exc:

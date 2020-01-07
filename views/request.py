@@ -4,6 +4,6 @@ import config
 from models import User
 
 
-class Request(_Request):  # type: ignore
+class Request(_Request):
     user: User
     partials = config.partials

@@ -36,7 +36,7 @@ class PanguMeta(type):
         return wrapper
 
 
-class BlogHtmlFormatter(HtmlFormatter):  # type: ignore
+class BlogHtmlFormatter(HtmlFormatter):
 
     def __init__(self, **options):
         super().__init__(**options)
@@ -114,7 +114,7 @@ def block_code(text: str, lang: str, inlinestyles: bool = False,
         )
 
 
-class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):  # type: ignore
+class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):
     def header(self, text, level, raw=None):
         hid = text.replace(' ', '')
         return f'<h{level} id="{hid}">{text}</h{level}>\n'
@@ -128,7 +128,7 @@ class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):  # type: ignore
         return f' {super().link(link, title, text) } '
 
 
-class TocRenderer(TocMixin, mistune.Renderer):  # type:ignore
+class TocRenderer(TocMixin, mistune.Renderer):
     ...
 
 
