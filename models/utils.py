@@ -193,7 +193,7 @@ def _parse_rfc1738_args(name: str) -> Dict[str, str]:
 
 
 @dataclass
-class RedisSettings(_RedisSettings):  # type: ignore
+class RedisSettings(_RedisSettings):
     @classmethod
     def from_url(cls, db_url: str) -> RedisSettings:
         url = _parse_rfc1738_args(db_url)

@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.1 (2019-12-31)
+## 3.1 (2020-01-07)
 
 1. Fix some issues
 2. Add task log
