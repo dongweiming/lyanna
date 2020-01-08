@@ -424,7 +424,7 @@ body {
     position: fixed;
     margin-left: -15px;
     width: 200px;
-    top: 25%;
+    top: 5rem;
     z-index: 1;
     font-size: 12px;
     padding: 10px;
@@ -454,7 +454,6 @@ body {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  width: 180px;
 }
 .post-container .toc-container .toc-article .toc .toc-item.toc-level-4 {
   color: #444;
