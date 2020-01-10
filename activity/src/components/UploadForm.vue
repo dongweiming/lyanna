@@ -141,7 +141,6 @@ export default @Component({components: {FileUpload}}) class Main extends Vue {
     })
   }
 
-
   async customAction(file, component) {
     let result = await component.uploadHtml5(file)
     const filename = JSON.parse(result.xhr.responseText)['filename']
