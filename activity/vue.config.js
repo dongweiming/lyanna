@@ -1,3 +1,5 @@
+const debug = process.env.NODE_ENV !== 'production'
+
 module.exports = {
     indexPath: 'index.html',
     productionSourceMap: false,  // 生产环境禁用
@@ -5,15 +7,20 @@ module.exports = {
         config.resolve.alias
             .set('#', resolve('../common/src'))
     },
-    configureWebpack: {
-        devtool: 'eval-source-map',
-        output: {
-            filename: 'static/js/activity/[name].js',
-            chunkFilename: 'static/js/activity/[name].js'
-        },
-        externals: {
+    configureWebpack: (config) => {
+        if (debug) {
+            config.devtool = 'eval-source-map'
+        } else {
+            config.devtool = false
+        }
+        config.output.filename = 'static/js/activity/[name].js'
+        config.output.chunkFilename = 'static/js/activity/[name].js'
+        config.externals = {
             'vue': 'Vue',
             'moment': 'moment'
+        }
+        config.optimization = {
+            splitChunks: false
         }
     },
     css: {
