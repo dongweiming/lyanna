@@ -57,7 +57,7 @@ spec:
               name: lyanna-cfg
               key: redis_url
         - name: PYTHONPATH
-          value: $PYTHONPATH:/usr/local/src/aiomcache:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src
+          value: $PYTHONPATH:/usr/local/src/aiomysql:/usr/local/src/aiomcache:/usr/local/src/tortoise:/usr/local/src/arq:/usr/local/src
         #imagePullPolicy: Always
         imagePullPolicy: IfNotPresent
 #        livenessProbe:
