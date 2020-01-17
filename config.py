@@ -63,6 +63,9 @@ COMMENT_REACTIONS = ['heart', 'upvote']
 USE_FFMPEG = bool(distutils.spawn.find_executable('ffmpeg'))
 CDN_DOMAIN = ''
 
+ACCESS_LOG = True
+ENABLE_DEBUG_LOG = False
+
 try:
     from local_settings import *  # noqa
 except ImportError:

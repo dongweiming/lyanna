@@ -1,5 +1,6 @@
 import asyncio
 import sys
+import time
 import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -9,6 +10,7 @@ import aiohttp
 import aiomcache
 import aioredis
 from sanic import Sanic
+from sanic.log import logger
 from sanic.exceptions import FileNotFound, NotFound, ServerError
 from sanic.handlers import ErrorHandler as _ErrorHandler
 from sanic.response import HTTPResponse, text
@@ -131,6 +133,18 @@ async def setup_context(request: Request) -> None:
             config.REDIS_URL, minsize=5, maxsize=20, loop=loop)
     redis_var.set(redis)
     memcache_var.set(client)
+    if config.ENABLE_DEBUG_LOG:
+        request.start_time = time.time()
+
+
+@app.middleware('response')
+async def add_spent_time(request, response):
+    if config.ENABLE_DEBUG_LOG:
+        spend_time = round((time.time() - request.start_time) * 1000)
+        path = request.path
+        if request.query_string:
+            path = f'{path}?{request.query_string}'
+        logger.info(f'{request.method} {path} {response.status} {spend_time}ms')  # noqa
 
 
 @cache(MC_KEY_SITEMAP)
