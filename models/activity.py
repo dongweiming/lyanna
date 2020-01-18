@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from tortoise import fields
 
-from config import UPLOAD_FOLDER, USE_FFMPEG, CDN_DOMAIN, DEBUG
+from config import CDN_DOMAIN, DEBUG, UPLOAD_FOLDER, USE_FFMPEG
 
 from .base import BaseModel
 from .blog import Post

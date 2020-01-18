@@ -213,7 +213,8 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
         return f'/post/{getattr(self, PERMALINK_TYPE) or self.id}/'
 
     async def incr_pageview(self, increment: int = 1) -> int:
-        redis = await self.redis
+        redis = await get_redis()
+
         try:
             await redis.sadd(RK_ALL_POST_IDS, self.id)
             await redis.sadd(RK_VISITED_POST_IDS, self.id)
@@ -224,8 +225,9 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
 
     @property
     async def pageview(self) -> int:
+        redis = await get_redis()
         try:
-            return int(await (await self.redis).hget(
+            return int(await redis.hget(
                 RK_PAGEVIEW.format(self.id), PAGEVIEW_FIELD) or 0)
         except RedisError:
             return self._pageview

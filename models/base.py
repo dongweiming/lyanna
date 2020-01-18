@@ -40,7 +40,6 @@ class ModelMeta(_ModelMeta, PropertyHolder):
 class BaseModel(Model, metaclass=ModelMeta):
     id = fields.IntField(pk=True)
     created_at = fields.DatetimeField(auto_now_add=True)
-    _redis = None
 
     class Meta:
         abstract = True

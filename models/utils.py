@@ -202,17 +202,19 @@ class RedisSettings(_RedisSettings):
                    url['password'], 1, 5, 1)
 
 
-async def get_redis() -> Redis:
+async def get_redis(loop=None) -> Redis:
     global _redis
     if _redis is None:
         try:
             redis = redis_var.get()
         except LookupError:
             # Hack for debug mode
-            loop = asyncio.get_event_loop()
+            if loop is None:
+                loop = asyncio.get_event_loop()
             redis = await aioredis.create_redis_pool(
                 REDIS_URL, minsize=5, maxsize=20, loop=loop)
         _redis = redis
+        redis_var.set(redis)
     return _redis
 
 
