@@ -1,22 +1,16 @@
-import asyncio
-import sys
 import time
-import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, List, Optional, Union
 
 import aiohttp
-import aiomcache
-import aioredis
 from sanic import Sanic
+from sanic.exceptions import FileNotFound, NotFound
 from sanic.log import logger
-from sanic.exceptions import FileNotFound, NotFound, ServerError
-from sanic.handlers import ErrorHandler as _ErrorHandler
 from sanic.response import HTTPResponse, text
 from sanic_jwt import Initialize
 from sanic_mako import render_string
-from sanic_session import MemcacheSessionInterface, Session
+from sanic_session import AIORedisSessionInterface, Session
 from uvloop import Loop
 from werkzeug.utils import ImportStringError, find_modules, import_string
 
@@ -24,9 +18,9 @@ import config
 from ext import init_db, mako, sentry
 from models import User, jwt_authenticate
 from models.blog import MC_KEY_SITEMAP, Post, Tag
-from models.mc import cache
 from models.consts import STATIC_FILE_TYPES
-from models.var import memcache_var, redis_var
+from models.mc import cache
+from models.utils import get_redis
 from views.request import Request
 
 
@@ -71,17 +65,7 @@ class LyannaSanic(Sanic):
         return url
 
 
-class ErrorHandler(_ErrorHandler):
-    def default(self, request: Request, exception) -> HTTPResponse:
-        exc = '\n'.join(traceback.format_tb(sys.exc_info()[-1]))
-        if 'Connection refused' in str(exception) and 'memcache' in exc:
-            exception = ServerError(
-                f'Please confirm that memcached is running!\n{exc}')
-        return super().default(request, exception)
-
-
 app = LyannaSanic(__name__, request_class=Request)
-app.error_handler = ErrorHandler()
 app.config.from_object(config)
 mako.init_app(app, context_processors=())
 if sentry is not None:
@@ -111,10 +95,11 @@ async def server_error_handler(request, exception):
 
 @app.listener('before_server_start')
 async def setup_db(app: Sanic, loop: Loop) -> None:
-    global client
+    global client, redis
     await init_db()
-    client = aiomcache.Client(config.MEMCACHED_HOST, config.MEMCACHED_PORT, loop=loop)  # noqa
-    session.init_app(app, interface=MemcacheSessionInterface(client))
+    redis = await get_redis(loop=loop)
+    # init extensions fabrics
+    session.init_app(app, interface=AIORedisSessionInterface(redis))
     app.async_session = aiohttp.ClientSession()
     Path(config.UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 
@@ -126,13 +111,6 @@ async def close_aiohttp_session(sanic_app, _loop) -> None:
 
 @app.middleware('request')
 async def setup_context(request: Request) -> None:
-    global redis
-    loop = asyncio.get_event_loop()
-    if redis is None:
-        redis = await aioredis.create_redis_pool(
-            config.REDIS_URL, minsize=5, maxsize=20, loop=loop)
-    redis_var.set(redis)
-    memcache_var.set(client)
     if config.ENABLE_DEBUG_LOG:
         request.start_time = time.time()
 

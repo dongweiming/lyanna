@@ -10,7 +10,7 @@ from tortoise.query_utils import Q
 from config import REDIS_URL, partials
 
 from .base import BaseModel
-from .consts import K_COMMENT, ONE_HOUR, K_POST, ONE_DAY
+from .consts import K_COMMENT, K_POST, ONE_DAY, ONE_HOUR
 from .mc import cache, clear_mc, mc
 from .mixin import ContentMixin
 from .react import ReactItem, ReactMixin

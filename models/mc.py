@@ -5,36 +5,13 @@ from functools import wraps
 from pickle import dumps, loads
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import aiomcache
-from aiomcache.client import Client, ClientException
+from aioredis.errors import RedisError
 
-import config
+from .utils import Empty, get_redis
 
-from .utils import Empty
-from .var import memcache_var
-
-_memcache = None
 __formaters: Dict[str, Callable] = {}
 percent_pattern = re.compile(r'%\w')
 brace_pattern = re.compile(r'\{[\w\d\.\[\]_]+\}')
-
-
-async def get_memcache() -> Client:
-    global _memcache
-    if _memcache is not None:
-        return _memcache
-    try:
-        memcache = memcache_var.get()
-    except LookupError:
-        # Hack for debug mode
-        memcache = ''
-    if memcache == '':
-        loop = asyncio.get_event_loop()
-        memcache = aiomcache.Client(config.MEMCACHED_HOST,
-                                    config.MEMCACHED_PORT,
-                                    loop=loop)
-    _memcache = memcache
-    return memcache
 
 
 def formater(text: str) -> Callable:
@@ -106,14 +83,14 @@ def cache(key_pattern: str, expire: int = 0, serialize: bool = True,
 
         @wraps(f)
         async def __(*a: Any, **kw: Any) -> Dict[str, List[Tuple]]:
-            memcache = await get_memcache()
+            redis = await get_redis()
             key, args = gen_key(*a, **kw)
             if not key:
                 return f(*a, **kw)
             force = kw.pop('force', False)
             try:
-                r = await memcache.get(key.encode('utf-8')) if not force else None
-            except ClientException:
+                r = await redis.get(key.encode('utf-8')) if not force else None
+            except RedisError:
                 r = None
             if r is None:
                 r = await f(*a, **kw)
@@ -122,8 +99,8 @@ def cache(key_pattern: str, expire: int = 0, serialize: bool = True,
                         r = dumps(r)
                     else:
                         r = str(r).encode('utf-8')
-                    await memcache.set(key.encode('utf-8'),
-                                       r, expire)
+                    await redis.set(key.encode('utf-8'),
+                                    r, expire=expire)
             if serialize:
                 try:
                     r = loads(r)
@@ -142,10 +119,10 @@ def cache(key_pattern: str, expire: int = 0, serialize: bool = True,
 
 
 async def clear_mc(*keys) -> bool:
-    memcache = await get_memcache()
-    if memcache is None:
+    redis = await get_redis()
+    if redis is None:
         return False
-    await asyncio.gather(*[memcache.delete(k.encode('utf-8')) for k in keys],
+    await asyncio.gather(*[redis.delete(k.encode('utf-8')) for k in keys],
                          return_exceptions=True)
     return True
 
@@ -153,10 +130,10 @@ async def clear_mc(*keys) -> bool:
 class mc:
     @staticmethod
     async def get_multi(*keys) -> List[Any]:
-        memcache = await get_memcache()
-        if memcache is None:
+        redis = await get_redis()
+        if redis is None:
             return []
-        values = await memcache.multi_get(*[k.encode('utf-8') for k in keys])
+        values = await redis.mget(*[k.encode('utf-8') for k in keys])
 
         rs = []
         for value in values:
@@ -169,40 +146,40 @@ class mc:
 
     @staticmethod
     async def set_multi(keys, values, expire: int = 0) -> bool:
-        memcache = await get_memcache()
+        redis = await get_redis()
         for k, v in zip(keys, values):
-            await memcache.set(k.encode('utf-8'),
-                               dumps(v), expire)
+            await redis.set(k.encode('utf-8'),
+                            dumps(v), expire=expire)
         return True
 
     @staticmethod
     async def incr(key: str, increment: int = 1, default: int = 0) -> bytes:
-        memcache = await get_memcache()
+        redis = await get_redis()
         key = key.encode('utf-8')
         try:
-            return await memcache.incr(key, increment)
-        except ClientException:
+            return await redis.incr(key, increment)
+        except RedisError:
             increment_ = str(default).encode('utf-8')
-            await memcache.set(key, increment_)
+            await redis.set(key, increment_)
             return increment_
 
     @staticmethod
     async def decr(key: str, increment: int = 1) -> Union[bytes, bool]:
-        memcache = await get_memcache()
+        redis = await get_redis()
         key = key.encode('utf-8')
         try:
-            return await memcache.decr(key, increment)
-        except ClientException:
+            return await redis.decr(key, increment)
+        except RedisError:
             return False
 
     @staticmethod
     async def get(key: str):
-        memcache = await get_memcache()
+        redis = await get_redis()
         key = key.encode('utf-8')
-        return await memcache.get(key)
+        return await redis.get(key)
 
     @staticmethod
     async def set(key: str, value):
-        memcache = await get_memcache()
+        redis = await get_redis()
         key = key.encode('utf-8')
-        return await memcache.set(key, value)
+        return await redis.set(key, value)
