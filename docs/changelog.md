@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.3 (2020-01-19)
+
+1. Use aioredis instead of aiomcache
+2. Record response spent time
+3. Optimize pagination
+
+## 3.2 (2020-01-10)
+
+1. Optimize dist files size
+2. Fix docker env
+
 ## 3.1 (2020-01-07)
 
 1. Fix some issues

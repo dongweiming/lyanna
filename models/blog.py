@@ -187,6 +187,14 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             orderings=['-id'], limit=None)
 
     @classmethod
+    def _paginate_args(cls):
+        return {
+            'orderings': ['-id'],
+            'status': cls.STATUS_ONLINE,
+            'type__not': cls.TYPE_PAGE
+        }
+
+    @classmethod
     async def cache(cls, ident: Union[str, int]) -> Post:
         if str(ident).isdigit():
             return await super().cache(ident)

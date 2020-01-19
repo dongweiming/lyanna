@@ -1,3 +1,4 @@
+import math
 import asyncio
 import inspect
 from datetime import datetime
@@ -7,14 +8,16 @@ from sanic.exceptions import abort
 from tortoise import fields
 
 import config
-from config import AttrDict
+from config import AttrDict, PER_PAGE
 
 from .mc import cache, clear_mc
+from .utils import Pagination
 
 from tortoise.models import Model, ModelMeta as _ModelMeta  # isort:skip
 
 
 MC_KEY_ITEM_BY_ID = '%s:%s:v2'
+MC_KEY_PAGINATE = 'paginate:%s:%s:%s:%s'
 IGNORE_ATTRS = ['redis', 'stats']
 
 
@@ -107,11 +110,6 @@ class BaseModel(Model, metaclass=ModelMeta):
         return obj
 
     @classmethod
-    @cache(MC_KEY_ITEM_BY_ID % ('{cls.__name__}', '{id}'))
-    async def cache(cls, id: Union[str, int]) -> Any:
-        return await cls.filter(id=id).first()
-
-    @classmethod
     async def get_multi(cls, ids: Union[List[int], Set[int], KeysView[Any]]):
         return [await cls.cache(id) for id in ids]
 
@@ -135,8 +133,13 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     @classmethod
     async def __flush__(cls, target) -> None:
+        total = await cls.count()
+        page_count = math.ceil(total / PER_PAGE)
+        keys = [MC_KEY_PAGINATE % (cls.__name__, p, PER_PAGE, count)
+                for p in range(1, page_count + 1) for count in [True, False]]
+        keys.append(MC_KEY_ITEM_BY_ID % (target.__class__.__name__, target.id))
         await asyncio.gather(
-            clear_mc(MC_KEY_ITEM_BY_ID % (target.__class__.__name__, target.id)),  # noqa
+            clear_mc(*keys),  # noqa
             target.clear_mc(), return_exceptions=True
         )
 
@@ -157,3 +160,39 @@ class BaseModel(Model, metaclass=ModelMeta):
 
     async def decr(self):
         ...
+
+    @classmethod
+    def _paginate_args(cls):
+        return {
+            'orderings': ['-id']
+        }
+
+    @classmethod
+    async def count(cls):
+        kwargs = cls._paginate_args()
+        kw = {k: kwargs[k] for k in kwargs if k in cls._meta.fields}
+        return await cls.filter(**kw).count()
+
+    @classmethod
+    @cache(MC_KEY_PAGINATE % ('{cls.__name__}', '{page}', '{per_page}', '{count}'))
+    async def paginate(cls, page: int = 1, per_page: int = PER_PAGE, count: bool = True) -> Pagination:  # noqa
+        if page < 1:
+            page = 1
+
+        kwargs = cls._paginate_args()
+        kwargs.update(offset=(page - 1) * per_page, limit=per_page)
+
+        items = await cls.sync_filter(**kwargs)
+
+        if not count:
+            total = None
+        elif page == 1 and len(items) < per_page:
+            total = len(items)
+        else:
+            total = await cls.count()
+        return Pagination(page, per_page, total, items)
+
+    @classmethod
+    @cache(MC_KEY_ITEM_BY_ID % ('{cls.__name__}', '{id}'))
+    async def cache(cls, id: Union[str, int]) -> Any:
+        return await cls.filter(id=id).first()
