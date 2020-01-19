@@ -157,7 +157,7 @@ class mc:
         redis = await get_redis()
         key = key.encode('utf-8')
         try:
-            return await redis.incr(key, increment)
+            return await redis.incrby(key, increment)
         except RedisError:
             increment_ = str(default).encode('utf-8')
             await redis.set(key, increment_)
@@ -168,7 +168,7 @@ class mc:
         redis = await get_redis()
         key = key.encode('utf-8')
         try:
-            return await redis.decr(key, increment)
+            return await redis.decrby(key, increment)
         except RedisError:
             return False
 
