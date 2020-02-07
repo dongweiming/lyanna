@@ -38,7 +38,6 @@ async def page(request: Request, ident: Union[str, int] = 1):
 
 @mako.template('index.html')
 async def _posts(request: Request, page: int = 1):
-    start = (page - 1) * PER_PAGE
     paginatior = await Post.paginate(page, PER_PAGE)
     json: Dict[
         str, Union[List[Tuple[int, Post]], List[AttrDict],
