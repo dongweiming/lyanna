@@ -162,13 +162,13 @@ class BaseModel(Model, metaclass=ModelMeta):
         ...
 
     @classmethod
-    def _paginate_args(cls):
+    def _paginate_args(cls) -> Dict:
         return {
             'orderings': ['-id']
         }
 
     @classmethod
-    async def count(cls):
+    async def count(cls) -> int:
         kwargs = cls._paginate_args()
         kw = {k: kwargs[k] for k in kwargs if k in cls._meta.fields}
         return await cls.filter(**kw).count()
@@ -185,7 +185,7 @@ class BaseModel(Model, metaclass=ModelMeta):
         items = await cls.sync_filter(**kwargs)
 
         if not count:
-            total = None
+            total = 0
         elif page == 1 and len(items) < per_page:
             total = len(items)
         else:
