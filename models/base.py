@@ -51,7 +51,7 @@ class BaseModel(Model, metaclass=ModelMeta):
     def url(self) -> str:
         return f'/{self.__class__.__name__.lower()}/{self.id}/'
 
-    def canonical_url(self):
+    def canonical_url(self) -> str:
         return f'{config.BLOG_URL}{self.url}'
 
     def to_dict(self) -> Dict[str, Union[datetime, int, str]]:
@@ -66,6 +66,7 @@ class BaseModel(Model, metaclass=ModelMeta):
             else:
                 rv[field] = coro
         rv['url'] = self.url
+        rv['canonical_url'] = self.canonical_url()
         return AttrDict(rv)
 
     @classmethod

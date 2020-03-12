@@ -85,7 +85,7 @@ async def _feed(request):
 
         feed.add(  # type: ignore
             post.title, body, content_type='html', summary=summary,
-            summary_type='html', author=OWNER, url=post.url,
+            summary_type='html', author=OWNER, url=post.canonical_url,
             id=post.id, updated=post.created_at, published=post.created_at
         )
     return feed.to_string()  # type: ignore
