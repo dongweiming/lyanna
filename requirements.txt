@@ -26,3 +26,5 @@ tortoise-orm==0.15.4
 lxml==4.4.2
 extraction==0.3
 -e git+https://github.com/dongweiming/aiomysql.git@python38#egg=aiomysql
+dj-database-url==0.5.0
+Django==3.0.5

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Dict
 
@@ -7,6 +8,7 @@ from tortoise import Tortoise, run_async
 from tortoise.exceptions import IntegrityError
 
 from config import HERE
+from django_migrations import sync_models
 from ext import init_db
 from models import create_user
 from models.blog import PAGEVIEW_FIELD, RK_ALL_POST_IDS, RK_PAGEVIEW
@@ -139,6 +141,27 @@ def migrate_for_v27():
 def migrate_for_v30():
     run_async(_migrate_for_v30())
     click.echo('Migrate Finished!')
+
+
+@cli.command()
+def makemigrations() -> None:
+    """用于数据库makemigrations"""
+    click.echo('Sync ./models to django migrations...')
+    sync_models.main()
+    cmd = './django_migrations/manage.py makemigrations'
+    click.echo('--> ' + cmd)
+    os.system(cmd)
+    p = Path("./django_migrations/tortoise_orm/migrations")
+    if len(list(p.rglob("0*.py"))) == 1:
+        click.echo("\nYou may need to run the following command:\n")
+        cmd = "./django_migrations/manage.py migrate tortoise_orm 0001 --fake"
+        click.echo(" " * 4 + cmd, "\n")
+
+
+@cli.command()
+def migrate() -> None:
+    """用于数据库migrate"""
+    manage.main()
 
 
 async def _adduser(**kwargs) -> None:
