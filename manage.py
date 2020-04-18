@@ -145,7 +145,7 @@ def migrate_for_v30():
 
 @cli.command()
 def makemigrations() -> None:
-    """用于数据库makemigrations"""
+    """Like django makemigrations, run it if models/*.py changed"""
     click.echo('Sync ./models to django migrations...')
     sync_models.main()
     cmd = './django_migrations/manage.py makemigrations'
@@ -161,7 +161,7 @@ def makemigrations() -> None:
 
 @cli.command()
 def migrate() -> None:
-    """用于数据库migrate"""
+    """Apply migrations to db, run it after makemigrations"""
     cmd = './django_migrations/manage.py migrate'
     click.echo('--> ' + cmd)
     if os.system(cmd):
