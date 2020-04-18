@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-from tortoise.query_utils import Q
+from django.db.models import Q
 
 from models.user import GithubUser
 

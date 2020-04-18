@@ -7,9 +7,9 @@ from html.parser import HTMLParser
 from typing import Any, Callable, Dict, List, Tuple, Union  # noqa
 
 from aioredis.errors import RedisError
-from tortoise import fields
-from tortoise.models import ModelMeta
-from tortoise.query_utils import Q
+from .base import fields
+from .base import ModelMeta
+from django.db.models import Q
 from tortoise.queryset import QuerySet
 
 from config import PERMALINK_TYPE, AttrDict
@@ -63,7 +63,7 @@ class MLStripper(HTMLParser):
         return ''.join(self.fed)
 
 
-class StatusMixin(metaclass=ModelMeta):
+class StatusMixin(object):
     STATUSES = (
         STATUS_UNPUBLISHED,
         STATUS_ONLINE
@@ -84,7 +84,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
     kind = K_POST
 
     class Meta:
-        table = 'posts'
+        db_table = 'posts'
 
     @classmethod
     async def create(cls, **kwargs):
@@ -245,7 +245,7 @@ class Tag(BaseModel):
     name = fields.CharField(max_length=100, unique=True)
 
     class Meta:
-        table = 'tags'
+        db_table = 'tags'
 
     @classmethod
     def get_by_name(cls, name: str) -> QuerySet:
@@ -264,7 +264,7 @@ class PostTag(BaseModel):
     updated_at = fields.DatetimeField(auto_now_add=True)
 
     class Meta:
-        table = 'post_tags'
+        db_table = 'post_tags'
 
     @classmethod
     async def update_multi(cls, post_id: int, tags: List[str]) -> None:
@@ -297,7 +297,7 @@ class SpecialItem(BaseModel):
     special_id = fields.SmallIntField()
 
     class Meta:
-        table = 'special_item'
+        db_table = 'special_item'
 
     @classmethod
     @cache(MC_KEY_SPECIAL_BY_PID % ('{post_id}'))
@@ -313,7 +313,7 @@ class SpecialTopic(StatusMixin, BaseModel):
     title = fields.CharField(max_length=100, unique=True)
 
     class Meta:
-        table = 'special_topic'
+        db_table = 'special_topic'
 
     @cache(MC_KEY_SPECIAL_POST_ITEMS % ('{self.id}'))
     async def get_post_items(self):

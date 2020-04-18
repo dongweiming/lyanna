@@ -7,7 +7,7 @@ from pathlib import Path
 from pickle import dumps, loads
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from tortoise import fields
+from .base import fields
 
 from config import CDN_DOMAIN, DEBUG, UPLOAD_FOLDER, USE_FFMPEG
 
@@ -66,7 +66,7 @@ class Status(ContentMixin, BaseModel):
     user_id = fields.IntField()
 
     class Meta:
-        table = 'statuses'
+        db_table = 'statuses'
 
     @classmethod
     async def create(cls, **kwargs) -> Status:

@@ -150,18 +150,22 @@ def makemigrations() -> None:
     sync_models.main()
     cmd = './django_migrations/manage.py makemigrations'
     click.echo('--> ' + cmd)
-    os.system(cmd)
+    if os.system(cmd):
+        return
     p = Path("./django_migrations/tortoise_orm/migrations")
     if len(list(p.rglob("0*.py"))) == 1:
         click.echo("\nYou may need to run the following command:\n")
         cmd = "./django_migrations/manage.py migrate tortoise_orm 0001 --fake"
-        click.echo(" " * 4 + cmd, "\n")
+        click.echo(" " * 4 + cmd + "\n")
 
 
 @cli.command()
 def migrate() -> None:
     """用于数据库migrate"""
-    manage.main()
+    cmd = './django_migrations/manage.py migrate'
+    click.echo('--> ' + cmd)
+    if os.system(cmd):
+        return
 
 
 async def _adduser(**kwargs) -> None:

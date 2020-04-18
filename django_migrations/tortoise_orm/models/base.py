@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Any, Dict, KeysView, List, Optional, Set, Union
 
 from django.db.models import Model
+from django.db.models.base import ModelBase
 from sanic.exceptions import abort
 
 import config
@@ -32,6 +33,11 @@ class PropertyHolder(type):
             if isinstance(getattr(new_cls, attr), property):
                 new_cls.property_fields.append(attr)  # type: ignore
         return new_cls
+
+
+class ModelMeta(ModelBase):
+    def __new__(cls, name, bases, attrs, **kwargs):
+        return super().__new__(cls, name, bases, attrs, **kwargs)
 
 
 class BaseModel(Model):

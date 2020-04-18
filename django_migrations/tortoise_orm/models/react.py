@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Any, DefaultDict, Dict, List
 
-from tortoise import fields
+from .base import fields
 
 from .base import BaseModel
 from .consts import K_COMMENT
@@ -39,7 +39,7 @@ class ReactItem(BaseModel):
     }
 
     class Meta:
-        table = 'react_items'
+        db_table = 'react_items'
 
     @classmethod
     async def create(cls, **kwargs) -> ReactItem:

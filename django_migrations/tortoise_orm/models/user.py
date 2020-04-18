@@ -1,6 +1,6 @@
 from typing import Any, Dict, Tuple, Union
 
-from tortoise import fields
+from .base import fields
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .base import BaseModel
@@ -14,7 +14,7 @@ class User(BaseModel):
     active = fields.BooleanField(default=True)
 
     class Meta:
-        table = 'users'
+        db_table = 'users'
 
     def to_dict(self) -> Dict[str, Any]:
         rv = super().to_dict()
@@ -30,7 +30,7 @@ class GithubUser(BaseModel):
     link = fields.CharField(max_length=100, default='')
 
     class Meta:
-        table = 'github_users'
+        db_table = 'github_users'
 
 
 def generate_password(password: str) -> str:

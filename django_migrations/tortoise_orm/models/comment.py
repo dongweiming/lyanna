@@ -4,8 +4,8 @@ import asyncio
 from typing import Dict, List
 
 from arq import create_pool
-from tortoise import fields
-from tortoise.query_utils import Q
+from .base import fields
+from django.db.models import Q
 
 from config import REDIS_URL, partials
 
@@ -32,7 +32,7 @@ class Comment(ReactMixin, ContentMixin, BaseModel):
     kind = K_COMMENT
 
     class Meta:
-        table = 'comments'
+        db_table = 'comments'
 
     async def clear_mc(self):
         keys = [MC_KEY_COMMENT_LIST % (self.target_id, self.target_kind)]
