@@ -133,7 +133,7 @@ async def _sitemap(request):
     items: List[List] = []
 
     for rv in [posts, tags]:
-        items.extend([[item.url, item.created_at] for item in rv])
+        items.extend([[item.canonical_url, item.created_at] for item in rv])
 
     for _, route in app.router.routes_names.values():
         if any(endpoint in route.uri for endpoint in ('/admin', '/j', '/api')):
