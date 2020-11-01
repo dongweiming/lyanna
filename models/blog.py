@@ -12,7 +12,7 @@ from tortoise.models import ModelMeta
 from tortoise.query_utils import Q
 from tortoise.queryset import QuerySet
 
-from config import PERMALINK_TYPE, AttrDict
+from config import PERMALINK_TYPE, AttrDict, LIMIT_RSS_CRAWLING, READ_MORE
 
 from .base import BaseModel
 from .comment import CommentMixin
@@ -123,10 +123,23 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
 
     @property
     async def html_content(self) -> str:
-        content = await self.content
         if not (content := await self.content):
             return ''
         return markdown(content)
+
+    @property
+    async def html_content_for_rss(self) -> str:
+        if not (content := await self.content):
+            return ''
+
+        if LIMIT_RSS_CRAWLING:
+            content = content[:int(len(content) * 0.8)]  + '...'
+
+        content = markdown(content)
+
+        if READ_MORE:
+            content += READ_MORE.format(url=self.canonical_url(), title=self.title)
+        return content
 
     @property
     async def excerpt(self) -> str:
