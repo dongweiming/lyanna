@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4 (2020-11-01)
+
+1. Add LIMIT_RSS_CRAWLING & READ_MORE
+2. Disable specify UA and empty UA access
+
 ## 3.3 (2020-01-19)
 
 1. Use aioredis instead of aiomcache
