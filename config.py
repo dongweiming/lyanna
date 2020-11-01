@@ -66,6 +66,9 @@ CDN_DOMAIN = ''
 ACCESS_LOG = True
 ENABLE_DEBUG_LOG = False
 
+LIMIT_RSS_CRAWLING = False
+READ_MORE = ""
+
 try:
     from local_settings import *  # noqa
 except ImportError:

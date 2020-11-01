@@ -80,7 +80,7 @@ async def _feed(request):
     posts = await Post.sync_filter(status=Post.STATUS_ONLINE,
                                    orderings=['-id'], limit=10)
     for post in posts:
-        body = post.html_content
+        body = post.html_content_for_rss
         summary = post.excerpt
 
         feed.add(  # type: ignore
