@@ -189,3 +189,15 @@ Redis Sentinel集群架构，本项指定主机端口号。另外也支持从环
 - 默认值: `''`
 
 为了更好地访问效果，博客内的静态文件(Javascript/css/img/fonts等)地址可以使用CDN的域名，默认不开启
+
+## LIMIT_RSS_CRAWLING
+
+- 默认值: `False`
+
+开启后，RSS只显示全文的80%。注意，不显示全问会影响了订阅用户，但能提高搜索权重
+
+## READ_MORE
+
+- 默认值: `<p>原文: <a href="{url}">{title}</a></p>`
+
+在RSS内容中添加原文链接，文案支持HTML，支持2个内置参数: `{url}`表示文章链接，`{title}`表示文章标题。
