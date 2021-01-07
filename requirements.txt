@@ -23,6 +23,6 @@ PyYAML==5.1.2
 aiosmtplib==1.1.0
 arq==0.18.3
 tortoise-orm==0.15.23
-lxml==4.4.2
+lxml==4.6.2
 extraction==0.3
 -e git+https://github.com/dongweiming/aiomysql.git@python38#egg=aiomysql
