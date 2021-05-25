@@ -133,7 +133,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             return ''
 
         if LIMIT_RSS_CRAWLING:
-            content = content[:int(len(content) * 0.8)]  + '...'
+            content = content[:int(len(content) * 0.8)] + '...'
 
         content = markdown(content)
 

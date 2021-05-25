@@ -6,7 +6,7 @@
         <div class="mod">
           <div class="hd">
             <div class="avatar">
-              <a href="javascript:void(0);" title="dd">
+              <a href="javascript:void(0);" :title="activity.user.name">
                 <img :src="activity.user.avatar" v-if="activity.user.avatar" :alt="activity.user.name">
               </a>
             </div>
