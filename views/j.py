@@ -2,12 +2,12 @@ from typing import Any, Callable, Dict, List
 
 import mistune
 from sanic import Blueprint
-from sanic.response import json
 from sanic_mako import render_template_def
 
 from config import DEBUG
 from models import Activity, Comment, Post, ReactItem
 from models.consts import K_POST
+from views.utils import json
 
 bp = Blueprint('j', url_prefix='/j')
 
