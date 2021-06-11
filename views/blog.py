@@ -169,7 +169,11 @@ async def tag(request, tag_id):
 @bp.route('/topics')
 @bp.route('/topics/<ident>')
 @mako.template('topics.html')
-async def topics(request: Request, ident: int = 1) -> Dict[str, Pagination]:
+async def topics(request: Request, ident: str = 1) -> Dict[str, Pagination]:
+    try:
+        ident = int(ident)
+    except ValueError:
+        abort(404)
     start = (ident - 1) * PER_PAGE
     topics = await SpecialTopic.get_all()
     total = len(topics)
