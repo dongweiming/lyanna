@@ -27,7 +27,7 @@ CODE_RE = re.compile('```([A-Za-z]+\n)?|#+')
 async def oauth(request: Request, post_id: Union[str, None] = None) -> HTTPResponse:
     url = request.url.replace(config.OAUTH_REDIRECT_PATH, '') or '/'
 
-    if (user := request['session'].get('user')):
+    if (user := request.ctx.session.get('user')):
         return redirect(url)
 
     client = GithubClient(
@@ -68,7 +68,7 @@ async def oauth(request: Request, post_id: Union[str, None] = None) -> HTTPRespo
         return redirect(config.OAUTH_REDIRECT_PATH)
 
     user = await create_github_user(user)
-    request['session']['user'] = user.to_dict()
+    request.ctx.session['user'] = user.to_dict()
 
     return redirect(url)
 

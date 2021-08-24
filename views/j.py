@@ -14,7 +14,7 @@ bp = Blueprint('j', url_prefix='/j')
 
 def login_required(f: Callable) -> Callable:
     async def wrapped(request, **kwargs):
-        if not (user := request['session'].get('user')):
+        if not (user := request.ctx.session.get('user')):
             return json({'r': 403, 'msg': 'Login required.'})
             user = {'gid': 841395}  # My Github id
         if (target_id := kwargs.pop('target_id', None)) is not None:
@@ -71,7 +71,7 @@ async def comments(request, post_id):
     comments = (await post.comments)[start: start + per_page]
 
     reacted_comments: List[List[int]] = []
-    if (user := request['session'].get('user')):
+    if (user := request.ctx.session.get('user')):
         reacted_comments = await post.comments_reacted_by(user['gid'])
 
     return json({
@@ -140,7 +140,7 @@ async def activities(request):
     page = int(request.args.get('page', 1))
     total = await Activity.count()
     items = await Activity.get_multi_by(page)
-    if not (user := request['session'].get('user')):
+    if not (user := request.ctx.session.get('user')):
         user_id = 841395 if DEBUG else None
     else:
         user_id = user['gid']
