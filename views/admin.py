@@ -38,9 +38,9 @@ bp.static('fonts', './static/fonts')
 @bp.middleware('request')
 async def inject_user(request: Request) -> None:
     with instant_config(bp, request=request):
-        payload = bp.auth.extract_payload(request, verify=False)
+        payload = await bp.ctx.auth.extract_payload(request, verify=False)
         user = await jwt_call(
-            bp.auth.retrieve_user, request, payload
+            bp.ctx.auth.retrieve_user, request, payload
         )
         if user:
             request.user = user
@@ -155,7 +155,7 @@ async def post(request, post_id):
 async def list_users(request: Request) -> HTTPResponse:
     users = await User.sync_all()
     total = await User.filter().count()
-    return response.json({'items': users, 'total': total})
+    return json({'items': users, 'total': total})
 
 
 @bp.route('/api/user/new', methods=['POST'])
@@ -174,7 +174,7 @@ async def user(request, user_id):
     avatar = user.avatar
     user['avatar_url'] = (request.app.url_for('static', filename=f'upload/{avatar}')  # noqa
                           if avatar else '')
-    return response.json(user)
+    return json(user)
 
 
 async def _user(request: Request, user_id: Optional[Any] = None):
@@ -205,7 +205,7 @@ async def _user(request: Request, user_id: Optional[Any] = None):
     else:
         ok = False
 
-    return response.json({'user': await user.to_sync_dict(), 'ok': ok})  # type: ignore
+    return json({'user': await user.to_sync_dict(), 'ok': ok})  # type: ignore
 
 
 @bp.route('/api/upload', methods=['POST', 'OPTIONS'])
@@ -303,7 +303,7 @@ async def topic(request, topic_id):
     topic = await SpecialTopic.get_or_404(topic_id)
     topic = await topic.to_sync_dict()
     topic['status'] = str(topic['status'])
-    return response.json(topic)
+    return json(topic)
 
 
 async def _topic(request: Request, topic_id: Optional[Any] = None):

@@ -90,7 +90,7 @@ async def _post(request: Request, ident: str, is_preview: bool = False):
     if not is_preview and post.status != Post.STATUS_ONLINE:
         abort(404)
 
-    github_user = request['session'].get('user')
+    github_user = request.ctx.session.get('user')
     stats = await post.stats
     reaction_type = None
     reacted_comments: List[List[int]] = []

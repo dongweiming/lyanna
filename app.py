@@ -53,7 +53,7 @@ def register_blueprints(root: str, app: Sanic) -> None:
                            retrieve_refresh_token=retrieve_refresh_token,
                            secret=config.JWT_SECRET,
                            expiration_delta=config.EXPIRATION_DELTA)
-            app.register_blueprint(mod.bp)
+            app.blueprint(mod.bp)
 
 
 class LyannaSanic(Sanic):
@@ -66,7 +66,7 @@ class LyannaSanic(Sanic):
 
 
 app = LyannaSanic(__name__, request_class=Request)
-app.config.from_object(config)
+app.config.update_config(config)
 mako.init_app(app, context_processors=())
 if sentry is not None:
     sentry.init_app(app)
