@@ -21,10 +21,11 @@ from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG
 from ext import mako
 from forms import PostForm, TopicForm, UserForm
 from models import Post, PostTag, SpecialTopic, Tag, User
-from models.activity import create_status
+from models.activity import create_status, Activity
 from models.signals import post_created
 from models.user import generate_password
 from models.utils import generate_id
+from models.consts import K_POST
 from views.request import Request
 from views.utils import json
 
@@ -140,6 +141,9 @@ async def post(request, post_id):
     if request.method == 'DELETE':
         await post.delete()
         await PostTag.filter(Q(post_id=post_id)).delete()
+        activity = await Activity.filter(target_id=post_id, target_kind=K_POST).first()
+        if activity:
+            await activity.delete()
         return response.json({'r': 1})
 
     rv = await post.to_sync_dict()

@@ -4,7 +4,7 @@ from typing import Dict
 import click
 import cssmin
 from tortoise import Tortoise, run_async
-from tortoise.exceptions import IntegrityError
+from tortoise.exceptions import IntegrityError, OperationalError
 
 from config import HERE
 from ext import init_db
@@ -33,6 +33,11 @@ async def init() -> None:
     if not await client.execute_query(
             'show columns from `posts` like "pageview"'):
         await migrate_for_v25()
+
+    try:
+        await migrate_for_v35()
+    except OperationalError:
+        ...
 
 
 async def _migrate_for_v25() -> None:
@@ -112,6 +117,13 @@ async def _migrate_for_v30() -> None:
         'alter table comments add column `target_kind` smallint(6) DEFAULT 1001')
 
 
+async def _migrate_for_v35() -> None:
+     await init_db(create_db=False)
+     client = Tortoise.get_connection('default')
+     await client.execute_script(
+         'alter table activity add index `idx_target_kind` (`target_id`, `target_kind`)')  # noqa
+
+
 @click.group()
 def cli():
     ...
@@ -138,6 +150,12 @@ def migrate_for_v27():
 @cli.command()
 def migrate_for_v30():
     run_async(_migrate_for_v30())
+    click.echo('Migrate Finished!')
+
+
+@cli.command()
+def migrate_for_v35():
+    run_async(_migrate_for_v35())
     click.echo('Migrate Finished!')
 
 
