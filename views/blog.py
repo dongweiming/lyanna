@@ -169,9 +169,9 @@ async def tag(request, tag_id):
 @bp.route('/topics')
 @bp.route('/topics/<ident>')
 @mako.template('topics.html')
-async def topics(request: Request, ident: str = 1) -> Dict[str, Pagination]:
+async def topics(request: Request, ident_: str = "1") -> Dict[str, Pagination]:
     try:
-        ident = int(ident)
+        ident = int(ident_)
     except ValueError:
         abort(404)
     start = (ident - 1) * PER_PAGE
