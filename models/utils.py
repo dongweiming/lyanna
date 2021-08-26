@@ -199,7 +199,7 @@ class RedisSettings(_RedisSettings):
         url = _parse_rfc1738_args(db_url)
         return cls(url['host'], url['port'],
                    url['database'] and int(url['database']) or 0,
-                   url['password'], 1, 5, 1)
+                   url['password'], None, 5, 1)
 
 
 async def get_redis(loop=None) -> Redis:
