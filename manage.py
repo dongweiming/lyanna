@@ -118,10 +118,10 @@ async def _migrate_for_v30() -> None:
 
 
 async def _migrate_for_v35() -> None:
-     await init_db(create_db=False)
-     client = Tortoise.get_connection('default')
-     await client.execute_script(
-         'alter table activity add index `idx_target_kind` (`target_id`, `target_kind`)')  # noqa
+    await init_db(create_db=False)
+    client = Tortoise.get_connection('default')
+    await client.execute_script(
+        'alter table activity add index `idx_target_kind` (`target_id`, `target_kind`)')  # noqa
 
 
 @click.group()

@@ -5,8 +5,8 @@ from functools import wraps
 
 import aiosmtplib
 from arq import create_pool, cron
+from arq.worker import logger
 from mako.lookup import TemplateLookup
-from tortoise.query_utils import Q
 
 from config import (BLOG_URL, MAIL_PASSWORD, MAIL_PORT, MAIL_SERVER,
                     MAIL_USERNAME, REDIS_URL, SITE_TITLE)
@@ -64,7 +64,7 @@ async def mention_users(ctx, post_id, content, author_id):
         html = template.render(username=user.username,
                                site_url=BLOG_URL, post=post,
                                site_name=SITE_TITLE)
-        print(f'Send Mail(subject={subject}, html={html}) To {email}')
+        logger.info(f'Send Mail(subject={subject}, html={html}) To {email}')
         await send_email(subject, html.decode(), email)
 
 
@@ -75,15 +75,16 @@ async def flush_to_db(ctx):
         if (post_id := await redis.spop(RK_VISITED_POST_IDS)) is None:
             break
 
-        post = await Post.get(Q(id=post_id))
+        post = await Post.filter(id=post_id).first()
         if post:
             post._pageview = int(await redis.hget(
                 RK_PAGEVIEW.format(post_id), PAGEVIEW_FIELD) or 0)
             await post.save()
-            print(f'Flush Post(id={post_id}) pageview')
+            logger.info(f'Flush Post(id={post_id}) pageview')
+        else:
+            logger.warning(f'Post(id={post_id}) have deleted!')
 
 
 class WorkerSettings:
     functions = [mention_users]
-    redis_settings = RedisSettings.from_url(REDIS_URL)
     cron_jobs = [cron(flush_to_db, hour=None)]
