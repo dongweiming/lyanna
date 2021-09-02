@@ -57,7 +57,7 @@ def register_blueprints(root: str, app: Sanic) -> None:
 
 
 class LyannaSanic(Sanic):
-    def url_for(self, view_name: str, **kwargs):
+    def url_for(self, view_name: str, **kwargs) -> str:
         url = super().url_for(view_name, **kwargs)
         cdn = config.CDN_DOMAIN
         if cdn and not config.DEBUG and url.split('.')[-1] in STATIC_FILE_TYPES:
@@ -135,11 +135,12 @@ async def _sitemap(request):
     for rv in [posts, tags]:
         items.extend([[item.canonical_url, item.created_at] for item in rv])
 
-    for _, route in app.router.routes_names.values():
-        if any(endpoint in route.uri for endpoint in ('/admin', '/j', '/api')):
+    for route in app.router.routes:
+        uri = route.uri
+        if any(endpoint in uri for endpoint in ('/admin', '/j', '/api')):
             continue
-        if 'GET' in route.methods and not route.parameters:
-            items.append([route.uri, ten_days_ago])
+        if 'GET' in route.methods and not route._params:
+            items.append([uri, ten_days_ago])
 
     return await render_string('sitemap.xml', request, {'items': items})
 

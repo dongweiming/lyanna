@@ -32,6 +32,11 @@ class GithubUser(BaseModel):
     class Meta:
         table = 'github_users'
 
+    def to_dict(self) -> Dict[str, Any]:
+        rv = super().to_dict()
+        rv.pop('created_at')
+        return rv
+
 
 def generate_password(password: str) -> str:
     return generate_password_hash(
