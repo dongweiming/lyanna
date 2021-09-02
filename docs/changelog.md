@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.5.1 (2021-09-02)
+
+1. Fix `ident` params
+
+## 3.5 (2021-08-27)
+
+1. Bump the version of the dependent libraries to the latest
+2. Delete the corresponding activity after deleting the post
+3. Fix topic page params
+4. Fix created_at format
+
 ## 3.4 (2020-11-01)
 
 1. Add LIMIT_RSS_CRAWLING & READ_MORE
