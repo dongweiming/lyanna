@@ -14,8 +14,8 @@
 
 - 相关课程
 
-  - [Python项目实战](https://www.pycourses.com/article/python-project/)
-  - [Vue.js入门到进阶](https://www.pycourses.com/article/vue-course/)
+  - [Python项目实战](https://www.bytedemy.com/article/python-project/)
+  - [Vue.js入门到进阶](https://www.bytedemy.com/article/vue-course/)
   - [爱湃森店铺](https://appv72m4Msi7516.h5.xiaoeknow.com)
 
 - [Changelog](changelog.md)
