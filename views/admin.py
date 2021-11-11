@@ -290,7 +290,7 @@ async def list_tags(request: Request) -> HTTPResponse:
 async def list_topics(request: Request) -> HTTPResponse:
     topics = await SpecialTopic.sync_all()
     total = len(topics)
-    return response.json({'items': topics, 'total': total})
+    return json({'items': topics, 'total': total})
 
 
 @bp.route('/api/topic/new', methods=['POST'])
