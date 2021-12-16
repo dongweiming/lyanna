@@ -228,7 +228,7 @@ async def upload(request):
         f.write(file.body)
 
     mime, _ = mimetypes.guess_type(str(uploaded_file))
-    encoded = b''.join(base64.encodestring(file.body).splitlines()).decode()
+    encoded = b''.join(base64.encodebytes(file.body).splitlines()).decode()
 
     dct: Dict[str, Union[Dict, int, str]]
 
