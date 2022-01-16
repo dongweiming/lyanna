@@ -167,9 +167,17 @@ async def tag(request, tag_id):
 
 
 @bp.route('/topics')
+def topics(request):
+    return _topics(request)
+
+
 @bp.route('/topics/<ident>')
+def topics_with_ident(request, ident):
+    return _topics(request, ident)
+
+
 @mako.template('topics.html')
-async def topics(request: Request,
+async def _topics(request: Request,
                  ident: Union[str, int] = 1) -> Dict[str, Pagination]:
     try:
         ident = int(ident)
