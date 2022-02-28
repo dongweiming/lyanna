@@ -56,7 +56,7 @@ async def create_user(**data) -> User:
 async def validate_login(name: str, password: str) -> Tuple[bool, Union[User, None]]:
     if not (user := await User.filter(name=name).first()):
         return False, None
-    if check_password_hash(user.password, password):  # type: ignore
+    if check_password_hash(user.password, password):
         return True, user
     return False, User()
 

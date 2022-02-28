@@ -174,7 +174,7 @@ def _parse_rfc1738_args(name: str) -> Dict[str, str]:
     )
 
     if (m := pattern.match(name)) is not None:
-        components = m.groupdict()  # type: ignore
+        components = m.groupdict()
         if components['database'] is not None:
             tokens = components['database'].split('?', 2)
             components['database'] = tokens[0]
@@ -255,4 +255,4 @@ class cached_property:
             obj.__dict__[self.func.__name__] = future
             return await future
 
-        return wrapper()
+        return wrapper()  # type: ignore

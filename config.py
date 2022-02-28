@@ -100,5 +100,5 @@ if redis_sentinel_host:
     from redis.sentinel import Sentinel
     sentinel = Sentinel([(redis_sentinel_host, redis_sentinel_port)],
                         socket_timeout=0.1)
-    redis_host, redis_port = sentinel.discover_master('mymaster')
+    redis_host, redis_port = sentinel.discover_master('mymaster')   # type: ignore
     REDIS_URL = f'redis://{redis_host}:{redis_port}'

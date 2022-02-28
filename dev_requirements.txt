@@ -2,6 +2,8 @@ bandit==1.6.2
 flake8==3.7.9
 isort==4.3.21
 autopep8==1.4.4
-mypy==0.750
+mypy==0.931
+types-PyYAML==5.4.12
+types-redis==3.5.15
 -e git+https://github.com/PyCQA/pycodestyle.git@d219c684f117be77927d33146e76a5364161e518#egg=pycodestyle
 -e git+https://github.com/PyCQA/pyflakes.git@1911c203a13826d2eb03d582d60874b91e36f4fc#egg=pyflakes
