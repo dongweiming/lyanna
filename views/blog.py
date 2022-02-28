@@ -147,7 +147,7 @@ async def tags(request: Request) -> Dict[str, List[Tuple[Tag, int]]]:
 
 async def _tags() -> List[Tuple[Tag, int]]:
     tag_ids = await PostTag.filter().values_list('tag_id', flat=True)
-    counter = Counter(tag_ids)
+    counter = Counter(tag_ids)  # type: ignore
     tags_ = await Tag.get_multi(counter.keys())
     return [(tags_[index], count)
             for index, count in enumerate(counter.values())]
@@ -178,7 +178,7 @@ def topics_with_ident(request, ident):
 
 @mako.template('topics.html')
 async def _topics(request: Request,
-                 ident: Union[str, int] = 1) -> Dict[str, Pagination]:
+                  ident: Union[str, int] = 1) -> Dict[str, Pagination]:
     try:
         ident = int(ident)
     except ValueError:

@@ -66,7 +66,7 @@ async def list_posts(request: Request):
     exclude_ids: List[int] = []
     if (special_id := int(request.args.get('special_id') or 0)):
         if (topic := await SpecialTopic.cache(special_id)):
-            items = await topic.get_items()  # type: ignore
+            items = await topic.get_items()
             exclude_ids = [s.post_id for s in items]
         total -= len(exclude_ids)
     for post in _posts:
@@ -324,9 +324,9 @@ async def _topic(request: Request, topic_id: Optional[Any] = None):
             if k.startswith('posts'):
                 match = FORM_REGEX.search(k)
                 if (match := FORM_REGEX.search(k)):
-                    key = match['key']  # type: ignore
+                    key = match['key']
                     val = request.form[k][0]
-                    dct[match['index']][key] = (  # type: ignore
+                    dct[match['index']][key] = (
                         int(val) if key == 'id' else val)
                     del request.form[k]
 

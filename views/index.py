@@ -3,10 +3,11 @@ from datetime import datetime
 from typing import Dict, List, Union
 from urllib.parse import unquote
 
+from aiohttp import ClientResponse
 from sanic import Blueprint, response
 from sanic.log import logger
 from sanic.response import HTTPResponse, redirect, text
-from sanic_oauth.providers import GithubClient
+from sanic_oauth.providers import GithubClient as GithubClient_
 from werkzeug.contrib.atom import AtomFeed
 
 import config
@@ -19,6 +20,20 @@ from views.request import Request
 
 bp = Blueprint('index', url_prefix='/')
 CODE_RE = re.compile('```([A-Za-z]+\n)?|#+')
+
+
+class GithubClient(GithubClient_):
+    async def request(
+            self, method: str, url: str,
+            params: Union[Dict[str, str], None] = None,
+            headers: Union[Dict[str, str], None] = None,
+            **aio_kwargs) -> ClientResponse:
+        if self.access_token:
+            headers = headers or {}
+            headers['Authorization'] = f'token {self.access_token}'
+        return await self.aiohttp_session.request(
+            method, url, params=params, headers=headers, **aio_kwargs
+        )
 
 
 @bp.route(config.OAUTH_REDIRECT_PATH)
@@ -83,12 +98,12 @@ async def _feed(request):
         body = post.html_content_for_rss
         summary = post.excerpt
 
-        feed.add(  # type: ignore
+        feed.add(
             post.title, body, content_type='html', summary=summary,
             summary_type='html', author=OWNER, url=post.canonical_url,
             id=post.id, updated=post.created_at, published=post.created_at
         )
-    return feed.to_string()  # type: ignore
+    return feed.to_string()
 
 
 @bp.route('atom.xml', methods=['GET', 'HEAD'])

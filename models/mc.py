@@ -48,7 +48,7 @@ def format(text: str, *a, **kw) -> str:
     if (f := __formaters.get(text)) is None:
         f = formater(text)
         __formaters[text] = f
-    return f(*a, **kw)  # type: ignore
+    return f(*a, **kw)
 
 
 def gen_key(key_pattern, arg_names, defaults, *a, **kw):
