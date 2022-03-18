@@ -100,13 +100,13 @@ async def setup_db(app: Sanic, loop: Loop) -> None:
     redis = await get_redis(loop=loop)
     # init extensions fabrics
     session.init_app(app, interface=AIORedisSessionInterface(redis))
-    app.async_session = aiohttp.ClientSession()
+    app.ctx.async_session = aiohttp.ClientSession()
     Path(config.UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
 
 
 @app.listener('after_server_stop')
 async def close_aiohttp_session(sanic_app, _loop) -> None:
-    await sanic_app.async_session.close()
+    await sanic_app.ctx.async_session.close()
 
 
 @app.middleware('request')

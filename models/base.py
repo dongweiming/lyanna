@@ -1,14 +1,14 @@
-import math
 import asyncio
 import inspect
+import math
 from datetime import datetime
 from typing import Any, Dict, KeysView, List, Optional, Set, Union
 
-from sanic.exceptions import abort
+from sanic.exceptions import SanicException
 from tortoise import fields
 
 import config
-from config import AttrDict, PER_PAGE
+from config import PER_PAGE, AttrDict
 
 from .mc import cache, clear_mc
 from .utils import Pagination
@@ -105,7 +105,7 @@ class BaseModel(Model, metaclass=ModelMeta):
     @classmethod
     async def get_or_404(cls, id: Union[str, int], sync: bool = False):
         if not (obj := await cls.cache(id)):
-            abort(404)
+            raise SanicException(None, 404)
         if sync:
             return await obj.to_sync_dict()
         return obj
@@ -127,7 +127,7 @@ class BaseModel(Model, metaclass=ModelMeta):
         await self.decr()  # type: ignore
         return rv
 
-    async def save(self, *args, **kwargs):
+    async def save(self, *args, **kwargs) -> None:
         rv = await super().save(*args, **kwargs)
         await self.__flush__(self)
         return rv

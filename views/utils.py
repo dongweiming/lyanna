@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from json import JSONEncoder, dumps
 from typing import Any, Dict, Optional
 
+from sanic.exceptions import SanicException
 from sanic.response import HTTPResponse
 
 
@@ -25,3 +26,7 @@ def json(body: Dict[str, Any], status: int = 200, headers: Optional[Any] = None,
         status=status,
         content_type=content_type,
     )
+
+
+def abort(status_code):
+    raise SanicException(None, status_code)
