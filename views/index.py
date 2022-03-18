@@ -46,7 +46,7 @@ async def oauth(request: Request, post_id: Union[str, None] = None) -> HTTPRespo
         return redirect(url)
 
     client = GithubClient(
-        request.app.async_session,
+        request.app.ctx.async_session,
         client_id=config.CLIENT_ID,
         client_secret=config.CLIENT_SECRET
     )
@@ -70,7 +70,7 @@ async def oauth(request: Request, post_id: Union[str, None] = None) -> HTTPRespo
     )
 
     client = GithubClient(
-        request.app.async_session,
+        request.app.ctx.async_session,
         client_id=config.CLIENT_ID,
         client_secret=config.CLIENT_SECRET,
         access_token=token

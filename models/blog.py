@@ -9,10 +9,10 @@ from typing import Any, Callable, Dict, List, Tuple, Union  # noqa
 from aioredis.errors import RedisError
 from tortoise import fields
 from tortoise.models import ModelMeta
-from tortoise.query_utils import Q
+from tortoise.expressions import Q
 from tortoise.queryset import QuerySet
 
-from config import PERMALINK_TYPE, AttrDict, LIMIT_RSS_CRAWLING, READ_MORE
+from config import LIMIT_RSS_CRAWLING, PERMALINK_TYPE, READ_MORE, AttrDict
 
 from .base import BaseModel
 from .comment import CommentMixin
@@ -64,16 +64,18 @@ class MLStripper(HTMLParser):
 
 
 class StatusMixin(metaclass=ModelMeta):
+    STATUS_UNPUBLISHED: int = 0
+    STATUS_ONLINE: int = 1
     STATUSES = (
         STATUS_UNPUBLISHED,
         STATUS_ONLINE
-    ) = range(2)
+    )
     status = fields.SmallIntField(default=STATUS_UNPUBLISHED)
 
 
 class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
 
-    TYPES = (TYPE_ARTICLE, TYPE_PAGE) = range(2)
+    TYPES = (TYPE_ARTICLE, TYPE_PAGE, TYPE_NOTE) = range(3)
 
     title = fields.CharField(max_length=100, unique=True)
     author_id = fields.IntField()
@@ -252,6 +254,11 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
                 RK_PAGEVIEW.format(self.id), PAGEVIEW_FIELD) or 0)
         except RedisError:
             return self._pageview
+
+    @property
+    async def card(self) -> int:
+        if self.type == self.TYPE_NOTE:
+            return
 
 
 class Tag(BaseModel):

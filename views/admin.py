@@ -10,24 +10,23 @@ from typing import Any, DefaultDict, Dict, List, Optional, Union
 import aiohttp
 import extraction
 from sanic import Blueprint, response
-from sanic.exceptions import abort
 from sanic.response import HTTPResponse
 from sanic_jwt import protected
 from sanic_jwt.decorators import instant_config
 from sanic_jwt.utils import call as jwt_call
-from tortoise.query_utils import Q
+from tortoise.expressions import Q
 
 from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG
 from ext import mako
 from forms import PostForm, TopicForm, UserForm
 from models import Post, PostTag, SpecialTopic, Tag, User
-from models.activity import create_status, Activity
+from models.activity import Activity, create_status
+from models.consts import K_POST
 from models.signals import post_created
 from models.user import generate_password
 from models.utils import generate_id
-from models.consts import K_POST
 from views.request import Request
-from views.utils import json
+from views.utils import json, abort
 
 FORM_REGEX = re.compile(r'posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')  # noqa
 

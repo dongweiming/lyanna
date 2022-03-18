@@ -5,9 +5,10 @@ from typing import Any, Generator, Tuple, Union
 import markupsafe
 from sanic.log import logger
 from sanic_wtf import SanicForm as _SanicForm
-from wtforms import (BooleanField, PasswordField, SelectField,
-                     SelectMultipleField, StringField, SubmitField,
-                     TextAreaField)
+from wtforms import (
+    BooleanField, PasswordField, SelectField,
+    SelectMultipleField, StringField, SubmitField, TextAreaField,
+)
 from wtforms.validators import DataRequired
 from wtforms.widgets import HiddenInput
 

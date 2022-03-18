@@ -5,7 +5,7 @@ from typing import Dict, List
 
 from arq import create_pool
 from tortoise import fields
-from tortoise.query_utils import Q
+from tortoise.expressions import Q
 
 from config import REDIS_URL, partials
 
