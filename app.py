@@ -112,13 +112,13 @@ async def close_aiohttp_session(sanic_app, _loop) -> None:
 @app.middleware('request')
 async def setup_context(request: Request) -> None:
     if config.ENABLE_DEBUG_LOG:
-        request.start_time = time.time()
+        request.ctx.start_time = time.time()
 
 
 @app.middleware('response')
 async def add_spent_time(request, response):
     if config.ENABLE_DEBUG_LOG:
-        spend_time = round((time.time() - request.start_time) * 1000)
+        spend_time = round((time.time() - request.ctx.start_time) * 1000)
         path = request.path
         if request.query_string:
             path = f'{path}?{request.query_string}'

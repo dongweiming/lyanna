@@ -2,7 +2,7 @@
 
 [![Build Status](https://app.travis-ci.com/dongweiming/lyanna.svg?branch=master)](https://app.travis-ci.com/github/dongweiming/lyanna)
 ![Tag](https://img.shields.io/github/v/tag/dongweiming/lyanna)
-![Python Version](https://img.shields.io/badge/python-3.8-blue)
+![Python Version](https://img.shields.io/badge/python-3.9-blue)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 My Blog Using Sanic
@@ -11,7 +11,11 @@ My Blog Using Sanic
 
 ## 版本提示
 
-3.0版本开始已经使用了最新的Python3.8语法，所以如果你不方便升级CPython请使用2.X版本
+4.0版本开始已经使用了最新的Python3.10语法
+3.X版本使用Python3.8语法
+2.X版本兼容Python2
+
+强烈建议升级到最新的CPython版本.
 
 ## Overview
 

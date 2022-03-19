@@ -53,7 +53,7 @@ async def write_post(file: str) -> None:
         content = ''.join(f.readlines())
 
         try:
-            await Post.create(title=title, content=content,  # type: ignore
+            await Post.create(title=title, content=content,
                               tags=tags, author_id=args.uid, slug='',
                               summary='', status=Post.STATUS_ONLINE,
                               created_at=str(date))

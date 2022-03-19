@@ -10,7 +10,6 @@ from aioredis.errors import RedisError
 from tortoise import fields
 from tortoise.models import ModelMeta
 from tortoise.expressions import Q
-from tortoise.queryset import QuerySet
 
 from config import LIMIT_RSS_CRAWLING, PERMALINK_TYPE, READ_MORE, AttrDict
 
@@ -147,7 +146,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
     async def excerpt(self) -> str:
         if self.summary:
             return self.summary
-        s = MLStripper()  # type: ignore
+        s = MLStripper()
         s.feed(await self.html_content)
         return trunc_utf8(BQ_REGEX.sub('', s.get_data()).replace('\n', ''), 100)  # noqa
 
@@ -187,7 +186,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
 
     @classmethod
     @cache(MC_KEY_POST_BY_SLUG % '{slug}')
-    async def get_by_slug(cls, slug: str) -> None:
+    async def get_by_slug(cls, slug: str) -> Union[Post, None]:
         return await cls.filter(slug=slug).first()
 
     @classmethod
@@ -258,7 +257,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
     @property
     async def card(self) -> int:
         if self.type == self.TYPE_NOTE:
-            return
+            return 0
 
 
 class Tag(BaseModel):
@@ -268,14 +267,14 @@ class Tag(BaseModel):
         table = 'tags'
 
     @classmethod
-    def get_by_name(cls, name: str) -> QuerySet:
+    def get_by_name(cls, name: str):
         return cls.filter(name=name).first()
 
     @classmethod
-    def create(cls, **kwargs) -> Tag:
+    def create(cls, **kwargs):
         name = kwargs.pop('name')
         kwargs['name'] = name.lower()
-        return super().create(**kwargs)  # type: ignore
+        return super().create(**kwargs)
 
 
 class PostTag(BaseModel):
@@ -305,7 +304,7 @@ class PostTag(BaseModel):
             await cls.filter(Q(post_id=post_id),
                              Q(tag_id__in=need_del_tag_ids)).delete()
         for tag_id, _ in sorted(need_add_tag_ids,
-                                key=lambda x: tags.index(x[1])):
+                                key=lambda x: tags.index(x[1])):  # type: ignore
             await cls.get_or_create(post_id=post_id, tag_id=tag_id)
 
         await clear_mc(MC_KEY_TAGS_BY_POST_ID % post_id)
@@ -321,13 +320,13 @@ class SpecialItem(BaseModel):
 
     @classmethod
     @cache(MC_KEY_SPECIAL_BY_PID % ('{post_id}'))
-    async def get_special_id_by_pid(cls, post_id: int) -> List[Any]:
+    async def get_special_id_by_pid(cls, post_id: int) -> Union[List[Any], Tuple[Any, ...]]:  # noqa
         return await SpecialItem.filter(post_id=post_id).values_list(
             'special_id', flat=True)
 
 
 class SpecialTopic(StatusMixin, BaseModel):
-    id = fields.SmallIntField(pk=True)
+    id: int = fields.SmallIntField(pk=True)
     intro = fields.CharField(max_length=2000)
     slug = fields.CharField(max_length=100)
     title = fields.CharField(max_length=100, unique=True)
@@ -392,7 +391,7 @@ class SpecialTopic(StatusMixin, BaseModel):
 
     @classmethod
     @cache(MC_KEY_SPECIAL_BY_SLUG % '{slug}')
-    async def get_by_slug(cls, slug: str) -> SpecialTopic:
+    async def get_by_slug(cls, slug: str) -> Union[SpecialTopic, None]:
         return await cls.filter(slug=slug).first()
 
     @classmethod

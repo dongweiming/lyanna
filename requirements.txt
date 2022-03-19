@@ -1,7 +1,7 @@
 click==8.0.4
 aiohttp==3.8.1
 WTForms==3.0.1
-aioredis==2.0.1
+aioredis==1.3.1
 cython==0.29.28
 mistune==2.0.2
 asyncblink==0.3.2
@@ -19,7 +19,7 @@ lxml==4.8.0
 extraction==0.3
 sanic==21.6.2
 sanic-jwt==1.7.0
-Sanic-Mako==0.6.0
+Sanic-Mako==0.7.0
 sanic-routing==0.7.2
 sanic-sentry==0.1.7
 sanic-session==0.8.0

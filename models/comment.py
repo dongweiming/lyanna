@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from arq import create_pool
 from tortoise import fields
@@ -45,7 +45,7 @@ class Comment(ReactMixin, ContentMixin, BaseModel):
         await clear_mc(*keys)
 
     @property
-    async def user(self) -> GithubUser:
+    async def user(self) -> Optional[GithubUser]:
         return await GithubUser.filter(gid=self.github_id).first()
 
     async def incr(self):

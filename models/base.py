@@ -41,8 +41,10 @@ class ModelMeta(_ModelMeta, PropertyHolder):
 
 
 class BaseModel(Model, metaclass=ModelMeta):
-    id = fields.IntField(pk=True)
+    id: int = fields.IntField(pk=True)
     created_at = fields.DatetimeField(auto_now_add=True)
+
+    property_fields: list[str]
 
     class Meta:
         abstract = True
@@ -124,7 +126,7 @@ class BaseModel(Model, metaclass=ModelMeta):
     async def delete(self, using_db=None):
         rv = await super().delete(using_db=using_db)
         await self.__flush__(self)
-        await self.decr()  # type: ignore
+        await self.decr()
         return rv
 
     async def save(self, *args, **kwargs) -> None:
@@ -153,7 +155,7 @@ class BaseModel(Model, metaclass=ModelMeta):
             if k not in fields:
                 print(f'WARN: Field `{k}` may not be saved!')
             setattr(self, k, v)
-        await self.save()  # type: ignore
+        await self.save()
         return self
 
     async def incr(self):

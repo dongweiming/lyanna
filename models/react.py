@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Any, DefaultDict, Dict, List
+from typing import Any, DefaultDict, Dict, List, Optional
 
 from tortoise import fields
 
@@ -59,8 +59,8 @@ class ReactItem(BaseModel):
         return await cls.filter(user_id=user_id, target_id=target_id,
                                 target_kind=target_kind).all()
 
-    async def delete(self, using_db=None) -> ReactItem:
-        rv = await super().delete(using_db=using_db)  # type: ignore
+    async def delete(self, using_db=None):
+        rv = await super().delete(using_db=using_db)
         stat = await ReactStats.get_by_target(self.target_id, self.target_kind)
         react_name = next((name for name, type in self.REACTION_MAP.items()
                            if type == self.reaction_type), None)
@@ -111,7 +111,7 @@ class ReactStats(BaseModel):
 
     @classmethod
     @cache(MC_KEY_USER_REACT_STAT % ('{target_id}', '{target_kind}'))
-    async def get_by_target(cls, target_id: int, target_kind: int) -> ReactStats:
+    async def get_by_target(cls, target_id: int, target_kind: int) -> Optional[ReactStats]:  # noqa
         rv = await cls.filter(target_id=target_id,
                               target_kind=target_kind).first()
         if not rv:

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Type, Union
 
 import mistune
 from sanic import Blueprint
@@ -19,6 +19,7 @@ def login_required(f: Callable) -> Callable:
             user = {'gid': 841395}  # My Github id
         if (target_id := kwargs.pop('target_id', None)) is not None:
             target_kind = kwargs.pop('target_kind', 'post')
+            kls: Union[Type[Post], Type[Activity], Type[Comment]]
             if target_kind == 'post':
                 kls = Post
             elif target_kind == 'activity':

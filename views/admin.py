@@ -76,7 +76,7 @@ async def list_posts(request: Request):
             author = await post.author
             dct['author_name'] = author.name
             tags = await post.tags
-            dct['tags'] = [t.name for t in tags]
+            dct['tags'] = [t.name for t in tags]  # type: ignore
         posts.append(dct)
     return json({'items': posts, 'total': total})
 
@@ -196,7 +196,7 @@ async def _user(request: Request, user_id: Optional[Any] = None):
         if (user := await User.filter(name=name).first()):
             user.email = email
             if password:
-                user.password = generate_password(password)
+                user.password = generate_password(password)  # type: ignore
             user.avatar = avatar
             user.active = active
             await user.save()
@@ -256,9 +256,9 @@ async def status(request, target_kind, target_id):
     if not (obj := await kls.get(id=target_id)):
         return response.json({'r': 0, 'msg': 'item not exist'})
     if request.method == 'POST':
-        obj.status = kls.STATUS_ONLINE
+        obj.status = kls.STATUS_ONLINE  # type: ignore
     elif request.method == 'DELETE':
-        obj.status = kls.STATUS_UNPUBLISHED
+        obj.status = kls.STATUS_UNPUBLISHED  # type: ignore
     await obj.save()
     return response.json({'r': 1})
 

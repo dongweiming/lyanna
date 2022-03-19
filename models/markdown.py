@@ -89,7 +89,7 @@ def block_code(text: str, lang: str, inlinestyles: bool = False,
         if lang in ('py', 'python'):
             lang = 'python3'
         lexer = get_lexer_by_name(lang, stripall=True)
-        formatter = BlogHtmlFormatter(  # type: ignore
+        formatter = BlogHtmlFormatter(
             noclasses=inlinestyles, linenos=linenos,
             cssclass='highlight %s' % lang, lang=lang
         )
