@@ -197,7 +197,7 @@ class RedisSettings(_RedisSettings):
     @classmethod
     def from_url(cls, db_url: str) -> RedisSettings:
         url = _parse_rfc1738_args(db_url)
-        return cls(url['host'], url['port'],
+        return cls(url['host'], int(url['port']),
                    url['database'] and int(url['database']) or 0,
                    url['password'], None, 5, 1)
 
@@ -243,7 +243,7 @@ class cached_property:
             return self
 
         if asyncio and asyncio.iscoroutinefunction(self.func):
-            return self._wrap_in_coroutine(obj)  # type: ignore
+            return self._wrap_in_coroutine(obj)
 
         value = obj.__dict__[self.func.__name__] = self.func(obj)
         return value
@@ -255,4 +255,4 @@ class cached_property:
             obj.__dict__[self.func.__name__] = future
             return await future
 
-        return wrapper()  # type: ignore
+        return wrapper()

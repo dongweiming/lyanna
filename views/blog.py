@@ -149,7 +149,7 @@ async def tags(request: Request) -> Dict[str, List[Tuple[Tag, int]]]:
 
 async def _tags() -> List[Tuple[Tag, int]]:
     tag_ids = await PostTag.filter().values_list('tag_id', flat=True)
-    counter = Counter(tag_ids)  # type: ignore
+    counter = Counter(tag_ids)
     tags_ = await Tag.get_multi(counter.keys())
     return [(tags_[index], count)
             for index, count in enumerate(counter.values())]

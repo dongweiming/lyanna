@@ -5,7 +5,7 @@ import subprocess
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from pickle import dumps, loads
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, Type
 
 from tortoise import fields
 
@@ -129,7 +129,7 @@ class Activity(CommentMixin, ReactMixin, BaseModel):
 
     @cached_property
     async def target(self):
-        kls = None
+        kls: Union[Type[Post], Type[Status], None] = None
         if self.target_kind == K_POST:
             kls = Post
         elif self.target_kind == K_STATUS:
