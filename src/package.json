@@ -1,0 +1,28 @@
+{
+  "name": "src",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 5050"
+  },
+  "dependencies": {
+    "axios": "^0.26.1",
+    "js-cookie": "^3.0.1",
+    "moment": "^2.29.1",
+    "plyr": "^3.6.12",
+    "qs": "^6.10.3",
+    "sass": "^1.49.9",
+    "sass-loader": "^12.6.0",
+    "vue": "^3.2.31",
+    "vue-plyr": "^7.0.0",
+    "vue-router": "^4.0.14",
+    "vue-toastification": "^2.0.0-rc.5",
+    "vue-upload-component": "^3.1.2",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.2.2",
+    "vite": "^2.8.4"
+  }
+}
