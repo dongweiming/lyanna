@@ -1,8 +1,8 @@
 <%inherit file="/base.html" />
 <%def name="title()">动态</%def>
 
-<%def name="doc_head()">
-<link href="${ app.url_for('static', filename='css/activity/app.css') }" rel="stylesheet">
+<%def name="more_header()">
+<link href="${ app.url_for('static', filename='css/index.css') }" rel="stylesheet">
 </%def>
 
 <%def name="pagination()"></%def>
@@ -12,7 +12,6 @@
 </%def>
 
 <%def name="bottom_script()">
-  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/moment@2.18.1/min/moment-with-locales.min.js"></script>
-  <script src="${ app.url_for('static', filename='js/activity/app.js') }"></script>
+  <script type="module" crossorigin src="${ app.url_for('static', filename='js/index.js') }"></script>
+  <link rel="modulepreload" href="${ app.url_for('static', filename='js/vendor.js') }">
 </%def>
