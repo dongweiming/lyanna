@@ -182,7 +182,7 @@ def adduser(name, email, password):
 def build_css():
     build_map = {
         'main.min.css': ['pure-min.css', 'base.css', 'iconfont.css'],
-        'index.min.css': ['main.min.css', 'balloon.min.css', 'index.css',
+        'index.min.css': ['main.min.css', 'balloon.min.css', 'lightbox.css',
                           'widget.css'],
         'topic.min.css': ['main.min.css', 'topic.css'],
         'post.min.css': ['main.min.css', 'post.css', 'react.css',

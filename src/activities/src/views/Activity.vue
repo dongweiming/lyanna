@@ -115,7 +115,7 @@ const token = computed(() => {
 })
 
 const insertNewActivity = (activity) => {
-    activities.unshift(patchActivity(activity))
+    activities.value.unshift(patchActivity(activity))
 }
 
 const moment = (value) => {
@@ -206,7 +206,7 @@ const reply = (activity, comment) => {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-@import "../../../static/css/dracula.css";
+@import "../../../../static/css/dracula.css";
 ::selection {
   background: #63B5F5;
   color: #fff;

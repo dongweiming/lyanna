@@ -15,7 +15,7 @@
         <div class="bd">
           <div v-if="urlError" class="error"><span>{{ this.urlError }}</span><a href="javascript:void(0);" v-on:click="urlError = ''">重新输入</a></div>
           <input v-if="!urlError && !urlLoading && !urlInfo" type="text" class="link-text" name="url" v-model="url">
-          <input v-if="!urlError && !urlLoading && !urlInfo" type="button" class="input-link" v-on:click="getLinkInfo" :disabled="!url">
+          <input v-if="!urlError && !urlLoading && !urlInfo" type="button" class="input-link" value="输入网址" v-on:click="getLinkInfo" :disabled="!url">
           <p v-if="urlLoading">正在获取网址信息...</p>
           <p v-if="urlInfo">{{ this.urlInfo.abstract }}</p>
         </div>
@@ -27,12 +27,13 @@
                   @focus="OnFocus = true"></textarea>
       </div>
       <div class="upload-form" v-if="[2, 3].includes(activeLi)">
+        <!--
         <file-upload v-if="!files.length"
           class="upload"
           :custom-action="customAction"
            post-action="/api/upload"
           :multiple="true"
-          :size="1024 * 1024 * 50"
+          :size="1024 * 1024 * 500"
           :drop="true"
           :drop-directory="true"
           v-model="files"
@@ -40,14 +41,17 @@
           @input-filter="inputFilter"
         ref="upload">
         </file-upload>
+        -->
         <div class="bd">
+          <!--
           <div class="upload-section" v-if="!files.length">
             <p class="drag-tip"><i class="iconfont icon-Drag-Drop icon-right"></i>拖文件到框里上传</p>
             <a href="javascript: void 0;" class="upload-btn">
               <i class="iconfont icon-big" v-bind:class="{ 'icon-photoadd' : activeLi == 2, 'icon-video_add' : activeLi == 3  }"></i>
               <span class="upload-info">上传{{ activeLi == 2 ? '照片' : '视频' }}</span></a>
           </div>
-          <ul class="file-list" v-else>
+          -->
+          <ul class="file-list">
             <li v-for="file in files" :key="file.id" class="file-item">
               <img :src="file.thumb" class="thumb" v-if="file.thumb">
               <a v-else :title="file.name">
@@ -57,7 +61,7 @@
               <a href="#" class="lnk-remove-photo" v-on:click="removeFile(file)">×</a>
             </li>
             <li class="file-item add-photo"><i>+</i>
-              <file-upload v-if="files.length"
+              <file-upload v-if="[2, 3].includes(activeLi)"
                 class="file-upload"
                 :custom-action="customAction"
                 post-action="/api/upload"
@@ -79,19 +83,6 @@
       </div>
     </form>
     <div class="pure-button-group btn-group" v-if="activeLi == 1">
-        <file-upload v-if="!files.length"
-          class="file-upload-btn"
-          :custom-action="customAction"
-          post-action="/api/upload"
-          :multiple="true"
-          :size="1024 * 1024 * 50"
-          :drop="true"
-          :drop-directory="true"
-          v-model="files"
-          @input-file="inputFile"
-          @input-filter="inputFilter"
-          ref="upload">
-        </file-upload>
       <a v-if="showIcon" href="javascript:void(0);" class="iconfont icon-photo1" title="上传照片">
         <span class="ico">照片</span>
       </a>
@@ -103,168 +94,169 @@
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
-import { useToast } from "vue-toastification";
+<script>
+// This component cannot use the Composition API of Vue 3,
+// because the `vue-upload-component` used does not support use `$refs`
+// TODO change to Vue 3 Composition API
 import FileUpload from 'vue-upload-component'
+import { useToast } from "vue-toastification";
 import { createStatus, getUrlInfo } from '@/api'
 
 const toast = useToast()
-var text = ref('')
-var url = ref('')
-var urlInfo = ref(null)
-var urlLoading = ref(false)
-var urlError = ref('')
-var activeLi = ref(1)
-var files = ref([])
-var fids = ref(new Map())
-var OnFocus = ref(false)
-var name = ref('file')
-var changeTracker = ref(1)  // Hack
 
-const getLinkInfo = () => {
-    if (!url.startsWith('http')) {
-        urlError = '这不是一个网址'
+export default {
+
+  data() {
+    return {
+      text: '',
+      url: '',
+      urlInfo: null,
+      urlLoading: false,
+      urlError: '',
+      activeLi: 1,
+      files: [],
+      fids: new Map(),
+      OnFocus: false,
+      name: 'file'
+    }
+  },
+
+  methods: {
+    getLinkInfo() {
+      if (!this.url.startsWith('http')) {
+        this.urlError = '这不是一个网址'
         return false
-    }
-    urlLoading = true
-    getUrlInfo(url).then(response => {
+      }
+      this.urlLoading = true
+      getUrlInfo(this.url).then(response => {
         if (response.data.r == 1) {
-            urlError = response.data.msg
+          this.urlError = response.data.msg
         } else {
-            urlInfo = response.data.info
+          this.urlInfo = response.data.info
         }
-        urlLoading = false
-    }).catch(() => {
-        urlError = '超时了，请重试'
-        urlLoading = false
-    })
-}
+        this.urlLoading = false
+      }).catch(() => {
+        this.urlError = '超时了，请重试'
+        this.urlLoading = false
+      })
+    },
 
-const customAction = async (file, component) => {
-    let result = await ccomponent.uploadHtml5(file)
-    const filename = JSON.parse(result.xhr.responseText)['filename']
-    fids.set(file.id, filename)
-    changeTracker++
-    return result
-}
+    async customAction(file, component) {
+      let result = await component.uploadHtml5(file)
+      const filename = JSON.parse(result.xhr.responseText)['filename']
+      this.fids.set(file.id, filename)
+      console.log(file, filename)
+      return result
+    },
 
-const reset = () => {
-    files = []
-    fids = new Map()
-    url = ''
-    urlInfo = null
-}
+    reset() {
+      this.files = []
+      this.fids = new Map()
+      this.url = ''
+      this.urlInfo = null
+    },
 
-const activate = (num) => {
-    activeLi = num;
-    if (!(activeLi == 1 && num != 1)) {
-        reset()
-    }
-}
+    activate(num) {
+      this.activeLi = num;
+      if (!(this.activeLi == 1 && num != 1)) {
+        this.reset()
+      }
+    },
 
-const onSubmit = () => {
-    const fids_ =[ ...fids.value.values() ];
-    const data = {
-        text, url, fids: fids_
-    }
-    if (url) {
-        data['url_info'] = urlInfo
-    }
-    createStatus(data).then(response => {
+    onSubmit() {
+      const fids =[ ...this.fids.values() ];
+      const data = {
+        text: this.text,
+        url: this.url,
+        fids
+      }
+      if (this.url) {
+        data['url_info'] = this.urlInfo
+      }
+      createStatus(data).then(response => {
         if (response.data.r == 1) {
-            toast.error(`发布失败: ${response.data.msg}`)
+          toast.error(`发布失败: ${response.data.msg}`)
         } else {
-            text = ''
-            url = ''
-            toast.success('已发布')
-            $emit('insertNewActivity', response.data.activity);
-            reset()
+          this.text = ''
+          this.url = ''
+          toast.success('已发布')
+          this.$emit('insertNewActivity', response.data.activity);
+          this.reset()
         }
-    }).catch(() => {
+      }).catch(() => {
         toast.error('发布失败')
-    })
-}
+      })
+    },
 
-const getCover = (file) => {
-    return changeTracker && '/static/upload/' + (fids.get(file.id) || '').replace('.mp4', '.png')
-}
+    getCover(file) {
+      return file.id in this.fids && '/static/upload/' + this.fids.get(file.id).replace('.mp4', '.png') || '' 
+    },
 
-const removeFile = (file) => {
-    $refs.upload.remove(file)
-    fids.delete(file.id)
-}
+    removeFile(file) {
+      this.$refs.upload.remove(file)
+      this.fids.delete(file.id)
+    },
 
-const inputFilter = (newFile, oldFile, prevent) => {
-    if (newFile && !oldFile) {
+    inputFilter(newFile, oldFile, prevent) {
+      if (newFile && !oldFile) {
         if (!/\.(jepg?|png?|mp4?|gif?|jpg?)$/i.test(newFile.name)) {
-            toast.error(`不支持的文件类型`)
-            return prevent()
+          toast.error(`不支持的文件类型`)
+          return prevent()
         }
         let subtype = newFile.type.substr(0, 6)
-        if (activeLi == 2 && subtype != 'image/') {
-            toast.error(`照片Tab下不能放视频`)
-            return prevent()
+        if (this.activeLi ==2 && subtype != 'image/') {
+          toast.error(`照片Tab下不能放视频`)
+          return prevent()
         }
-        if (activeLi == 3 && subtype != 'video/') {
-            toast.error(`视频Tab下不能放照片`)
-            return prevent()
+        if (this.activeLi ==3 && subtype != 'video/') {
+          toast.error(`视频Tab下不能放照片`)
+          return prevent()
         }
-    }
-    if (newFile) {
+      }
+      if (newFile) {
         newFile.active = true
-    }
-    if (newFile && (!oldFile || newFile.file !== oldFile.file)) {
+      }
+      if (newFile && (!oldFile || newFile.file !== oldFile.file)) {
         newFile.blob = ''
         let URL = window.URL || window.webkitURL
         if (URL && URL.createObjectURL) {
-            newFile.blob = URL.createObjectURL(newFile.file)
+          newFile.blob = URL.createObjectURL(newFile.file)
         }
         newFile.thumb = ''
         if (newFile.blob && newFile.type.substr(0, 6) === 'image/') {
-            newFile.thumb = newFile.blob
+          newFile.thumb = newFile.blob
         }
-    }
-}
+      }
+    },
 
-const inputFile = (newFile, oldFile) => {
-    if (newFile && !oldFile) {
-        if (files.length == 1) {
-            let subtype = newFile.type.substr(0, 6)
-            if (subtype === 'image/') {
-                activeLi = 2;
-            } else if (subtype === 'video/') {
-                activeLi = 3;
-            }
+    inputFile(newFile, oldFile) {
+      if (newFile && !oldFile) {
+        if (this.files.length == 1) {
+          let subtype = newFile.type.substr(0, 6)
+          if (subtype === 'image/') {
+            this.activeLi = 2;
+          } else if (subtype === 'video/') {
+            this.activeLi = 3;
+          }
         }
+      }
     }
+  },
 
-    if (newFile && oldFile) {
-        let text = newFile.xhr.responseText
-        if (text) {
-            const filename = JSON.parse(text)['filename']
-            fids.set(newFile.id, filename)
-            changeTracker++
+  computed: {
+    textAreaHeight () {
+      if (this.OnFocus || this.activeLi != 1) {
+        let rows = this.text.split(/\r\n|\r|\n/).length + 1
+        return rows > 5 ? rows * 16 : 80
+      } else {
+        return 32
+      }
+    },
+    showIcon() {
+      return this.activeLi == 1
     }
   }
 }
-
-const textAreaHeight = computed(() => {
-    get: () => {
-        if (OnFocus || activeLi != 1) {
-            let rows = text.split(/\r\n|\r|\n/).length + 1
-            return rows > 5 ? rows * 16 : 80
-        } else {
-            return 32
-        }
-    }
-})
-
-const showIcon = computed(() => {
-    get: () => {
-        return activeLi == 1
-    }
-})
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>

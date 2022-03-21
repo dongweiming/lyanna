@@ -22,6 +22,7 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@rollup/plugin-babel": "^5.3.1",
     "@vitejs/plugin-vue": "^2.2.2",
     "vite": "^2.8.4"
   }
