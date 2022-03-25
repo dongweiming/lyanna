@@ -72,8 +72,7 @@ class PostForm(SanicForm):
     content = TextAreaField('Content', default='')
     can_comment = BooleanField('CanComment', default=True)
     tags = SelectMultipleField('Tags', default=[])
-    author_id = SelectField('AuthorId', default='', validators=[DataRequired()])  # noqa
-    status = SwitchField('Published', choices=[(0, 0), (1, 1)], default=1)
+    status = SwitchField('Published', choices=[0, 1], default=1, coerce=int)
     is_page = BooleanField('IsPage', default=False)
     submit = SubmitField('Submit')
 
@@ -82,4 +81,4 @@ class TopicForm(SanicForm):
     slug = StringField('Slug')
     intro = StringField('Intro', validators=[DataRequired()])
     title = StringField('Title', validators=[DataRequired()])
-    status = SwitchField('Published', choices=[(0, 0), (1, 1)], default=1)
+    status = SwitchField('Published', choices=[0, 1], default=1, coerce=int)
