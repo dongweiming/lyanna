@@ -55,12 +55,16 @@ async def admin(request: Request) -> Dict:
 @bp.route('/api/posts')
 @protected(bp)
 async def list_posts(request: Request):
+    user = request.user
+    if not user:
+        return json({'ok': False, 'msg': 'Need Login'}, status=401)
     limit = int(request.args.get('limit')) or PER_PAGE
     page = int(request.args.get('page')) or 1
     with_tag = int(request.args.get('with_tag') or 0)
     offset = (page - 1) * limit
-    _posts = await Post.filter().order_by('-id').offset(offset).limit(limit)
-    total = await Post.filter().count()
+    _posts = await Post.filter(author_id=user.id).order_by('-id').offset(
+        offset).limit(limit)
+    total = await Post.filter(author_id=user.id).count()
     posts = []
     exclude_ids: List[int] = []
     if (special_id := int(request.args.get('special_id') or 0)):
@@ -88,6 +92,9 @@ async def new_post(request: Request):
 
 
 async def _post(request: Request, post_id: Optional[Any] = None):
+    user = request.user
+    if not user:
+        return json({'ok': False, 'msg': 'Need Login'}, status=401)
     form = PostForm(request)
     form.status.data = int(form.status.data)
 
@@ -97,8 +104,6 @@ async def _post(request: Request, post_id: Optional[Any] = None):
 
     if request.method in ('POST', 'PUT') and form.validate():
         title = form.title.data
-        if not str(form.author_id.data).isdigit():
-            return json({'ok': False})
         if post_id is None:
             post = await Post.filter(title=title).first()
         if not post:
@@ -114,6 +119,7 @@ async def _post(request: Request, post_id: Optional[Any] = None):
         del form.is_page
         form.populate_obj(post)
         post.type = Post.TYPE_PAGE if is_page else Post.TYPE_ARTICLE
+        post.author_id = user.id
         await post.save()
         await post.update_tags(tags)
         await post.set_content(content)
@@ -122,9 +128,18 @@ async def _post(request: Request, post_id: Optional[Any] = None):
         ok = True
     else:
         ok = False
+        if (err := raise_error(form.errors)):
+            return json({'ok': ok, 'msg': err}, status=400)
     post = await post.to_sync_dict()  # type: ignore
     post['tags'] = [t.name for t in post['tags']]
     return json({'post': post if post else None, 'ok': ok})
+
+
+def raise_error(errors):
+    if errors:
+        for k, items in errors.items():
+            for i in items:
+                return f'{k}: {i}'
 
 
 @bp.route('/api/post/<post_id>', methods=['GET', 'PUT', 'DELETE'])
