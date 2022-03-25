@@ -189,7 +189,7 @@ export default {
     },
 
     getCover(file) {
-      return file.id in this.fids && '/static/upload/' + this.fids.get(file.id).replace('.mp4', '.png') || '' 
+      return file.id in this.fids && '/static/upload/' + this.fids.get(file.id).replace('.mp4', '.png') || ''
     },
 
     removeFile(file) {
