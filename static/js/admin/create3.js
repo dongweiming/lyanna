@@ -1,0 +1,1 @@
+import{_ as t,j as e,x as i,n as o}from"./index.js";import{T as r}from"./topic-detail.js";import"./index3.js";import"./index4.js";var a=t({name:"CreateForm",components:{TopicDetail:r}},[["render",function(t,r,a,s,n,m){const p=e("topic-detail");return o(),i(p,{"is-edit":!1})}]]);export{a as default};

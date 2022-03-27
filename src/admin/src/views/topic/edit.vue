@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import TopicDetail from './components/TopicDetail.vue'
+import TopicDetail from './components/topic-detail.vue'
 
 export default {
   name: 'EditForm',
