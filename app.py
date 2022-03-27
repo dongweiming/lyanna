@@ -1,13 +1,12 @@
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional
 
 import aiohttp
 from sanic import Sanic
-from sanic.exceptions import FileNotFound, NotFound
 from sanic.log import logger
-from sanic.response import HTTPResponse, text
+from sanic.response import HTTPResponse
 from sanic_jwt import Initialize
 from sanic_mako import render_string
 from sanic_session import AIORedisSessionInterface, Session
@@ -82,17 +81,6 @@ client = None
 redis = None
 
 
-@app.exception(NotFound)
-async def ignore_404s(request: Request,
-                      exception: Union[FileNotFound, NotFound]) -> HTTPResponse:
-    return text("Oops, That page couldn't found.")
-
-
-async def server_error_handler(request, exception):
-    return text('Oops, Sanic Server Error! Please contact the blog owner',
-                status=500)
-
-
 @app.listener('before_server_start')
 async def setup_db(app: Sanic, loop: Loop) -> None:
     global client, redis
@@ -149,9 +137,6 @@ async def _sitemap(request):
 async def sitemap(request):
     return HTTPResponse(await _sitemap(request), status=200, headers=None,
                         content_type="text/xml")
-
-
-# app.error_handler.add(Exception, server_error_handler)
 
 
 if __name__ == '__main__':

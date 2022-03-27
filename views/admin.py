@@ -52,6 +52,11 @@ async def admin(request: Request) -> Dict:
     return {}
 
 
+@bp.route('/api/logout', methods=['POST'])
+async def logout(request: Request):
+    return json({'ok': True})
+
+
 @bp.route('/api/posts')
 @protected(bp)
 async def list_posts(request: Request):

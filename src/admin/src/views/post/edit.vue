@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import PostDetail from './components/PostDetail.vue'
+import PostDetail from './components/post-detail.vue'
 
 export default {
   name: 'EditPostForm',

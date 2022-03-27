@@ -114,9 +114,9 @@ export default ({ command, mode }) => {
       rollupOptions: {
         output: {
           manualChunks: undefined,
-          chunkFileNames: 'static/js/[name].js',
-          entryFileNames: 'static/js/[name].js',
-          assetFileNames: 'static/[ext]/[name].[ext]'
+          chunkFileNames: 'static/js/admin/[name].js',
+          entryFileNames: 'static/js/admin/[name].js',
+          assetFileNames: 'static/[ext]/admin/[name].[ext]'
         }
       }
     },
