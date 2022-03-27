@@ -1,11 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Layout from '@/layout'
-import CreatePost from '@/views/post/create.vue'
-import EditPost from '@/views/post/edit.vue'
-import PostList from '@/views/post/list.vue'
-import CreateTopic from '@/views/topic/create.vue'
-import EditTopic from '@/views/topic/edit.vue'
-import TopicList from '@/views/topic/list.vue'
 
 export const constantRoutes = [
   {
@@ -21,7 +15,7 @@ export const constantRoutes = [
   },
   {
     path: '/login',
-    component: () => import('@/views/Login.vue'),
+    component: () => import('@/views/login.vue'),
     hidden: true
   },
   {
@@ -42,7 +36,7 @@ export const constantRoutes = [
       {
         path: 'dashboard',
         name: 'Dashboard',
-        component: () => import('@/views/Dashboard.vue'),
+        component: () => import('@/views/dashboard.vue'),
         //using el svg icon, the elSvgIcon first when at the same time using elSvgIcon and icon
         meta: { title: 'Dashboard', elSvgIcon: 'Fold' }
       }
@@ -147,7 +141,7 @@ export const constantRoutes = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/SettingSwitch.vue'),
+        component: () => import('@/views/setting-switch.vue'),
         name: 'Setting',
         meta: { title: 'Setting', icon: 'example' }
       }

@@ -1,0 +1,1 @@
+import{_ as t,j as s,x as e,n as o}from"./index.js";import{P as a}from"./post-detail.js";import"./index3.js";import"./index4.js";var i=t({name:"CreatePost",components:{PostDetail:a}},[["render",function(t,a,i,r,n,d){const m=s("post-detail");return o(),e(m,{"is-edit":!1})}]]);export{i as default};
