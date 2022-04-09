@@ -11,6 +11,14 @@
       </sticky>
 
       <div class="createPost-main-container">
+        <el-card v-if="postForm.target_title">
+          <img :src="cover" class="image" />
+          <div style="padding: 14px">
+            <span>{{ postForm.target_title }}</span>
+            <div class="abstract">{{ postForm.target_abstract }}</div>
+          </div>
+        </el-card>
+
         <el-row>
           <el-col :span="24">
             <el-form-item style="margin-bottom: 20px;" prop="title">
@@ -42,6 +50,16 @@
         </el-row>
 
         <el-row>
+          <el-col :span="24">
+            <el-form-item style="margin-bottom: 20px;" prop="target_url">
+              <MDinput v-model:value="postForm.target_url" name="target_url" required>
+                Target URL
+              </MDinput>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row>
           <el-col :span="12">
             <el-form-item label-width="45px" label="标签:" class="postInfo-container-item">
               <el-select v-model="postForm.tags" multiple filterable allow-create placeholder="搜索标签">
@@ -65,7 +83,7 @@ import MarkdownEditor from '@/components/MarkdownEditor/index.vue'
 import MDinput from '@/components/MDinput/index.vue'
 import Sticky from '@/components/Sticky/index.vue'
 import Dropdown from '@/components/Dropdown/index.vue'
-import { fetchPost, updatePost, createPost, fetchTags } from '@/api'
+import { fetchPost, updatePost, createPost, fetchTags, getUrlInfo } from '@/api'
 
 const defaultForm = {
     id: undefined,
@@ -76,7 +94,11 @@ const defaultForm = {
     is_page: false,
     can_comment: true,
     tags: [],
-    status: "1"
+    status: '1',
+    target_title: '',
+    target_abstract: '',
+    target_url: '',
+    target_basename: ''
 }
 
 export default {
@@ -87,6 +109,11 @@ export default {
             type: Boolean,
             default: false
         }
+    },
+    watch: {
+      'postForm.target_url'(dst, ast) {
+        this.getLinkInfo()
+      }
     },
     data() {
         const validateRequire = (rule, value, callback) => {
@@ -104,6 +131,7 @@ export default {
         return {
             postForm: Object.assign({}, defaultForm),
             loading: false,
+            cover: '',
             tagListOptions: [],
             rules: {
                 title: [{ validator: validateRequire }],
@@ -147,11 +175,13 @@ export default {
                 if (valid) {
                     this.loading = true
                     let promise
+                    let form = Object.assign({}, this.postForm)
+
                     if (this.isEdit) {
-                        let id = this.postForm.id
-                        promise = updatePost(id, this.postForm)
+                        let id = form.id
+                        promise = updatePost(id, form)
                     } else {
-                        promise = createPost(this.postForm)
+                        promise = createPost(form)
                     }
                     let self = this;
                     promise.then(() => {
@@ -171,6 +201,27 @@ export default {
                     return false
                 }
             })
+        },
+        getLinkInfo() {
+          if (!this.postForm.target_url.startsWith('http')) {
+            this.urlError = '这不是一个网址'
+            return false
+          }
+          this.urlLoading = true
+          getUrlInfo(this.postForm.target_url).then(response => {
+            if (response.data.r == 1) {
+              this.urlError = response.data.msg
+            } else {
+              this.cover = response.data.info.cover
+              this.postForm.target_title = response.data.info.title
+              this.postForm.target_abstract = response.data.info.abstract
+              this.postForm.target_basename = response.data.info.basename
+            }
+            this.urlLoading = false
+          }).catch(() => {
+            this.urlError = '超时了，请重试'
+            this.urlLoading = false
+          })
         }
     }
 }
@@ -183,5 +234,13 @@ export default {
   .createPost-main-container {
     padding: 40px 45px 20px 50px;
   }
+}
+.el-card {
+  float: right;
+  margin-top: 2em;
+  width: 300px;
+}
+.image {
+  width: 100%;
 }
 </style>

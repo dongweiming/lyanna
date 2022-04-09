@@ -1,5 +1,5 @@
 {
-  "name": "admin page",
+  "name": "adminpage",
   "version": "1.0",
   "scripts": {
     "dev": "vite --mode serve-dev --host",
@@ -12,6 +12,8 @@
     "axios": "0.21.3",
     "echarts": "4.2.1",
     "element-plus": "2.1.4",
+    "lodash": "^4.17.21",
+    "marked": "^4.0.13",
     "mitt": "3.0.0",
     "moment-mini": "2.22.1",
     "nprogress": "0.2.0",

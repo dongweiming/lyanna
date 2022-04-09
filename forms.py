@@ -74,6 +74,10 @@ class PostForm(SanicForm):
     tags = SelectMultipleField('Tags', default=[])
     status = SwitchField('Published', choices=[0, 1], default=1, coerce=int)
     is_page = BooleanField('IsPage', default=False)
+    target_title = StringField('TargetTitle')
+    target_url = StringField('TargetURL')
+    target_abstract = StringField('TargetAbstract')
+    target_basename = StringField('TargetBaseName')
     submit = SubmitField('Submit')
 
 

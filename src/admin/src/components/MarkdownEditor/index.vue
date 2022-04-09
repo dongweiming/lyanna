@@ -7,7 +7,7 @@
 
 <script>
 // import _ from 'lodash'
-import marked from 'marked'
+import { marked } from 'marked'
 import debounce from 'lodash/debounce'
 
 export default {
@@ -45,6 +45,7 @@ export default {
 #editor {
   margin: 0;
   color: #333;
+  width: 100%;
 }
 
 textarea, #editor div {
