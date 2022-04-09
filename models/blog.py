@@ -15,7 +15,7 @@ from config import LIMIT_RSS_CRAWLING, PERMALINK_TYPE, READ_MORE, AttrDict
 
 from .base import BaseModel
 from .comment import CommentMixin
-from .consts import K_POST, ONE_HOUR, PERMALINK_TYPES
+from .consts import K_POST, K_CARD, ONE_HOUR, PERMALINK_TYPES, K_DOUBAN, K_OTHER
 from .markdown import markdown, toc, toc_md
 from .mc import cache, clear_mc
 from .mixin import ContentMixin, get_redis
@@ -39,6 +39,7 @@ MC_KEY_SPECIAL_POST_ITEMS = 'special:%s:post_items'
 MC_KEY_SPECIAL_BY_PID = 'special:by_pid:%s'
 MC_KEY_SPECIAL_BY_SLUG = 'special:%s:slug'
 MC_KEY_ALL_SPECIAL_TOPICS = 'special:topics'
+MC_KEY_CARD_POST_ID = 'card:%s'
 RK_PAGEVIEW = 'lyanna:pageview:{}:v2'
 RK_ALL_POST_IDS = 'lyanna:all_post_ids'
 RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
@@ -255,9 +256,50 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             return self._pageview
 
     @property
-    async def card(self) -> int:
+    # @cache(MC_KEY_CARD_POST_ID % '{self.id}')
+    async def card(self) -> Union[Card, None]:
         if self.type == self.TYPE_NOTE:
-            return 0
+            return await Card.filter(post_id=self.id).first()
+
+    async def update_card(self, title: str, url: str, abstract: str,
+                          basename: str) -> bool:
+        if not title:
+            return False
+        self.type = self.TYPE_NOTE if title else self.TYPE_ARTICLE
+        await self.save()
+        card, _ = await Card.get_or_create(post_id=self.id)
+
+        # TODO: Support more kind
+        kind = K_DOUBAN if 'douban' in url else K_OTHER
+        await card.update(title=title, target_url=url, abstract=abstract,
+                          target_kind=kind, basename=basename)
+        await self.save()
+        return True
+
+    async def to_sync_dict(self):
+        rv = await super().to_sync_dict()
+        card = await Card.filter(post_id=self.id).first()
+        if card:
+            rv['target_url'] = card.target_url
+            rv['target_title'] = card.title
+            rv['target_basename'] = card.basename
+            rv['target_abstract'] = card.abstract
+            rv['target_cover'] = ''
+        else:
+            rv['target_url'] = ''
+            rv['target_title'] = ''
+        return rv
+
+
+class Card(BaseModel):
+    id: int = fields.SmallIntField(pk=True)
+    basename = fields.CharField(max_length=200, default='')
+    post_id = fields.IntField(unique=True)
+    target_url = fields.CharField(max_length=200, default='')
+    target_kind = fields.IntField(default=K_DOUBAN)
+    title = fields.CharField(max_length=100, default='')
+    abstract = fields.CharField(max_length=200, default='')
+    kind = K_CARD
 
 
 class Tag(BaseModel):

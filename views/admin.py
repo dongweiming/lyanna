@@ -21,12 +21,12 @@ from ext import mako
 from forms import PostForm, TopicForm, UserForm
 from models import Post, PostTag, SpecialTopic, Tag, User
 from models.activity import Activity, create_status
-from models.consts import K_POST
+from models.consts import K_POST, UA
 from models.signals import post_created
 from models.user import generate_password
 from models.utils import generate_id
 from views.request import Request
-from views.utils import json, abort
+from views.utils import json, abort, save_image
 
 FORM_REGEX = re.compile(r'posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')  # noqa
 
@@ -128,9 +128,12 @@ async def _post(request: Request, post_id: Optional[Any] = None):
         await post.save()
         await post.update_tags(tags)
         await post.set_content(content)
+        await post.update_card(form.target_title.data, form.target_url.data,
+                               form.target_abstract.data, form.target_basename.data)
         if is_new:
             post_created.send(post_id=post.id, user_id=post.author_id)
         ok = True
+
     else:
         ok = False
         if (err := raise_error(form.errors)):
@@ -395,7 +398,7 @@ async def get_url_info(request):
     if not (url := request.json.get('url')):
         return json({'r': 403, 'msg': 'URL required'})
 
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(headers={'User-Agent': UA}) as session:
         try:
             async with session.get(url) as resp:
                 try:
@@ -407,11 +410,18 @@ async def get_url_info(request):
     if not html:
         return json({'r': 1, 'msg': '这个网址无法识别'})
     extracted = extraction.Extractor().extract(html, source_url=url)
+    # if 'douban' in urlparse(extracted.image).netloc:
+    mime, _ = mimetypes.guess_type(extracted.image)
+    data, basename = await save_image(extracted.image)
+    data64 = base64.b64encode(data).decode()
+    image = f'data:{mime};base64,{data64}'
     return json({
         'ok': 0,
         'info': {
             'title': extracted.title,
             'url': extracted.url or url,
+            'cover': image,
+            'basename': basename,
             'abstract': extracted.description
         }
     })

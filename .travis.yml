@@ -2,10 +2,10 @@ language: python
 cache:
   directories:
     - $HOME/.cache/pip
-env: TOXENV=Python3.8
+env: TOXENV=Python3.10
 matrix:
   include:
-    - python: 3.8
-      dist: xenial
+    - python: 3.10
+      dist: focal
 install: pip install -r dev_requirements.txt
 script: make lint

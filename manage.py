@@ -30,14 +30,12 @@ async def init() -> None:
     await client.execute_script(
         'alter table react_items add index `idx_id_kind_user` (`target_id`, `target_kind`, `user_id`)')  # noqa
 
-    if not await client.execute_query(
-            'show columns from `posts` like "pageview"'):
-        await migrate_for_v25()
-
-    try:
-        await migrate_for_v35()
-    except OperationalError:
-        ...
+    for func in [_migrate_for_v25, _migrate_for_v27, _migrate_for_v30,
+                 _migrate_for_v35, _migrate_for_v4]:
+        try:
+            await func()
+        except OperationalError:
+            ...
 
 
 async def _migrate_for_v25() -> None:
@@ -57,7 +55,9 @@ async def _migrate_for_v27() -> None:
             await redis.hset(RK_PAGEVIEW.format(id.decode()), PAGEVIEW_FIELD,
                              int(await redis.get(k)))
             ids.append(id)
-    await redis.sadd(RK_ALL_POST_IDS, *ids)
+
+    if ids:
+        await redis.sadd(RK_ALL_POST_IDS, *ids)
     await init_db(create_db=False)
     client = Tortoise.get_connection('default')
     await client.execute_script(
@@ -124,6 +124,24 @@ async def _migrate_for_v35() -> None:
         'alter table activity add index `idx_target_kind` (`target_id`, `target_kind`)')  # noqa
 
 
+async def _migrate_for_v4() -> None:
+    await init_db(create_db=False)
+    client = Tortoise.get_connection('default')
+    await client.execute_script(
+        '''CREATE TABLE `card` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `created_at` datetime(6) NOT NULL,
+        `post_id` int(11) NOT NULL,
+        `target_kind` tinyint(2) NOT NULL,
+        `title` varchar(100) NOT NULL,
+        `basename` varchar(100) NOT NULL,
+        `abstract` varchar(100) NOT NULL,
+        `target_url` varchar(200) NOT NULL,
+        PRIMARY KEY (`id`),
+        KEY `idx_post_id` (`post_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
+
+
 @click.group()
 def cli():
     ...
@@ -156,6 +174,12 @@ def migrate_for_v30():
 @cli.command()
 def migrate_for_v35():
     run_async(_migrate_for_v35())
+    click.echo('Migrate Finished!')
+
+
+@cli.command()
+def migrate_for_v4():
+    run_async(_migrate_for_v4())
     click.echo('Migrate Finished!')
 
 

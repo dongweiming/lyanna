@@ -2,8 +2,11 @@ from datetime import datetime, timezone
 from json import JSONEncoder, dumps
 from typing import Any, Dict, Optional
 
+import aiohttp
 from sanic.exceptions import SanicException
 from sanic.response import HTTPResponse
+
+from config import HERE
 
 
 class APIJSONEncoder(JSONEncoder):
@@ -30,3 +33,14 @@ def json(body: Dict[str, Any], status: int = 200, headers: Optional[Any] = None,
 
 def abort(status_code):
     raise SanicException(None, status_code)
+
+
+async def save_image(url) -> str:
+    basename = url.rpartition('/')[-1]
+    dist = HERE / 'static/jpg' / basename
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            data = await resp.read()
+            with open(dist, 'wb') as f:
+                f.write(data)
+            return data, basename

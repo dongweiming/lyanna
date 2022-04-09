@@ -75,3 +75,4 @@ srv/deploy.retry
 k8s/config.yaml
 config.yaml
 .mypy_cache
+static/jpg
