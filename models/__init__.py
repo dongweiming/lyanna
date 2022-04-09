@@ -1,7 +1,7 @@
 from sanic_jwt import exceptions  # noqa
 
 from .activity import Activity, Status  # noqa
-from .blog import Post, PostTag, SpecialItem, SpecialTopic, Tag  # noqa
+from .blog import Post, PostTag, SpecialItem, SpecialTopic, Tag, Card  # noqa
 from .comment import Comment  # noqa
 from .react import ReactItem, ReactStats  # noqa
 from .user import GithubUser, User, create_user, validate_login  # noqa
