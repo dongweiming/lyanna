@@ -15,7 +15,8 @@ from config import LIMIT_RSS_CRAWLING, PERMALINK_TYPE, READ_MORE, AttrDict
 
 from .base import BaseModel
 from .comment import CommentMixin
-from .consts import K_POST, K_CARD, ONE_HOUR, PERMALINK_TYPES, K_DOUBAN, K_OTHER
+from .consts import (K_POST, K_CARD, ONE_HOUR, PERMALINK_TYPES, K_DOUBAN,
+                     K_OTHER, K_METACRITIC)
 from .markdown import markdown, toc, toc_md
 from .mc import cache, clear_mc
 from .mixin import ContentMixin, get_redis
@@ -209,12 +210,6 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             'type__not': cls.TYPE_PAGE
         }
 
-    @classmethod
-    async def cache(cls, ident: Union[str, int]) -> Post:
-        if str(ident).isdigit():
-            return await super().cache(ident)
-        return await cls.get_by_slug(ident)
-
     @property
     async def toc(self) -> str:
         if not (content := await self.content):
@@ -256,7 +251,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             return self._pageview
 
     @property
-    # @cache(MC_KEY_CARD_POST_ID % '{self.id}')
+    @cache(MC_KEY_CARD_POST_ID % ('{self.id}'))
     async def card(self) -> Union[Card, None]:
         if self.type == self.TYPE_NOTE:
             return await Card.filter(post_id=self.id).first()
@@ -269,11 +264,17 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
         await self.save()
         card, _ = await Card.get_or_create(post_id=self.id)
 
-        # TODO: Support more kind
-        kind = K_DOUBAN if 'douban' in url else K_OTHER
+        if 'douban.com' in url:
+            kind = K_DOUBAN
+        elif 'metacritic.com' in url:
+            kind = K_METACRITIC
+        else:
+            # TODO: Support more kind
+            kind = K_OTHER
         await card.update(title=title, target_url=url, abstract=abstract,
                           target_kind=kind, basename=basename)
         await self.save()
+        await clear_mc(MC_KEY_CARD_POST_ID % self.id)
         return True
 
     async def to_sync_dict(self):
@@ -290,6 +291,12 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             rv['target_title'] = ''
         return rv
 
+    @classmethod
+    async def cache(cls, ident: Union[str, int]) -> Post:
+        if str(ident).isdigit():
+            return await super().cache(ident)
+        return await cls.get_by_slug(ident)
+
 
 class Card(BaseModel):
     id: int = fields.SmallIntField(pk=True)
@@ -300,6 +307,17 @@ class Card(BaseModel):
     title = fields.CharField(max_length=100, default='')
     abstract = fields.CharField(max_length=200, default='')
     kind = K_CARD
+
+    TYPES = (TYPE_BOOK, TYPE_MOVIE, TYPE_GAME) = range(3)
+
+    @property
+    def type(self):
+        if 'book' in self.target_url and self.target_kind == K_DOUBAN:
+            return self.TYPE_BOOK
+        elif 'movie' in self.target_url and self.target_kind == K_DOUBAN:
+            return self.TYPE_MOVIE
+        elif 'douban.com/game' in self.target_url or 'metacritic.com/game' in self.target_url:  # noqa
+            return self.TYPE_GAME
 
 
 class Tag(BaseModel):
