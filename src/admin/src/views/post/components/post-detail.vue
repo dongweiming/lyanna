@@ -11,7 +11,7 @@
       </sticky>
 
       <div class="createPost-main-container">
-        <el-card v-if="postForm.target_title">
+        <el-card v-if="postForm.target_title" v-loading="fetchLoading">
           <img :src="cover" class="image" />
           <div style="padding: 14px">
             <span>{{ postForm.target_title }}</span>
@@ -79,6 +79,7 @@
 </template>
 
 <script>
+import { ElNotification } from 'element-plus'
 import MarkdownEditor from '@/components/MarkdownEditor/index.vue'
 import MDinput from '@/components/MDinput/index.vue'
 import Sticky from '@/components/Sticky/index.vue'
@@ -112,7 +113,9 @@ export default {
     },
     watch: {
       'postForm.target_url'(dst, ast) {
-        this.getLinkInfo()
+        if (dst !== "") {
+          this.getLinkInfo()
+        }
       }
     },
     data() {
@@ -131,6 +134,7 @@ export default {
         return {
             postForm: Object.assign({}, defaultForm),
             loading: false,
+            fetchLoading: false,
             cover: '',
             tagListOptions: [],
             rules: {
@@ -162,7 +166,11 @@ export default {
                 this.postForm = response.data
                 this.setTagsViewTitle()
             }).catch(err => {
-                console.log(err)
+                ElNotification({
+                title: 'Error',
+                message: err,
+                type: 'error',
+              })
             })
         },
         setTagsViewTitle() {
@@ -203,24 +211,35 @@ export default {
             })
         },
         getLinkInfo() {
-          if (!this.postForm.target_url.startsWith('http')) {
-            this.urlError = '这不是一个网址'
+          if (this.postForm.target_url && !this.postForm.target_url.startsWith('http')) {
+            ElNotification({
+              title: 'Error',
+              message: '这不是一个网址',
+              type: 'error',
+            })
             return false
           }
-          this.urlLoading = true
+          this.fetchLoading = true
           getUrlInfo(this.postForm.target_url).then(response => {
             if (response.data.r == 1) {
-              this.urlError = response.data.msg
+              ElNotification({
+                title: 'Error',
+                message: response.data.msg,
+                type: 'error',
+              })
             } else {
               this.cover = response.data.info.cover
               this.postForm.target_title = response.data.info.title
               this.postForm.target_abstract = response.data.info.abstract
               this.postForm.target_basename = response.data.info.basename
             }
-            this.urlLoading = false
-          }).catch(() => {
-            this.urlError = '超时了，请重试'
-            this.urlLoading = false
+            this.fetchLoading = false
+          }).catch((err) => {
+            ElNotification({
+              title: 'Error',
+              message: err,
+              type: 'error',
+            })
           })
         }
     }

@@ -135,7 +135,7 @@ async def _migrate_for_v4() -> None:
         `target_kind` tinyint(2) NOT NULL,
         `title` varchar(100) NOT NULL,
         `basename` varchar(100) NOT NULL,
-        `abstract` varchar(100) NOT NULL,
+        `abstract` varchar(400) NOT NULL,
         `target_url` varchar(200) NOT NULL,
         PRIMARY KEY (`id`),
         KEY `idx_post_id` (`post_id`)
