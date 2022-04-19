@@ -34,7 +34,7 @@
 
       <el-table-column class-name="status-col" label="Published" width="100">
         <template #default="scope">
-          <el-tooltip :content="scope.row.status | statusFilter" placement="top">
+          <el-tooltip :content="statusFilter(parseInt(scope.row.status))" placement="top">
             <el-switch v-model="scope.row.status" :active-value=1 :inactive-value=0 @change="switchStatus(scope.row)"></el-switch>
           </el-tooltip>
         </template>
