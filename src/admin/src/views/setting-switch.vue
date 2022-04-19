@@ -29,18 +29,6 @@
           <el-switch v-model="store.state.app.settings.showTopNavbar" />
         </div>
       </div>
-
-      <div class="mb-1 ml-6">
-        page animation related
-        <div class="mt-2">
-          mainNeedAnimation：places to "settings file" for setting
-          <!-- <el-switch v-model="store.state.app.settings.mainNeedAnimation" />-->
-        </div>
-        <div class="mt-3">
-          isNeedNprogress：
-          <el-switch v-model="store.state.app.settings.isNeedNprogress" />
-        </div>
-      </div>
     </div>
   </div>
 </template>
