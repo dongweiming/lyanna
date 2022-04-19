@@ -103,6 +103,7 @@ async def _post(request: Request, ident: str, is_preview: bool = False):
     pageview = await post.incr_pageview()
     related_posts = await post.get_related()
     post = await post.to_sync_dict()
+    print(post)
     return {'post': post, 'github_user': github_user, 'stats': stats,
             'reaction_type': reaction_type, 'related_posts': related_posts,
             'reacted_comments': reacted_comments, 'pageview': pageview}
