@@ -42,11 +42,6 @@ const setting = {
    * @description Whether need animation of main area
    */
   mainNeedAnimation: true,
-  /**
-   * @type {boolean} true | false
-   * @description Whether need nprogress
-   */
-  isNeedNprogress: true,
 
   /*page login or other*/
   /**
