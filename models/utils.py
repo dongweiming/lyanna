@@ -25,7 +25,7 @@ from .var import redis_var
 _redis = None
 
 
-def trunc_utf8(string: str, num: int, etc: str = '...') -> str:
+def trunc_str(string: str, num: int, etc: str = '...') -> str:
     if num >= len(string):
         return string
 

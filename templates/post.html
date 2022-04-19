@@ -4,6 +4,7 @@
 <%!
     import json
     from config import SITE_TITLE, SHOW_PAGEVIEW, SHOW_AUTHOR
+    from models.utils import trunc_str
 %>
 
 <%def name="doc_head()">
@@ -68,7 +69,25 @@
     </div>
 
   </article>
-  <div class="toc-container">
+
+  % if post.card:
+  <div class="card-container">
+    <div class="card">
+      <div class="card-info">
+        <a class="card-cover" target="_blank" href="${ post.card.target_url }">
+          <img src="${ post.card.cover }">
+        </a>
+
+        <div class="card-detail">
+          <p class="card-title"><a target="_blank" href="${ post.card.target_url }">${ post.card.title }</a></p>
+          <p class="card-abstract"><a target="_blank" href="${ post.card.target_url }">${ trunc_str(post.card.abstract, 115) }</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  % endif
+
+  <div class="toc-container ${ 'has-card' if post.card else '' }">
     ${ post.toc | n }
   </div>
 </div>

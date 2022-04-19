@@ -19,7 +19,7 @@ from tortoise.expressions import Q
 from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG
 from ext import mako
 from forms import PostForm, TopicForm, UserForm
-from libs.extracted import DoubanGameExtracted
+from libs.extracted import DoubanGameExtracted, MetacriticExtracted
 from models import Post, PostTag, SpecialTopic, Tag, User
 from models.activity import Activity, create_status
 from models.consts import K_POST, UA
@@ -413,6 +413,8 @@ async def get_url_info(request):
 
     if 'douban.com/game' in url:
         extracted_class = DoubanGameExtracted
+    elif 'metacritic.com/game' in url:
+        extracted_class = MetacriticExtracted
     else:
         extracted_class = None
     extracted = extraction.Extractor(extracted_class).extract(html, source_url=url)

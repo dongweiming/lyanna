@@ -11,7 +11,8 @@ from tortoise import fields
 from tortoise.models import ModelMeta
 from tortoise.expressions import Q
 
-from config import LIMIT_RSS_CRAWLING, PERMALINK_TYPE, READ_MORE, AttrDict
+from config import (LIMIT_RSS_CRAWLING, PERMALINK_TYPE, READ_MORE,
+                    AttrDict, BLOG_URL)
 
 from .base import BaseModel
 from .comment import CommentMixin
@@ -22,7 +23,7 @@ from .mc import cache, clear_mc
 from .mixin import ContentMixin, get_redis
 from .react import ReactMixin
 from .user import User
-from .utils import trunc_utf8
+from .utils import trunc_str
 
 MC_KEY_TAGS_BY_POST_ID = 'post:%s:tags'
 MC_KEY_RELATED = 'post:related_posts:%s'
@@ -150,7 +151,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             return self.summary
         s = MLStripper()
         s.feed(await self.html_content)
-        return trunc_utf8(BQ_REGEX.sub('', s.get_data()).replace('\n', ''), 100)  # noqa
+        return trunc_str(BQ_REGEX.sub('', s.get_data()).replace('\n', ''), 100)  # noqa
 
     @cache(MC_KEY_RELATED % ('{self.id}'), ONE_HOUR)
     async def get_related(self, limit: int = 4):
@@ -251,10 +252,12 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             return self._pageview
 
     @property
-    @cache(MC_KEY_CARD_POST_ID % ('{self.id}'))
-    async def card(self) -> Union[Card, None]:
+    #@cache(MC_KEY_CARD_POST_ID % ('{self.id}'))
+    async def card(self) -> Union[dict, None]:
         if self.type == self.TYPE_NOTE:
-            return await Card.filter(post_id=self.id).first()
+            card = await Card.filter(post_id=self.id).first()
+            if card:
+                return await card.to_sync_dict()
 
     async def update_card(self, title: str, url: str, abstract: str,
                           basename: str) -> bool:
@@ -271,7 +274,8 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
         else:
             # TODO: Support more kind
             kind = K_OTHER
-        await card.update(title=title, target_url=url, abstract=abstract,
+        await card.update(title=title, target_url=url,
+                          abstract=trunc_str(abstract or '', 200),
                           target_kind=kind, basename=basename)
         await self.save()
         await clear_mc(MC_KEY_CARD_POST_ID % self.id)
@@ -318,6 +322,10 @@ class Card(BaseModel):
             return self.TYPE_MOVIE
         elif 'douban.com/game' in self.target_url or 'metacritic.com/game' in self.target_url:  # noqa
             return self.TYPE_GAME
+
+    @property
+    def cover(self):
+        return f'{BLOG_URL}/static/jpg/{self.basename}'
 
 
 class Tag(BaseModel):
