@@ -412,17 +412,13 @@ body {
   -ms-flex-pack: center;
       justify-content: center;
 }
-.post-container .toc-container .toc-article {
-  display: none;
-}
 .post-container .toc-container .toc-article a:hover {
   color: #2196F3;
 }
 @media screen and (min-width: 1260px) {
-  .post-container .toc-container .toc-article {
+  .toc-container, .card-container {
     display: block;
     position: fixed;
-    margin-left: -15px;
     width: 200px;
     top: 5rem;
     z-index: 1;
@@ -432,6 +428,7 @@ body {
     overflow-x: auto;
     border-radius: 4px;
     background-color: #F6F6F6;
+    right: calc((100vw - 1040px) / 2 - 100px);
   }
 }
 @media screen and (max-width: 1260px) {

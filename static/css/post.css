@@ -104,3 +104,15 @@
   .tribute-container .menu-highlighted {
     font-weight: bold;
 }
+.card-detail p {
+  font-size: 12px;
+  margin: 0;
+  line-height: 1rem;
+}
+
+.card-cover img {
+  width: 180px;
+}
+.has-card {
+  top: 36rem
+}

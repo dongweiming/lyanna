@@ -1,4 +1,4 @@
-<% from models.utils import trunc_utf8 %>
+<% from models.utils import trunc_str %>
 <%page args="partial"/>
 <section class="widget blogroll">
   <h5>${ partial.title if 'title' in partial else 'Recent Comments' }</h5>
@@ -13,7 +13,7 @@
       </div>
       <div class="body">
         <span><a class="user" href="${ comment.user.link }" target="_blank">${ comment.user.name }</a> </span>
-        <div class="content"><p>${ trunc_utf8(comment.content, partial.max_length) if 'max_length' in partial else comment.content }</p>
+        <div class="content"><p>${ trunc_str(comment.content, partial.max_length) if 'max_length' in partial else comment.content }</p>
         </div>
       </div>
 
