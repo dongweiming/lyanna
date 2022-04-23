@@ -42,7 +42,8 @@ python hexo-exporter.py Markdown文件目录1 Markdown文件目录1 --uid=1  # u
 最后启动应用就好啦:
 
 ```bash
-python app.py
+python app.py  # 启动应用
+arq tasks.WorkerSettings  # 启动arq支持异步任务
 ```
 
 如果你要部署到自己的服务器上，可以参考 [部署](deploying.md)
@@ -52,6 +53,14 @@ python app.py
 这个博客系统内置了强大的管理后台，可以登录`/admin`子路径访问它（是本地环境就是访问`localhost:8000/admin`，如果是线上的话就是`DOMAIN:PORT/admin`。
 
 可以通过后台添加用户(User)、文章(Post)、专题(Topic)等内容。
+
+## v4不兼容问题
+
+从v4开始，支持条目卡片、收藏等功能，可以通过如下命令完成迁移:
+
+```bash
+python manage.py migrate-for-v4
+```
 
 
 ## v3.5不兼容问题

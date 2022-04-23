@@ -9,6 +9,7 @@ from typing import Any, DefaultDict, Dict, List, Optional, Union
 
 import aiohttp
 import extraction
+from arq import create_pool
 from sanic import Blueprint, response
 from sanic.response import HTTPResponse
 from sanic_jwt import protected
@@ -16,18 +17,18 @@ from sanic_jwt.decorators import instant_config
 from sanic_jwt.utils import call as jwt_call
 from tortoise.expressions import Q
 
-from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG
+from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG, REDIS_URL
 from ext import mako
-from forms import PostForm, TopicForm, UserForm
+from forms import PostForm, TopicForm, UserForm, FavoriteForm
 from libs.extracted import DoubanGameExtracted, MetacriticExtracted
-from models import Post, PostTag, SpecialTopic, Tag, User
+from models import Post, PostTag, SpecialTopic, Tag, User, Subject, Favorite
 from models.activity import Activity, create_status
 from models.consts import K_POST, UA
 from models.signals import post_created
 from models.user import generate_password
-from models.utils import generate_id
+from models.utils import generate_id, RedisSettings
 from views.request import Request
-from views.utils import json, abort, save_image
+from views.utils import json, abort, save_image, normalization_url
 
 FORM_REGEX = re.compile(r'posts\[(?P<index>\d+)\]\[(?P<key>\w+)\]')  # noqa
 
@@ -399,6 +400,8 @@ async def get_url_info(request):
     if not (url := request.json.get('url')):
         return json({'r': 403, 'msg': 'URL required'})
 
+    url = normalization_url(url)
+
     async with aiohttp.ClientSession(headers={'User-Agent': UA}) as session:
         try:
             async with session.get(url) as resp:
@@ -433,6 +436,42 @@ async def get_url_info(request):
             'abstract': extracted.description
         }
     })
+
+
+@bp.route('/api/favorite', methods=['GET', 'PUT'])
+@protected(bp)
+async def favorites(request):
+    form = FavoriteForm(request)
+    if request.method == 'PUT':
+        if form.validate():
+            ids = form.ids.data.split(',')
+            type = form.type.data
+            redis = await create_pool(RedisSettings.from_url(REDIS_URL))
+            for index, id in enumerate(ids):
+                if not id.isdigit():
+                    return json({'r': 1, 'msg': 'IDS format error!'})
+                url = f'https://{type}.douban.com/subject/{id}'
+                subject = await Subject.filter(target_url=url).first()
+                if not subject:
+                    await redis.enqueue_job('save_subject', type, url, index),
+                else:
+                    fav, _ = await Favorite.get_or_create(subject_id=subject.id, type=type)
+                    if fav.index != index:
+                        fav.index = index
+                        await fav.save()
+            return json({'r': 0})
+        if (err := raise_error(form.errors)):
+            return json({'ok': 1, 'msg': err}, status=400)
+
+    dct = {
+        'book': [],
+        'movie': [],
+        'game': []
+    }
+    subjects = {s.id: s.slug for s in await Subject.filter().all()}
+    for f in (await Favorite.filter().order_by('type', 'index').all()):
+        dct[f.type].append(subjects[f.subject_id])
+    return json({'r': 0, 'data': {k: ','.join(v) for k, v in dct.items()}})
 
 
 @bp.route('/api/status', methods=['POST'])
