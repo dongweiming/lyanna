@@ -86,3 +86,9 @@ class TopicForm(SanicForm):
     intro = StringField('Intro', validators=[DataRequired()])
     title = StringField('Title', validators=[DataRequired()])
     status = SwitchField('Published', choices=[0, 1], default=1, coerce=int)
+
+
+class FavoriteForm(SanicForm):
+    type = SelectField('Type', choices=[('movie', 'Movie'), ('book', 'Book'),
+                                        ('game', 'Game')])
+    ids = StringField('Ids', validators=[DataRequired()])

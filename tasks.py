@@ -1,4 +1,6 @@
 import asyncio
+import aiohttp
+import extraction
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from functools import wraps
@@ -10,12 +12,16 @@ from mako.lookup import TemplateLookup
 
 from config import (
     BLOG_URL, MAIL_PASSWORD, MAIL_PORT, MAIL_SERVER,
-    MAIL_USERNAME, REDIS_URL, SITE_TITLE,
+    MAIL_USERNAME, REDIS_URL, SITE_TITLE
 )
 from ext import init_db
-from models.blog import PAGEVIEW_FIELD, RK_PAGEVIEW, RK_VISITED_POST_IDS, Post
+from libs.extracted import DoubanGameExtracted
+from models.blog import (
+    PAGEVIEW_FIELD, RK_PAGEVIEW, RK_VISITED_POST_IDS, Post, Subject, Favorite)
 from models.mention import EMAIL_SUBJECT, Mention
 from models.utils import RedisSettings
+from views.utils import save_image
+from models.consts import UA
 
 CAN_SEND = all((MAIL_SERVER, MAIL_USERNAME, MAIL_PASSWORD))
 
@@ -87,6 +93,28 @@ async def flush_to_db(ctx):
             logger.warning(f'Post(id={post_id}) have deleted!')
 
 
+@with_context
+async def save_subject(ctx, type, url, index):
+    async with aiohttp.ClientSession(headers={'User-Agent': UA}) as session:
+        try:
+            async with session.get(url) as resp:
+                html = await resp.text()
+        except Exception:
+            html = ''
+        if not html:
+            logger.error(f'Save Subejct(url={url}) fail!')
+        extracted_class = None if type != 'game' else DoubanGameExtracted
+        extracted = extraction.Extractor(extracted_class).extract(
+            html, source_url=url)
+        _, basename = await save_image(extracted.image)
+        subject = await Subject.create_with_pid(
+            0, url, extracted.title, extracted.description, basename)
+        fav, _ = await Favorite.get_or_create(subject_id=subject.id, type=type)
+        if fav.index != index:
+            fav.index = index
+            await fav.save()
+
+
 class WorkerSettings:
-    functions = [mention_users]
+    functions = [mention_users, save_subject]
     cron_jobs = [cron(flush_to_db, hour=None)]

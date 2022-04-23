@@ -17,7 +17,7 @@ from config import (LIMIT_RSS_CRAWLING, PERMALINK_TYPE, READ_MORE,
 from .base import BaseModel
 from .comment import CommentMixin
 from .consts import (K_POST, K_CARD, ONE_HOUR, PERMALINK_TYPES, K_DOUBAN,
-                     K_OTHER, K_METACRITIC)
+                     K_OTHER, K_METACRITIC, K_FAVORITE)
 from .markdown import markdown, toc, toc_md
 from .mc import cache, clear_mc
 from .mixin import ContentMixin, get_redis
@@ -255,7 +255,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
     #@cache(MC_KEY_CARD_POST_ID % ('{self.id}'))
     async def card(self) -> Union[dict, None]:
         if self.type == self.TYPE_NOTE:
-            card = await Card.filter(post_id=self.id).first()
+            card = await Subject.filter(post_id=self.id).first()
             if card:
                 return await card.to_sync_dict()
 
@@ -265,25 +265,15 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             return False
         self.type = self.TYPE_NOTE if title else self.TYPE_ARTICLE
         await self.save()
-        card, _ = await Card.get_or_create(post_id=self.id)
 
-        if 'douban.com' in url:
-            kind = K_DOUBAN
-        elif 'metacritic.com' in url:
-            kind = K_METACRITIC
-        else:
-            # TODO: Support more kind
-            kind = K_OTHER
-        await card.update(title=title, target_url=url,
-                          abstract=trunc_str(abstract or '', 200),
-                          target_kind=kind, basename=basename)
-        await self.save()
+        await Subject.create_with_pid(self.id, url, title, abstract, basename)
+
         await clear_mc(MC_KEY_CARD_POST_ID % self.id)
         return True
 
     async def to_sync_dict(self):
         rv = await super().to_sync_dict()
-        card = await Card.filter(post_id=self.id).first()
+        card = await Subject.filter(post_id=self.id).first()
         if card:
             rv['target_url'] = card.target_url
             rv['target_title'] = card.title
@@ -302,10 +292,11 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
         return await cls.get_by_slug(ident)
 
 
-class Card(BaseModel):
+class Subject(BaseModel):
     id: int = fields.SmallIntField(pk=True)
     basename = fields.CharField(max_length=200, default='')
-    post_id = fields.IntField(unique=True)
+    post_id = fields.IntField(default=0)
+    slug = fields.CharField(max_length=100, default='')
     target_url = fields.CharField(max_length=200, default='')
     target_kind = fields.IntField(default=K_DOUBAN)
     title = fields.CharField(max_length=100, default='')
@@ -326,6 +317,35 @@ class Card(BaseModel):
     @property
     def cover(self):
         return f'{BLOG_URL}/static/jpg/{self.basename}'
+
+    @classmethod
+    async def create_with_pid(cls, post_id, url, title, abstract, basename: str) -> bool:
+        card, ok = await cls.get_or_create(target_url=url)
+
+        if ok:
+            card.post_id = post_id
+
+        if 'douban.com' in url:
+            kind = K_DOUBAN
+            slug = url.rpartition('/')[-1]
+        elif 'metacritic.com' in url:
+            kind = K_METACRITIC
+            slug = url.rpartition('/')[-1]
+        else:
+            # TODO: Support more kind
+            kind = K_OTHER
+            slug = slug
+        await card.update(title=title, target_url=url, slug=slug,
+                          abstract=trunc_str(abstract or '', 200),
+                          target_kind=kind, basename=basename)
+        return card
+
+
+class Favorite(ReactMixin, BaseModel):
+    subject_id = fields.IntField()
+    type: str = fields.CharField(max_length=10)
+    index = fields.IntField(default=0)
+    kind = K_FAVORITE
 
 
 class Tag(BaseModel):

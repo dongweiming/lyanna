@@ -136,6 +136,18 @@ export const constantRoutes = [
       ]
   },
   {
+      path: '/favorites',
+      component: Layout,
+      children: [
+          {
+              path: 'index',
+              component: () => import('@/views/Favorite.vue'),
+              name: 'Favorites',
+              meta: { title: 'Favorites', icon: 'collection' }
+          }
+      ]
+  },
+  {
     path: '/setting',
     component: Layout,
     children: [

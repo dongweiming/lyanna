@@ -216,9 +216,25 @@ const getActivityCommentList = (id) => {
     })
 }
 
+const updateFavorite = (data) => {
+    return request({
+        url: '/api/favorite',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        method: 'put',
+        data: qs.stringify(data)
+    })
+}
+
+const getFavoriteData = () => {
+    return request({
+        url: `/api/favorite`,
+        method: 'get'
+    })
+}
+
 export {getUserList, createPost,
         getPostList, createUser, updatePost, updatePostStatus, updateUser,
         deletePost, fetchUser, fetchPost, userSearch, fetchTags,
         getTopicList, updateTopicStatus, createTopic, updateTopic,
         fetchTopic, createStatus, getUrlInfo, getActivities, reactActivity,
-        commentActivity, getActivityCommentList}
+        commentActivity, getActivityCommentList, updateFavorite, getFavoriteData}
