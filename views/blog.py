@@ -8,7 +8,7 @@ from tortoise.expressions import Q
 
 from config import PER_PAGE, AttrDict, partials
 from ext import mako
-from models import Post, PostTag, SpecialTopic, Tag
+from models import Post, PostTag, SpecialTopic, Tag, Favorite
 from models.blog import (
     MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
     MC_KEY_TAGS, get_most_viewed_posts,
@@ -206,3 +206,20 @@ async def topic(request: Request, ident: str):
 @mako.template('activities.html')
 async def activities(request: Request):
     return {}
+
+
+@bp.route('/favorites')
+@mako.template('favorites.html')
+async def favorites(request: Request) -> Dict[str, Pagination]:
+    ident = request.args.get('ident') or 1
+    try:
+        ident = int(ident)
+    except ValueError:
+        abort(404)
+    type = request.args.get('type')
+    start = (ident - 1) * PER_PAGE * 2
+    subjects = await Favorite.get_subjects(type)
+    total = len(subjects)
+    items = subjects[start: start + PER_PAGE * 2]
+    paginatior = Pagination(ident, PER_PAGE * 2, total, items)
+    return {'paginatior': paginatior, 'type': type}
