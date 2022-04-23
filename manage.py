@@ -128,17 +128,29 @@ async def _migrate_for_v4() -> None:
     await init_db(create_db=False)
     client = Tortoise.get_connection('default')
     await client.execute_script(
-        '''CREATE TABLE `card` (
+        '''CREATE TABLE `subject` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `created_at` datetime(6) NOT NULL,
         `post_id` int(11) NOT NULL,
+        `slug` varchar(100) NOT NULL,
         `target_kind` tinyint(2) NOT NULL,
         `title` varchar(100) NOT NULL,
         `basename` varchar(100) NOT NULL,
         `abstract` varchar(400) NOT NULL,
         `target_url` varchar(200) NOT NULL,
         PRIMARY KEY (`id`),
-        KEY `idx_post_id` (`post_id`)
+        KEY `idx_post_id` (`post_id`),
+        KEY `idx_slug` (`slug`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
+    await client.execute_script(
+        '''CREATE TABLE `favorite` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `created_at` datetime(6) NOT NULL,
+        `type` varchar(10) NOT NULL,
+        `index` tinyint(6) DEFAULT 0,
+        `subject_id` int(11) NOT NULL,
+        PRIMARY KEY (`id`),
+        KEY `idx_type_sid` (`type`, `subject_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')
 
 

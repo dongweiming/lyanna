@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timezone
 from json import JSONEncoder, dumps
 from typing import Any, Dict, Optional
@@ -7,6 +8,8 @@ from sanic.exceptions import SanicException
 from sanic.response import HTTPResponse
 
 from config import HERE
+
+DOUBAN_URL_RE = re.compile('https://(\w+)\.douban\.com\/subject\/(\d+)')
 
 
 class APIJSONEncoder(JSONEncoder):
@@ -44,3 +47,11 @@ async def save_image(url) -> str:
             with open(dist, 'wb') as f:
                 f.write(data)
             return data, basename
+
+
+def normalization_url(url):
+    if 'douban.com' in url:
+        m = DOUBAN_URL_RE.search(url)
+        if m:
+            url = m.group()
+    return url
