@@ -1,0 +1,33 @@
+<%inherit file="/base.html" />
+<%namespace name="utils" file="/utils.html"/>
+
+<%def name="doc_head()">
+  <link rel="stylesheet" href="${ app.url_for('static', filename='css/favorites.min.css') } ">
+</%def>
+
+<%def name="content()">
+  <ul class="types">
+    % for type_, label in [('movie', '电影'), ('book', '读书'), ('game', '游戏')]:
+    <li ><a href="${ app.url_for('blog.favorites', type=type_) }" class="type">
+      <span class="${ 'checked' if type == type_ else '' }">${label}</span></a></li>
+    % endfor
+  </ul>
+
+  <div class="subjects">
+    % for subject in paginatior.items:
+    <a target="_blank" href="${subject.target_url}" class="item">
+      <div class="cover">
+        <span class="pic">
+          <img src="${subject.cover}" alt="${subject.title}"></span>
+      </div>
+      <p>
+        <span class="title">${subject.title}</span>
+      </p>
+    </a>
+    % endfor
+  </div>
+</%def>
+
+<%def name="pagination()">
+${ utils.pagination('blog.favorites', paginatior, type=type) }
+</%def>
