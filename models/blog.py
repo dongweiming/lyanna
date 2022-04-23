@@ -347,6 +347,15 @@ class Favorite(ReactMixin, BaseModel):
     index = fields.IntField(default=0)
     kind = K_FAVORITE
 
+    @property
+    async def subject(self):
+        return await Subject.cache(self.subject_id)
+
+    @classmethod
+    async def get_subjects(cls, type: str):
+        return [await f.subject for f in await Favorite.filter(
+            type=type).order_by('index').all()]
+
 
 class Tag(BaseModel):
     name = fields.CharField(max_length=100, unique=True)

@@ -156,10 +156,10 @@
 </div>
 </%def>
 
-<%def name="pagination(endpoint, paginatior)">
+<%def name="pagination(endpoint, paginatior, **kw)">
   <nav class="page-nav text-center">
     % if paginatior.has_prev:
-    <a class="extend prev" rel="prev" href="${ app.url_for(endpoint, ident=paginatior.prev_num) }">〈</a>
+    <a class="extend prev" rel="prev" href="${ app.url_for(endpoint, ident=paginatior.prev_num, **kw) }">〈</a>
     % endif
 
     % for page in paginatior.iter_pages():
@@ -167,7 +167,7 @@
         % if page == paginatior.page:
         <span class="page-number current">${ page }</span>
         % else:
-        <a class="page-number" href="${ app.url_for(endpoint, ident=page) }">${ page }</a>
+        <a class="page-number" href="${ app.url_for(endpoint, ident=page, **kw) }">${ page }</a>
         % endif
       % else:
         <span class=ellipsis>…</span>
@@ -175,7 +175,7 @@
     % endfor
 
     % if paginatior.has_next:
-      <a class="extend next" rel="next" href="${ app.url_for(endpoint, ident=paginatior.next_num) }">〉</a>
+      <a class="extend next" rel="next" href="${ app.url_for(endpoint, ident=paginatior.next_num, **kw) }">〉</a>
     % endif
     </ul>
   </nav>
