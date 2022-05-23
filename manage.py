@@ -1,3 +1,4 @@
+import math
 from pathlib import Path
 from typing import Dict
 
@@ -9,7 +10,8 @@ from tortoise.exceptions import IntegrityError, OperationalError
 from config import HERE
 from ext import init_db
 from models import create_user
-from models.blog import PAGEVIEW_FIELD, RK_ALL_POST_IDS, RK_PAGEVIEW
+from models.base import clear_mc, MC_KEY_PAGINATE, PER_PAGE
+from models.blog import PAGEVIEW_FIELD, RK_ALL_POST_IDS, RK_PAGEVIEW, Post
 from models.utils import get_redis
 
 
@@ -241,6 +243,21 @@ def build_css():
             f.write(cssmin.cssmin(data))
             css_map[css] = data
 
+
+@cli.command()
+def clear_paginatior_cache():
+    run_async(_clear_paginatior_cache())
+    click.echo('Clear Paginatior cache Finished!')
+
+
+async def _clear_paginatior_cache() -> None:
+    await init_db()
+    cls = Post
+    total = await cls.count()
+    page_count = math.ceil(total / PER_PAGE)
+    keys = [MC_KEY_PAGINATE % (cls.__name__, p, PER_PAGE, count)
+            for p in range(1, page_count + 1) for count in [True, False]]
+    await clear_mc(*keys)
 
 if __name__ == '__main__':
     cli()
