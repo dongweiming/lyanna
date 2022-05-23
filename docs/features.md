@@ -28,3 +28,6 @@
 * Widget系统，内置aboutme、blogroll、most\_viewed、latest\_comments、tagcloud、html等widget
 * 导航栏项可以设置icon和颜色(如RSS)
 * 支持配置CDN域名服务静态文件
+* 支持日记类型文章，可以在右侧显示条目(读书/电影/游戏)信息
+* 显示收藏的条目(读书/电影/游戏)列表
+* 收藏的条目(读书/电影/游戏)列表可以从豆瓣同步进来

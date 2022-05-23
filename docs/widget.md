@@ -1,6 +1,6 @@
 Widget(小部件)功能思路来源于Wordpress，可以在博客的(左/右/上/下)边栏中添加、排列或删除这些部件。通过Widget可以方便自定义设置边栏的内容。
 
-目前lyanna内置了如下6种常用Widget，但是需要使用YAML配置文件设置。项目下包含一个配置模板config.yaml.tmpl，如果你希望侧边栏生效可以:
+目前lyanna内置了如下8种常用Widget，但是需要使用YAML配置文件设置。项目下包含一个配置模板config.yaml.tmpl，如果你希望侧边栏生效可以:
 
 ```bash
 ➜ cp config.yaml.tmpl config.yaml  # 也就是项目根目录下包含config.yaml这个文件

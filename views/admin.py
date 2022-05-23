@@ -23,7 +23,7 @@ from forms import PostForm, TopicForm, UserForm, FavoriteForm
 from libs.extracted import DoubanGameExtracted, MetacriticExtracted
 from models import Post, PostTag, SpecialTopic, Tag, User, Subject, Favorite
 from models.activity import Activity, create_status
-from models.consts import K_POST, UA
+from models.consts import K_POST, UA, SUBDOMAIN_MAP
 from models.signals import post_created
 from models.user import generate_password
 from models.utils import generate_id, RedisSettings
@@ -450,12 +450,13 @@ async def favorites(request):
             for index, id in enumerate(ids):
                 if not id.isdigit():
                     return json({'r': 1, 'msg': 'IDS format error!'})
-                url = f'https://{type}.douban.com/subject/{id}'
+                url = f'https://{SUBDOMAIN_MAP.get(type)}.douban.com/subject/{id}'
                 subject = await Subject.filter(target_url=url).first()
                 if not subject:
                     await redis.enqueue_job('save_subject', type, url, index),
                 else:
-                    fav, _ = await Favorite.get_or_create(subject_id=subject.id, type=type)
+                    fav, _ = await Favorite.get_or_create(
+                        subject_id=subject.id, type=type)
                     if fav.index != index:
                         fav.index = index
                         await fav.save()

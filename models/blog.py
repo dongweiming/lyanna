@@ -252,7 +252,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
             return self._pageview
 
     @property
-    #@cache(MC_KEY_CARD_POST_ID % ('{self.id}'))
+    @cache(MC_KEY_CARD_POST_ID % ('{self.id}'))
     async def card(self) -> Union[dict, None]:
         if self.type == self.TYPE_NOTE:
             card = await Subject.filter(post_id=self.id).first()
@@ -529,4 +529,9 @@ async def get_most_viewed_posts(
     for index, p in enumerate(posts):
         if p:
             items.append((counts[index], p))
+    return items
+
+
+async def get_latest_notes(count: int) -> List[Post]:
+    items = await Post.filter(type=Post.TYPE_NOTE).order_by('-id').limit(count)
     return items

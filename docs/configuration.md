@@ -201,3 +201,15 @@ Redis Sentinel集群架构，本项指定主机端口号。另外也支持从环
 - 默认值: `<p>原文: <a href="{url}">{title}</a></p>`
 
 在RSS内容中添加原文链接，文案支持HTML，支持2个内置参数: `{url}`表示文章链接，`{title}`表示文章标题。
+
+## SYNC_DOUBAN_ACTIVITIES
+
+- 默认值: `''`
+
+默认不开启，可以设置自己的`DOUBAN_ID`(https://www.douban.com/people/:id/)。这样当你在豆瓣上标记了电影/读书/游戏后，会定期同步到博客上
+
+## SYNC_INTERVAL
+
+- 默认值: `120`
+
+从豆瓣同步动态的间隔，默认每2小时同步一次(单位: 分钟)。

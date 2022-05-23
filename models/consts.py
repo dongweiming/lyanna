@@ -13,6 +13,16 @@ ONE_MINUTE = 60
 ONE_HOUR = ONE_MINUTE * 60
 ONE_DAY = ONE_HOUR * 24
 
+T_MOVIE = 'movie'
+T_BOOK = 'book'
+T_GAME = 'game'
+
+SUBDOMAIN_MAP = {
+    T_MOVIE: 'movie',
+    T_BOOK: 'book',
+    T_GAME: 'www'
+}
+
 PERMALINK_TYPES = ('id', 'slug', 'title')
 STATIC_FILE_TYPES = ('jpg', 'png', 'webp', 'gif', 'mp4', 'css', 'js')
 
