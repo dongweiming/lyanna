@@ -1,0 +1,13 @@
+<%page args="partial"/>
+<%
+
+%>
+<section class="widget">
+  <h5>${ partial.title if 'title' in partial else 'Recent Notes' }</h5>
+
+  <ul class="list-inline">
+    % for post in latest_notes:
+      <li class="list-item"><a target="_blank" href="${ post.url }">${ post.title }</a></li>
+    % endfor
+  </ul>
+</section>

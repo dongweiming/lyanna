@@ -9,9 +9,10 @@ from tortoise.expressions import Q
 from config import PER_PAGE, AttrDict, partials
 from ext import mako
 from models import Post, PostTag, SpecialTopic, Tag, Favorite
+from models.consts import T_MOVIE
 from models.blog import (
     MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
-    MC_KEY_TAGS, get_most_viewed_posts,
+    MC_KEY_TAGS, get_most_viewed_posts, get_latest_notes
 )
 from models.comment import get_latest_comments
 from models.mc import cache
@@ -78,6 +79,11 @@ async def _posts(request: Request, page: int = 1):
             tags = await _tags()
             random.shuffle(tags)
             json.update({'tags': tags})
+        elif partial.name == 'latest_notes':
+            json.update({
+                'latest_notes': await get_latest_notes(
+                    partial.count)
+            })
     return json
 
 
@@ -216,7 +222,7 @@ async def favorites(request: Request) -> Dict[str, Pagination]:
         ident = int(ident)
     except ValueError:
         abort(404)
-    type = request.args.get('type')
+    type = request.args.get('type') or T_MOVIE
     start = (ident - 1) * PER_PAGE * 2
     subjects = await Favorite.get_subjects(type)
     total = len(subjects)

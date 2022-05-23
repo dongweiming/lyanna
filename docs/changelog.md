@@ -1,5 +1,14 @@
 # Changelog
-## 4.0
+
+## 4.0 (2022-05-23)
+
+1. Add note type
+2. Show my favorite subjects(game, book, movie)
+3. Add more widgets(latest_notes, games, books, movies), with full page
+4. Post page can show subject card(movie, book, game)
+5. Compatible with Python 3.10
+6. Use Vue3 & Element-Plus
+7. Sync your douban activities(movie, book, game)
 
 ## 3.5.1 (2021-09-02)
 
