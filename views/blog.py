@@ -9,7 +9,7 @@ from tortoise.expressions import Q
 from config import PER_PAGE, AttrDict, partials
 from ext import mako
 from models import Post, PostTag, SpecialTopic, Tag, Favorite
-from models.consts import T_MOVIE
+from models.consts import T_MOVIE, T_GAME, T_BOOK
 from models.blog import (
     MC_KEY_ARCHIVE, MC_KEY_ARCHIVES, MC_KEY_TAG,
     MC_KEY_TAGS, get_most_viewed_posts, get_latest_notes
@@ -83,6 +83,18 @@ async def _posts(request: Request, page: int = 1):
             json.update({
                 'latest_notes': await get_latest_notes(
                     partial.count)
+            })
+        elif partial.name == 'favorite/movie':
+            json.update({
+                'latest_movies': (await Favorite.get_subjects(T_MOVIE))[:partial.count]
+            })
+        elif partial.name == 'favorite/book':
+            json.update({
+                'latest_books': (await Favorite.get_subjects(T_BOOK))[:partial.count]
+            })
+        elif partial.name == 'favorite/game':
+            json.update({
+                'latest_games': (await Favorite.get_subjects(T_GAME))[:partial.count]
             })
     return json
 

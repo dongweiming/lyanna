@@ -1,0 +1,13 @@
+<%page args="partial"/>
+
+<%def name="widget(partial, subjects)">
+<section class="widget">
+  <h5>${ partial.title if 'title' in partial else 'Recent Subjects' }</h5>
+
+  <ul class="list-inline">
+      % for subject in subjects:
+      <li class="list-item"><a target="_blank" href="${ subject.url }">${ subject.title }</a></li>
+    % endfor
+  </ul>
+</section>
+</%def>
