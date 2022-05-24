@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, timezone
 from json import JSONEncoder, dumps
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import aiohttp
 from sanic.exceptions import SanicException
@@ -9,7 +9,7 @@ from sanic.response import HTTPResponse
 
 from config import HERE
 
-DOUBAN_URL_RE = re.compile('https://(\w+)\.douban\.com\/subject\/(\d+)')
+DOUBAN_URL_RE = re.compile(r'https://(\w+)\.douban\.com\/subject\/(\d+)')
 
 
 class APIJSONEncoder(JSONEncoder):
@@ -38,7 +38,7 @@ def abort(status_code):
     raise SanicException(None, status_code)
 
 
-async def save_image(url) -> str:
+async def save_image(url) -> Tuple[bytes, str]:
     basename = url.rpartition('/')[-1]
     dist = HERE / 'static/jpg' / basename
     async with aiohttp.ClientSession() as session:
