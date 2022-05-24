@@ -340,6 +340,10 @@ class Subject(BaseModel):
                           target_kind=kind, basename=basename)
         return card
 
+    @property
+    def url(self) -> str:
+        return self.target_url
+
 
 class Favorite(ReactMixin, BaseModel):
     subject_id = fields.IntField()
