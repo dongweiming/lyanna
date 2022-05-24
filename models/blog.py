@@ -251,7 +251,7 @@ class Post(CommentMixin, ReactMixin, StatusMixin, ContentMixin, BaseModel):
         except RedisError:
             return self._pageview
 
-    @property
+    @property  # type: ignore
     @cache(MC_KEY_CARD_POST_ID % ('{self.id}'))
     async def card(self) -> Union[dict, None]:
         if self.type == self.TYPE_NOTE:
@@ -319,7 +319,8 @@ class Subject(BaseModel):
         return f'{BLOG_URL}/static/jpg/{self.basename}'
 
     @classmethod
-    async def create_with_pid(cls, post_id, url, title, abstract, basename: str) -> bool:
+    async def create_with_pid(cls, post_id, url, title, abstract,
+                              basename: str) -> Subject:
         card, ok = await cls.get_or_create(target_url=url)
 
         if ok:
@@ -405,7 +406,7 @@ class PostTag(BaseModel):
             await cls.filter(Q(post_id=post_id),
                              Q(tag_id__in=need_del_tag_ids)).delete()
         for tag_id, _ in sorted(need_add_tag_ids,
-                                key=lambda x: tags.index(x[1])):  # type: ignore
+                                key=lambda x: tags.index(x[1])):
             await cls.get_or_create(post_id=post_id, tag_id=tag_id)
 
         await clear_mc(MC_KEY_TAGS_BY_POST_ID % post_id)

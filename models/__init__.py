@@ -1,7 +1,7 @@
 from sanic_jwt import exceptions  # noqa
 
 from .activity import Activity, Status  # noqa
-from .blog import (Post, PostTag, SpecialItem, SpecialTopic,
+from .blog import (Post, PostTag, SpecialItem, SpecialTopic,  # noqa
                    Tag, Subject, Favorite)
 from .comment import Comment  # noqa
 from .react import ReactItem, ReactStats  # noqa

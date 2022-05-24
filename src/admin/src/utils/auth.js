@@ -1,5 +1,5 @@
 //to fix js-token issue for electron so replace js-cookie to localStorage
-const TokenKey = 'Admin-Token'
+const TokenKey = 'Lyanna-Token'
 const userNameKey = 'Username-Token'
 const userAvatarKey = 'UserAvatarToken'
 

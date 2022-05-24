@@ -1,1 +1,1 @@
-import{_ as e,j as r,x as s,n as t}from"./index.js";import{U as a}from"./user-detail.js";import"./index3.js";var i=e({name:"EditForm",components:{UserDetail:a}},[["render",function(e,a,i,n,o,d){const m=r("user-detail");return t(),s(m,{"is-edit":!0})}]]);export{i as default};
+import{_ as e,j as r,x as s,n as t}from"./index.js";import{U as i}from"./user-detail.js";import"./index3.js";import"./index4.js";var a=e({name:"EditForm",components:{UserDetail:i}},[["render",function(e,i,a,n,o,d){const m=r("user-detail");return t(),s(m,{"is-edit":!0})}]]);export{a as default};
