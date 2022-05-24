@@ -2,7 +2,7 @@
 
 [![Build Status](https://app.travis-ci.com/dongweiming/lyanna.svg?branch=master)](https://app.travis-ci.com/github/dongweiming/lyanna)
 ![Tag](https://img.shields.io/github/v/tag/dongweiming/lyanna)
-![Python Version](https://img.shields.io/badge/python-3.9-blue)
+![Python Version](https://img.shields.io/badge/python-3.10-blue)
 [![Checked with mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 My Blog Using Sanic
