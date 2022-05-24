@@ -1,7 +1,8 @@
 import random
 from collections import Counter
 from itertools import groupby
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Counter as T_Counter
+
 
 from sanic import Blueprint
 from tortoise.expressions import Q
@@ -44,7 +45,8 @@ async def _posts(request: Request, page: int = 1):
     paginatior = await Post.paginate(page, PER_PAGE)
     json: Dict[
         str, Union[List[Tuple[int, Post]], List[AttrDict],
-                   List[Tuple[Tag, int]], Pagination]] = {'paginatior': paginatior}
+                   List[Tuple[Tag, int]], Pagination,
+                   List[Post]]] = {'paginatior': paginatior}
 
     for partial in partials:
         partial = AttrDict(partial)
@@ -168,7 +170,7 @@ async def tags(request: Request) -> Dict[str, List[Tuple[Tag, int]]]:
 
 async def _tags() -> List[Tuple[Tag, int]]:
     tag_ids = await PostTag.filter().values_list('tag_id', flat=True)
-    counter = Counter(tag_ids)
+    counter: T_Counter = Counter(tag_ids)
     tags_ = await Tag.get_multi(counter.keys())
     return [(tags_[index], count)
             for index, count in enumerate(counter.values())]
@@ -228,7 +230,7 @@ async def activities(request: Request):
 
 @bp.route('/favorites')
 @mako.template('favorites.html')
-async def favorites(request: Request) -> Dict[str, Pagination]:
+async def favorites(request: Request) -> Dict[str, Union[str, Pagination]]:
     ident = request.args.get('ident') or 1
     try:
         ident = int(ident)

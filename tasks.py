@@ -85,7 +85,7 @@ async def flush_to_db(ctx):
 
         post = await Post.filter(id=post_id).first()
         if post:
-            post._pageview = int(await redis.hget(  # type: ignore
+            post._pageview = int(await redis.hget(
                 RK_PAGEVIEW.format(post_id), PAGEVIEW_FIELD) or 0)
             await post.save()
             logger.info(f'Flush Post(id={post_id}) pageview')
