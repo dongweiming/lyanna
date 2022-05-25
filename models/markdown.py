@@ -114,7 +114,7 @@ def block_code(text: str, lang: str, inlinestyles: bool = False,
         )
 
 
-class BlogRenderer(mistune.HTMLRenderer, metaclass=PanguMeta):
+class BlogRenderer(mistune.Renderer, metaclass=PanguMeta):
     def header(self, text, level, raw=None):
         hid = text.replace(' ', '')
         return f'<h{level} id="{hid}">{text}</h{level}>\n'
@@ -128,11 +128,11 @@ class BlogRenderer(mistune.HTMLRenderer, metaclass=PanguMeta):
         return f' {super().link(link, title, text) } '
 
 
-class TocRenderer(TocMixin, mistune.HTMLRenderer):
+class TocRenderer(TocMixin, mistune.Renderer):
     ...
 
 
-renderer = BlogRenderer()
+renderer = BlogRenderer(linenos=False, inlinestyles=False)
 toc = TocRenderer()
-markdown = mistune.create_markdown(escape=True, renderer=renderer)
-toc_md = mistune.create_markdown(renderer=toc)
+markdown = mistune.Markdown(escape=True, renderer=renderer)
+toc_md = mistune.Markdown(renderer=toc)
