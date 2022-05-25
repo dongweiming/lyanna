@@ -42,6 +42,7 @@ MC_KEY_SPECIAL_BY_PID = 'special:by_pid:%s'
 MC_KEY_SPECIAL_BY_SLUG = 'special:%s:slug'
 MC_KEY_ALL_SPECIAL_TOPICS = 'special:topics'
 MC_KEY_CARD_POST_ID = 'card:%s'
+MC_KEY_SUBJECTS_BY_TYPE = 'subjects:by_type:%s'
 RK_PAGEVIEW = 'lyanna:pageview:{}:v2'
 RK_ALL_POST_IDS = 'lyanna:all_post_ids'
 RK_VISITED_POST_IDS = 'lyanna:visited_post_ids'
@@ -357,9 +358,14 @@ class Favorite(ReactMixin, BaseModel):
         return await Subject.cache(self.subject_id)
 
     @classmethod
+    @cache(MC_KEY_SUBJECTS_BY_TYPE % ('{type}'))
     async def get_subjects(cls, type: str):
         return [await f.subject for f in await Favorite.filter(
             type=type).order_by('index').all()]
+
+    async def clear_mc(self):
+        keys = [MC_KEY_SUBJECTS_BY_TYPE % self.type]
+        await clear_mc(*keys)
 
 
 class Tag(BaseModel):
