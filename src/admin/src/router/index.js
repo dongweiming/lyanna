@@ -141,7 +141,7 @@ export const constantRoutes = [
       children: [
           {
               path: 'index',
-              component: () => import('@/views/Favorite.vue'),
+              component: () => import('@/views/favorite.vue'),
               name: 'Favorites',
               meta: { title: 'Favorites', icon: 'collection' }
           }

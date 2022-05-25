@@ -58,7 +58,7 @@ const options = [
 ]
 
 export default {
-  name: 'Favorite',
+  name: 'favorite',
   components: { Sticky, Dropdown },
   data() {
     const validateRequire = (rule, value, callback) => {
