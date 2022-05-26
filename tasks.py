@@ -94,27 +94,28 @@ async def flush_to_db(ctx):
 
 
 @with_context
-async def save_subject(ctx, type, url, index):
+async def save_subjects(ctx, jobs):
     async with aiohttp.ClientSession(headers={'User-Agent': UA}) as session:
-        try:
-            async with session.get(url) as resp:
-                html = await resp.text()
-        except Exception:
-            html = ''
-        if not html:
-            logger.error(f'Save Subejct(url={url}) fail!')
-        extracted_class = None if type != 'game' else DoubanGameExtracted
-        extracted = extraction.Extractor(extracted_class).extract(
-            html, source_url=url)
-        _, basename = await save_image(extracted.image)
-        subject = await Subject.create_with_pid(
-            0, url, extracted.title, extracted.description, basename)
-        fav, _ = await Favorite.get_or_create(subject_id=subject.id, type=type)
-        if fav.index != index:
-            fav.index = index
-            await fav.save()
+        for type, url, index in jobs:
+            try:
+                async with session.get(url) as resp:
+                    html = await resp.text()
+            except Exception:
+                html = ''
+            if not html:
+                logger.error(f'Save Subejct(url={url}) fail!')
+            extracted_class = None if type != 'game' else DoubanGameExtracted
+            extracted = extraction.Extractor(extracted_class).extract(
+                html, source_url=url)
+            _, basename = await save_image(extracted.image)
+            subject = await Subject.create_with_pid(
+                0, url, extracted.title, extracted.description, basename)
+            fav, _ = await Favorite.get_or_create(subject_id=subject.id, type=type)
+            if fav.index != index:
+                fav.index = index
+                await fav.save()
 
 
 class WorkerSettings:
-    functions = [mention_users, save_subject]
+    functions = [mention_users, save_subjects]
     cron_jobs = [cron(flush_to_db, hour=None)]
