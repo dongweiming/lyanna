@@ -447,19 +447,22 @@ async def favorites(request):
             ids = form.ids.data.split(',')
             type = form.type.data
             redis = await create_pool(RedisSettings.from_url(REDIS_URL))
+            jobs = []
             for index, id in enumerate(ids):
                 if not id.isdigit():
                     return json({'r': 1, 'msg': 'IDS format error!'})
                 url = f'https://{SUBDOMAIN_MAP.get(type)}.douban.com/subject/{id}'
                 subject = await Subject.filter(target_url=url).first()
                 if not subject:
-                    await redis.enqueue_job('save_subject', type, url, index),
+                    jobs.append((type, url, index))
                 else:
                     fav, _ = await Favorite.get_or_create(
                         subject_id=subject.id, type=type)
                     if fav.index != index:
                         fav.index = index
                         await fav.save()
+            if jobs:
+                await redis.enqueue_job('save_subjects', jobs)
             return json({'r': 0})
         if (err := raise_error(form.errors)):
             return json({'ok': 1, 'msg': err}, status=400)
