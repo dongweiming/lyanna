@@ -20,6 +20,7 @@ from tortoise.expressions import Q
 from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG, REDIS_URL
 from ext import mako
 from forms import PostForm, TopicForm, UserForm, FavoriteForm
+from config import SUPER_ADMIN_MODE
 from libs.extracted import DoubanGameExtracted, MetacriticExtracted
 from models import Post, PostTag, SpecialTopic, Tag, User, Subject, Favorite
 from models.activity import Activity, create_status
@@ -69,9 +70,10 @@ async def list_posts(request: Request):
     page = int(request.args.get('page')) or 1
     with_tag = int(request.args.get('with_tag') or 0)
     offset = (page - 1) * limit
-    _posts = await Post.filter(author_id=user.id).order_by('-id').offset(
+    kwargs = {} if SUPER_ADMIN_MODE else {'author_id': user.id}
+    _posts = await Post.filter(**kwargs).order_by('-id').offset(
         offset).limit(limit)
-    total = await Post.filter(author_id=user.id).count()
+    total = await Post.filter(**kwargs).count()
     posts = []
     exclude_ids: List[int] = []
     if (special_id := int(request.args.get('special_id') or 0)):

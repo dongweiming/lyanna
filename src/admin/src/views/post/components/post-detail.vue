@@ -176,7 +176,7 @@ export default {
         setTagsViewTitle() {
             const title = '编辑文章'
             const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.postForm.id}` })
-            this.$store.dispatch('updateVisitedView', route)
+            this.$store.dispatch('tagsView/updateVisitedView', route)
         },
         submitForm() {
             this.$refs.postForm.validate(valid => {

@@ -2,7 +2,11 @@
 
 <%def name="widget(partial, subjects)">
 <section class="widget">
-  <h5>${ partial.title if 'title' in partial else 'Recent Subjects' }</h5>
+    <h5>${ partial.title if 'title' in partial else 'Recent Subjects' } · · ·
+        <span class="more">
+            ( <a href="/favorites?type=${ partial.name.split('/')[-1] }" target="_blank">More</a> )
+        </span>
+    </h5>
 
   <ul class="list-inline">
       % for subject in subjects:

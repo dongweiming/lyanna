@@ -100,7 +100,7 @@ export default {
     setTagsViewTitle() {
       const title = '编辑收藏'
       const route = Object.assign({}, this.tempRoute, { title: `${title}-${this.type}` })
-      this.$store.dispatch('updateVisitedView', route)
+      this.$store.dispatch('tagsView/updateVisitedView', route)
     },
     changeType(val) {
       this.favoriteForm.ids = this.dataMap[val]

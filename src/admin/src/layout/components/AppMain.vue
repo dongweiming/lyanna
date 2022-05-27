@@ -139,6 +139,9 @@ watch(
   /*50 = navbar  */
   position: relative;
   overflow: hidden;
+  height: calc(100vh - 102px);
+  width: 100%;
+  overflow-y: auto;
 }
 .show-tag-view {
   height: calc(100vh - #{$navBarHeight} - #{$tagViewHeight}) !important;

@@ -11,11 +11,11 @@ My Blog Using Sanic
 
 ## 版本提示
 
-4.0版本开始已经使用了最新的Python3.10语法
-3.X版本使用Python3.8语法
-2.X版本兼容Python2
+* 4.0版本开始已经使用了最新的Python3.10语法
+* 3.X版本使用Python3.8语法
+* 2.X版本兼容Python2
 
-强烈建议升级到最新的CPython版本.
+强烈建议升级到最新的CPython版本。
 
 ## Overview
 
@@ -41,7 +41,7 @@ My Blog Using Sanic
   <img width="600" src="./screenshot/admin.png" >
 </p>
 
-Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
+Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin) and [vue3-admin-plus](https://github.com/jzfai/vue3-admin-plus)
 
 [动态](https://www.dongwm.com/activities) 使用: Vue-CLI + Vue-Router + Vuex
 
@@ -73,6 +73,8 @@ Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 * Widget系统，内置aboutme、blogroll、most\_viewed、latest\_comments、tagcloud、html等widget
 * 导航栏项可以设置icon和颜色(如RSS)
 * 支持配置CDN域名服务静态文件
+* 支持笔记类型的文章，在右侧会显示对应条目信息
+* 支持展示收藏的Movie(Tv)、Book和Game三种类型条目，并可以通过widget展示在主页右侧
 
 ## Github Cards
 
