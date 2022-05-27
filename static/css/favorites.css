@@ -66,3 +66,15 @@
   padding: 4px 0;
   background-color: #eee;
 }
+
+@media screen and (max-width: 768px) {
+  .item {
+    width: 180px;
+  }
+  .item .cover {
+    height: 245px;
+  }
+  .item .pic img {
+    width: 166px;
+  }
+}

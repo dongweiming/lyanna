@@ -69,6 +69,8 @@ ENABLE_DEBUG_LOG = False
 LIMIT_RSS_CRAWLING = False
 READ_MORE = ""
 
+SUPER_ADMIN_MODE = False
+
 try:
     from local_settings import *  # noqa
 except ImportError:

@@ -69,3 +69,7 @@
   line-height: .5rem;
   padding-right: 0;
 }
+.more a {
+  color: #2196F3;
+  font-size: 14px;
+}
