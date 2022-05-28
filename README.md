@@ -32,7 +32,7 @@ My Blog Using Sanic
 其他aio扩展: Sanic-Auth、Sanic-wtf、sanic-session、aiotask-context、asyncblink、sanic-sentry、sanic-jwt、aiosmtplib
 
 <p align="center">
-  <img width="600" src="./docs/widget.png" >
+  <img width="600" src="./screenshot/index.png" >
 </p>
 
 管理后台使用: ElementUI + Vue-CLI + Vue-Router + Vuex
