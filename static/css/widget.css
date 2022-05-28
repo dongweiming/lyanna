@@ -28,10 +28,6 @@
   font-size: 14px;
 }
 
-.widget .list-inline a:hover, .widget .list-inline a:active {
-  color: #2196F3;
-}
-
 .block {
   display: block !important;
 }
@@ -72,4 +68,11 @@
 .more a {
   color: #2196F3;
   font-size: 14px;
+}
+
+.widget .list-inline a:hover, .widget .list-inline a:active,
+.widget a:hover, .widget a:active,
+.comment .meta .title:hover, .comment .meta .title:active,
+.comment .meta .date:hover, .comment .meta .date:active {
+  color: #2196F3;
 }
