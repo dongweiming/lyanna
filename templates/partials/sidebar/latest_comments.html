@@ -18,7 +18,9 @@
       </div>
 
       <div class="meta">
-        <span class="title">${ comment.post.title }</span> | <span class="date">${ comment.date }</span>
+        <a target="_blank" href="${ comment.post.url }">
+          <span class="title">${ comment.post.title }</span> | <span class="date">${ comment.date }</span>
+        </a>
       </div>
     </li>
     % endfor

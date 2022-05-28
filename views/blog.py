@@ -67,6 +67,7 @@ async def _posts(request: Request, page: int = 1):
                     'avatar': user.picture,
                 })
                 post = AttrDict({
+                    'url': post.url,
                     'title': post.title if post else '[已删除]',
                 })
                 dct = {
