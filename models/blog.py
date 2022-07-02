@@ -351,6 +351,8 @@ class Favorite(ReactMixin, BaseModel):
     subject_id = fields.IntField()
     type: str = fields.CharField(max_length=10)
     index = fields.IntField(default=0)
+    rating = fields.FloatField()
+    comment = fields.CharField(max_length=200)
     kind = K_FAVORITE
 
     @property
