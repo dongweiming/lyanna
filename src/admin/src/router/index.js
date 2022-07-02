@@ -146,18 +146,6 @@ export const constantRoutes = [
               meta: { title: 'Favorites', icon: 'collection' }
           }
       ]
-  },
-  {
-    path: '/setting',
-    component: Layout,
-    children: [
-      {
-        path: 'index',
-        component: () => import('@/views/setting-switch.vue'),
-        name: 'Setting',
-        meta: { title: 'Setting', icon: 'example' }
-      }
-    ]
   }
 ]
 
