@@ -363,8 +363,13 @@ class Favorite(ReactMixin, BaseModel):
     @classmethod
     @cache(MC_KEY_SUBJECTS_BY_TYPE % ('{type}'))
     async def get_subjects(cls, type: str):
-        return [await f.subject for f in await Favorite.filter(
-            type=type).order_by('index').all()]
+        subjects = []
+        for f in await Favorite.filter(type=type).order_by('index').all():
+            subject = await f.subject
+            subject.rating = f.rating
+            subject.comment = f.comment
+            subjects.append(subject)
+        return subjects
 
     async def clear_mc(self):
         keys = [MC_KEY_SUBJECTS_BY_TYPE % self.type]

@@ -78,3 +78,36 @@
     width: 166px;
   }
 }
+
+/* Ratings widget */
+.rate {
+  display: inline-block;
+  border: 0;
+  margin-bottom: -1rem;
+}
+/* Hide radio */
+.rate > input {
+  display: none;
+}
+/* Order correctly by floating highest to the right */
+.rate > label {
+  float: right;
+}
+/* The star of the show */
+.rate > label:before {
+  display: inline-block;
+  font-size: 1.3rem;
+  padding: 0.2rem 0.1rem;
+  margin: 0;
+  cursor: pointer;
+  font-family: FontAwesome;
+  content: "\f005 "; /* full star */
+  color: #fdd030;
+}
+
+/* Half star trick */
+.rate .half:before {
+  content: "\f089 "; /* half star no outline */
+  position: absolute;
+  padding-right: 0;
+}

@@ -20,6 +20,11 @@
         <span class="pic">
           <img src="${subject.cover}" alt="${subject.title}"></span>
       </div>
+      <fieldset class="rate">
+         % for i in range(1, int(subject.rating * 2) + 1)[::-1]:
+          <input type="radio" id="rating${ i }" name="rating" value="${ i }" /><label ${ 'class=half' if i % 2 ==1 else '' } for="rating" title="${ i / 2 } stars"></label>
+        % endfor
+      </fieldset>
       <p>
         <span class="title">${subject.title}</span>
       </p>
