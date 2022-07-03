@@ -476,7 +476,7 @@ async def favorites(request):
     for f in (await Favorite.filter().order_by('type', 'index').all()):
         subject = subjects[f.subject_id]
         item = {
-            'id': subject.slug, # Subject ID
+            'id': subject.slug,  # Subject ID
             'title': f.title or subject.title,
             'url': subject.url,
             'rating': f.rating,

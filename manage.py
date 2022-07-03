@@ -226,7 +226,7 @@ def build_css():
         'index.min.css': ['main.min.css', 'balloon.min.css', 'lightbox.css',
                           'widget.css'],
         'topic.min.css': ['main.min.css', 'topic.css'],
-        'favorites.min.css': ['main.min.css', 'favorites.css'],
+        'favorites.min.css': ['font-awesome.css', 'main.min.css', 'favorites.css'],
         'post.min.css': ['main.min.css', 'post.css', 'react.css',
                          'gitment.css', 'dracula.css', 'social-sharer.css']
     }
