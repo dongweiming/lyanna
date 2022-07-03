@@ -19,8 +19,8 @@ from tortoise.expressions import Q
 
 from config import PER_PAGE, UPLOAD_FOLDER, USE_FFMPEG, REDIS_URL
 from ext import mako
-from forms import PostForm, TopicForm, UserForm, FavoriteForm
-from config import SUPER_ADMIN_MODE
+from forms import PostForm, TopicForm, UserForm
+from config import SUPER_ADMIN_MODE, AttrDict
 from libs.extracted import DoubanGameExtracted, MetacriticExtracted
 from models import Post, PostTag, SpecialTopic, Tag, User, Subject, Favorite
 from models.activity import Activity, create_status
@@ -443,41 +443,47 @@ async def get_url_info(request):
 @bp.route('/api/favorite', methods=['GET', 'PUT'])
 @protected(bp)
 async def favorites(request):
-    form = FavoriteForm(request)
     if request.method == 'PUT':
-        if form.validate():
-            ids = form.ids.data.split(',')
-            type = form.type.data
-            redis = await create_pool(RedisSettings.from_url(REDIS_URL))
-            jobs = []
-            for index, id in enumerate(ids):
-                if not id.isdigit():
-                    return json({'r': 1, 'msg': 'IDS format error!'})
-                url = f'https://{SUBDOMAIN_MAP.get(type)}.douban.com/subject/{id}'
-                subject = await Subject.filter(target_url=url).first()
-                if not subject:
-                    jobs.append((type, url, index))
-                else:
-                    fav, _ = await Favorite.get_or_create(
-                        subject_id=subject.id, type=type)
-                    if fav.index != index:
-                        fav.index = index
-                        await fav.save()
-            if jobs:
-                await redis.enqueue_job('save_subjects', jobs)
-            return json({'r': 0})
-        if (err := raise_error(form.errors)):
-            return json({'ok': 1, 'msg': err}, status=400)
+        type = request.json.get('type')
+        redis = await create_pool(RedisSettings.from_url(REDIS_URL))
+        jobs = []
+        for index, item in enumerate(request.json.get('items')):
+            item = AttrDict(item)
+            if not str(item.id).isdigit():
+                return json({'r': 1, 'msg': 'IDS format error!'})
+            url = f'https://{SUBDOMAIN_MAP.get(type)}.douban.com/subject/{item.id}'
+            subject = await Subject.filter(target_url=url).first()
+            if not subject:
+                jobs.append((type, url, index, item))
+            else:
+                fav, _ = await Favorite.get_or_create(
+                    subject_id=subject.id, type=type)
+                await fav.update(rating=item.rating, comment=item.comment,
+                                 title=item.title)
+                if fav.index != index:
+                    fav.index = index
+                    await fav.save()
+        if jobs:
+            await redis.enqueue_job('save_subjects', jobs)
+        return json({'r': 0})
 
     dct: Dict[str, list] = {
         'book': [],
         'movie': [],
         'game': []
     }
-    subjects = {s.id: s.slug for s in await Subject.filter().all()}
+    subjects = {s.id: s for s in await Subject.filter().all()}
     for f in (await Favorite.filter().order_by('type', 'index').all()):
-        dct[f.type].append(subjects[f.subject_id])
-    return json({'r': 0, 'data': {k: ','.join(v) for k, v in dct.items()}})
+        subject = subjects[f.subject_id]
+        item = {
+            'id': subject.slug, # Subject ID
+            'title': f.title or subject.title,
+            'url': subject.url,
+            'rating': f.rating,
+            'comment': f.comment
+        }
+        dct[f.type].append(item)
+    return json({'r': 0, 'data': dct})
 
 
 @bp.route('/api/status', methods=['POST'])
@@ -485,5 +491,6 @@ async def favorites(request):
 async def api_status(request):
     user_id = request.user.id
     obj, msg = await create_status(user_id, request.json)
+
     activity = None if not obj else await obj.to_full_dict()  # type: ignore
     return json({'r': not bool(obj), 'msg': msg, 'activity': activity})

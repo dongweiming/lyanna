@@ -153,6 +153,7 @@ async def _migrate_for_v4() -> None:
         `subject_id` int(11) NOT NULL,
         `rating` float DEFAULT '0',
         `comment` varchar(200) NOT NULL,
+        `title` varchar(200) DEFAULT '',
         PRIMARY KEY (`id`),
         KEY `idx_type_sid` (`type`, `subject_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4''')

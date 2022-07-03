@@ -219,9 +219,9 @@ const getActivityCommentList = (id) => {
 const updateFavorite = (data) => {
     return request({
         url: '/api/favorite',
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        headers: { 'content-type': 'application/json' },
         method: 'put',
-        data: qs.stringify(data)
+        data: data
     })
 }
 
