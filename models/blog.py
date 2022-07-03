@@ -353,6 +353,7 @@ class Favorite(ReactMixin, BaseModel):
     index = fields.IntField(default=0)
     rating = fields.FloatField()
     comment = fields.CharField(max_length=200)
+    title = fields.CharField(max_length=200, default='')
     kind = K_FAVORITE
 
     @property

@@ -96,7 +96,7 @@ async def flush_to_db(ctx):
 @with_context
 async def save_subjects(ctx, jobs):
     async with aiohttp.ClientSession(headers={'User-Agent': UA}) as session:
-        for type, url, index in jobs:
+        for type, url, index, item in jobs:
             try:
                 async with session.get(url) as resp:
                     html = await resp.text()
@@ -110,7 +110,9 @@ async def save_subjects(ctx, jobs):
             _, basename = await save_image(extracted.image)
             subject = await Subject.create_with_pid(
                 0, url, extracted.title, extracted.description, basename)
-            fav, _ = await Favorite.get_or_create(subject_id=subject.id, type=type)
+            fav, _ = await Favorite.get_or_create(
+                subject_id=subject.id, type=type,
+                rating=item.rating, comment=item.comment)
             if fav.index != index:
                 fav.index = index
                 await fav.save()
