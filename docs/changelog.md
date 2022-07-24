@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.1 (2022-07-24)
+
+1. Add tooltip on subject card. show my review content
+
 ## 4.0 (2022-05-23)
 
 1. Add note type
