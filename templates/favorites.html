@@ -15,7 +15,7 @@
 
   <div class="subjects">
     % for subject in paginatior.items:
-    <a target="_blank" href="${subject.target_url}" class="item">
+    <a target="_blank" href="${subject.target_url}" class="item ${ 'tool' if subject.comment else ''  }" data-tip="${ subject.comment if hasattr(subject, 'comment') else '' }">
       <div class="cover">
         <span class="pic">
           <img src="${subject.cover}" alt="${subject.title}"></span>
