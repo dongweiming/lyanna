@@ -111,3 +111,57 @@
   position: absolute;
   padding-right: 0;
 }
+
+/* Tooltips */
+
+.tool {
+  position: relative;
+}
+
+.tool::before,
+.tool::after {
+    left: 0;
+    opacity: 0;
+    position: absolute;
+    z-index: -100;
+}
+
+.tool:hover::before,
+.tool:focus::before,
+.tool:hover::after,
+.tool:focus::after {
+    opacity: 0.9;
+    transform: scale(1) translateY(0);
+    z-index: 100;
+}
+
+.tool:hover::before,
+.tool:focus::before {
+    transition: all .65s cubic-bezier(.84,-0.18,.31,1.26) .2s;
+}
+
+.tool::after {
+    background: #3E474F;
+    border-radius: .25em;
+    top: 0;
+    color: #EDEFF0;
+    content: attr(data-tip);
+    margin-left: 0;
+    padding: 1em;
+    transition: all .65s cubic-bezier(.84,-0.18,.31,1.26) .2s;
+    transform:  scale(.6) translateY(50%);
+    width: 185px;
+}
+
+.tool:hover::after,
+.tool:focus::after  {
+    transition: all .65s cubic-bezier(.84,-0.18,.31,1.26);
+}
+
+@media (max-width: 760px) {
+  .tool::after {
+        font-size: .75em;
+        margin-left: -5em;
+        width: 10em;
+  }
+}

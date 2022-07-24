@@ -450,7 +450,7 @@ async def favorites(request):
         for index, item in enumerate(request.json.get('items')):
             item = AttrDict(item)
             if not str(item.id).isdigit():
-                return json({'r': 1, 'msg': 'IDS format error!'})
+                continue
             url = f'https://{SUBDOMAIN_MAP.get(type)}.douban.com/subject/{item.id}'
             subject = await Subject.filter(target_url=url).first()
             if not subject:
