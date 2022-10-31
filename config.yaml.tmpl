@@ -115,3 +115,10 @@ partials:
   - name: most_viewed
     title: 最热文章
     count: 5
+  - name: feed
+    title: 订阅本站
+    path: /atom.xml  # or /feed
+    scheme: http
+    readers:
+      - feedly
+      - inoreader
