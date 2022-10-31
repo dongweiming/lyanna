@@ -15,7 +15,7 @@ from config import BLOG_URL
       % if reader == 'feedly':
       <%
         url = f"https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.swo.moe%2Fstats%2Ffeedly%2F{ quote_plus(quote_plus(feed_url)) }&query=count&color=282c34&label=Feedly&labelColor=2bb24c&logo=feedly&logoColor=ffffff&suffix=+subs&cacheSeconds=3600"
-        href = f"https:feedly.com/i/subscription/feed%2F{ feed_url }"
+        href = f"https://feedly.com/i/subscription/feed%2F{ feed_url }"
       %>
       % elif reader == 'inoreader':
       <%

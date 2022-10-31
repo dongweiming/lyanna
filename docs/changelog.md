@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2 (2022-10-31)
+
+1. Add feed(rss) widget
+
 ## 4.1 (2022-07-24)
 
 1. Add tooltip on subject card. show my review content
