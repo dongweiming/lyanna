@@ -1,0 +1,34 @@
+<%!
+from urllib.parse import quote_plus
+
+from config import BLOG_URL
+%>
+<%page args="partial"/>
+  <%
+    feed_url = f"{partial.scheme}://{ BLOG_URL.rpartition('//')[-1] }{partial.path}"
+  %>
+<section class="widget blogroll">
+  <h5>${ partial.title if 'title' in partial else '订阅本站' }</h5>
+
+  <ul class="list-inline">
+    % for reader in partial.readers:
+      % if reader == 'feedly':
+      <%
+        url = f"https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.swo.moe%2Fstats%2Ffeedly%2F{ quote_plus(quote_plus(feed_url)) }&query=count&color=282c34&label=Feedly&labelColor=2bb24c&logo=feedly&logoColor=ffffff&suffix=+subs&cacheSeconds=3600"
+        href = f"https:feedly.com/i/subscription/feed%2F{ feed_url }"
+      %>
+      % elif reader == 'inoreader':
+      <%
+        href = f'https://www.inoreader.com/feed/{ feed_url }'
+        url = 'https://img.shields.io/badge/Inoreader-no%20result-orange?logo=rss'
+      %>
+      % else:
+        <% url = '' %>
+      % endif
+
+      % if url:
+      <li class="block"><a target="_blank" href="${ href }"><img src="${ url }"></a></li>
+      % endif
+    % endfor
+  </ul>
+</section>
