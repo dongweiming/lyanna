@@ -96,6 +96,52 @@ partials:
     count: 5  # 限制最热文章数量，必选
 ```
 
+## favorite/movie
+
+根据后台添加的「电影收藏页面」`/favorites?type=movie`显示最近看过的影视信息(来源豆瓣)
+
+```yaml
+  - name: favorite/movie
+    title: 电影/电视剧
+    count: 5
+```
+
+## favorite/book
+
+根据后台添加的「读书收藏页面」`/favorites?type=book`显示最近读过的图书信息(来源豆瓣)
+
+```yaml
+  - name: favorite/book
+    title: 我的读书
+    count: 5
+```
+
+## favorite/movie
+
+根据后台添加的「游戏收藏页面」`/favorites?type=game`显示最近玩过的游戏信息(来源豆瓣)
+
+```yaml
+  - name: favorite/game
+    title: 近期玩过
+    count: 5
+```
+
+## feed
+
+列出Rss阅读器链接:
+
+```yaml
+- name: feed
+    title: 订阅本站
+    path: /atom.xml  # 也可以使用 /feed 这个路由，方便从这个路由迁移到本博客系统的朋友
+    scheme: http  # 可以使用http或者https，这么设计主要是很多订阅者是早期用户，他们当时使用了HTTP协议，所以这里强制指定
+    readers:
+      - feedly
+      - inoreader
+```
+
+目前仅支持feedly和inoreader，其中feedly可以显示对应订阅人数，但是inoreader目前还有公开API且由于网络问题不好直接抓取，所以不现实订阅人数。
+
 ## 贡献新的Widget
 
 目前只支持侧边栏(sidebar)类型的Widget。
