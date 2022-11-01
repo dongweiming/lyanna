@@ -75,6 +75,7 @@ Inspired by [vue-element-admin](https://github.com/PanJiaChen/vue-element-admin)
 * 支持配置CDN域名服务静态文件
 * 支持笔记类型的文章，在右侧会显示对应条目信息
 * 支持展示收藏的Movie(Tv)、Book和Game三种类型条目，并可以通过widget展示在主页右侧
+* 支持通过Widget显示rss阅读器feedly和inoreader的订阅链接，可以显示feedly订阅数
 
 ## Github Cards
 
