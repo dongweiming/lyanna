@@ -7,4 +7,4 @@ types-PyYAML==6.0.5
 types-redis==4.1.18
 pycodestyle==2.8.0
 pyflakes==2.4.0
-ipython==8.1.1
+ipython==8.10.0
