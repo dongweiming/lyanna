@@ -11,7 +11,7 @@ cssmin==0.2.0
 PyYAML==6.0
 gunicorn==20.1.0
 pangu==4.0.6.1
-redis==4.1.4
+redis==4.4.4
 aiosmtplib==1.1.6
 arq==0.22
 tortoise-orm==0.18.1
