@@ -6,7 +6,7 @@ cython==0.29.28
 mistune==0.8.4
 asyncblink==0.3.2
 werkzeug==2.2.3
-Pygments==2.11.2
+Pygments==2.15.0
 cssmin==0.2.0
 PyYAML==6.0
 gunicorn==20.1.0
