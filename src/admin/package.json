@@ -18,7 +18,7 @@
     "moment-mini": "2.22.1",
     "nprogress": "0.2.0",
     "path": "0.12.7",
-    "path-to-regexp": "6.2.0",
+    "path-to-regexp": "6.3.0",
     "qs": "^6.10.3",
     "tinymce": "4.9.11",
     "vue": "^3.2.29",
