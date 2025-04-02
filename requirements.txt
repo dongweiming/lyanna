@@ -34,7 +34,7 @@ propcache==0.3.1
 pydantic==1.10.21
 pydantic_core==2.33.0
 Pygments==2.11.2
-PyJWT==2.1.0
+PyJWT==2.4.0
 PyMySQL==0.9.3
 pypika-tortoise==0.1.6
 pytz==2025.2
