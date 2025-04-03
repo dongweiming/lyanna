@@ -35,7 +35,7 @@ pydantic==1.10.21
 pydantic_core==2.33.0
 Pygments==2.11.2
 PyJWT==2.1.0
-PyMySQL==0.9.3
+PyMySQL==1.1.1
 pypika-tortoise==0.1.6
 pytz==2025.2
 PyYAML==6.0.2
